@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "jwt-simple": "^0.5.1",
+    "vandium": "^3.3.0"
+  }
+}
