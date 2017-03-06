@@ -57,12 +57,6 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          path: hello
-          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -118,4 +112,11 @@ functions:
           method: get
   
   jwt:
-    handler: handler.getjwt
+    handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
+
+  testhtml:
+    handler: handler.client
+    events:
+      - http:
+          path: client/test.html
+          method: get

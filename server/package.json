@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "bluebird": "^3.5.0",
     "jwt-simple": "^0.5.1",
+    "mustache": "^2.3.0",
     "vandium": "^3.3.0"
   }
 }
