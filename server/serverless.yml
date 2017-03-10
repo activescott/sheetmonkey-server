@@ -101,22 +101,29 @@ functions:
     handler: handler.echo
     events:
       - http:
-          path: echo
+          path: api/echo
           method: get
 
-  boo:
-    handler: handler.boo
+  ping:
+    handler: handler.ping
     events:
       - http:
-          path: boo
+          path: api/ping
           method: get
   
   jwt:
     handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
 
   testhtml:
-    handler: handler.client
+    handler: handler.staticfile
     events:
       - http:
-          path: client/test.html
+          path: test.html
+          method: get
+  
+  testjs:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: test.js
           method: get

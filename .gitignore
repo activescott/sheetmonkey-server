@@ -1,3 +1,9 @@
 node_modules/
+.serverless/
 /server/data/private/test-key-private.pem
 /server/data/private/test-key.crt
+
+
+# These are put in by building the client. Don't check them into git:
+/server/data/public/*.html
+/server/data/public/*.js

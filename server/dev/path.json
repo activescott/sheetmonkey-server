@@ -2,5 +2,5 @@
   "foo": "bar",
   "headers": {
   },
-  "path": "/client/test.html"
+  "path": "/test.html"
 }
