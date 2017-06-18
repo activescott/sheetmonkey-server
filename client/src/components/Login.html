@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Developer Login</h3>
+  </div>
+  <div class="panel-body">
+    <form>
+      <span class="">Login with your Smartsheet Account to register a plugin.</span>
+      <div class="form-group">
+        <button id="login" class="btn btn-default center-block">Loginx with Smartsheet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+import Promise from 'bluebird';
+import $ from 'jquery';
+
+export default {
+  oncreate() {
+    console.log('Login domloaded');
+    let token = $('#jwt').val();
+
+    $('#login').click(function () {
+      console.log('login click');
+      let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=XXXX&scope=READ_SHEETS&state=' + token;
+      console.log('locx:', loc);
+      window.location.href = loc;
+    });
+  }
+}
+</script>

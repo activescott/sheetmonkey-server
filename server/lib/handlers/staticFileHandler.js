@@ -12,6 +12,18 @@ const D = new Diag('StaticFileHandler');
 BbPromise.promisifyAll(fs);
 
 class StaticFileHandler extends Handler {
+  /**
+   * 
+   * @param {*string} clientFilesPath The fully qualified path to the client files that this module should serve.
+   */
+  constructor(clientFilesPath) {
+    super();
+    if (clientFilesPath == null || clientFilesPath.length == 0) {
+      throw new Error('clientFilesPath must be specified');
+    }
+    this.clientFilesPath = clientFilesPath;
+  }
+
   get(event, context) {
     return new BbPromise((resolve, reject) => {
       D.log('event:',event);
@@ -30,7 +42,7 @@ class StaticFileHandler extends Handler {
       */
       const prefix = '';
       let postfix = event.path.substring(prefix.length); 
-      let basePath = path.join(__dirname, '../../data/public/'); 
+      let basePath = this.clientFilesPath;
       let filePath = path.join(basePath, postfix);
 
       return fs.readFileAsync(filePath).then(stream => {

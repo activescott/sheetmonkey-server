@@ -2,15 +2,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "build.sh",
-    "dev": "rollup --config --watch"
+    "dev": "nodemon -e js,html,svelte --ignore dist/ --exec 'rollup --config'"
   },
   "devDependencies": {
     "rollup": "^0.41.5",
     "rollup-plugin-commonjs": "^7.1.0",
-    "rollup-plugin-node-resolve": "^2.0.0"
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-svelte": "^2.0.2",
+    "rollup-watch": "^4.0.0"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "jquery": "^3.1.1"
+    "bootstrap": "3",
+    "jquery": "^3.2.1"
   }
 }

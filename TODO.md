@@ -8,8 +8,8 @@
   - [ ] [svelt](https://svelte.technology/guide) + [redux](http://redux.js.org/docs/introduction/CoreConcepts.html)
   - [+] roundtrip jwt in a test call
 - [ ] Need mocha tests for server.
-- [ ] Setup login via SS
-  - [ ] store tokens & user id in DynamoDB
+- [ ] Setup developer login via SS
+  - [ ] store developer tokens & user id in DynamoDB
   - [ ] show user info on content pages
 - [ ] Need mocha tests for client.
 - [ ] UI to CRUD clients + secrets
@@ -23,3 +23,5 @@
   - [ ] cloudfront setup in aws.
   - [ ] how to keep agig from creating a new API??
 - [ ] Can content page paths be added to serverless.yml via a script (based on all files in a dir)? How about with an import?
+
+- [ ] Break out the staticFileHandler, tokenHandler, and necessary parts of vandium to provide a boilerplate/starter for a serverless web app backend.

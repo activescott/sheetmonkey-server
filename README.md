@@ -43,7 +43,7 @@ Register the Host App itself as the redirection URI for the OAuth code. It is as
 2.2: Include an audience claim -signed by the Hosting App- so that the plugin can authenticate the token.
 2.3: Use an OAuth flow (can be triggered by the plugin) to ensure the user is adequately prompted (according to the authorization policies of the hosted app/REST API).
 2.4: DOH!
-    * The plugin should register with the Host App (separate from the plugin's own hosting) precisely what API operations it needs to further restrict the API operations the plugin (or an attacker spoofing the plugin) could access. THen the host app should essentially either support CORS or provide a proxy that enables it.
+    * The plugin should register with the Host App (separate from the plugin's own hosting) precisely what API operations it needs to further restrict the API operations the plugin (or an attacker spoofing the plugin) could access. Then the host app should essentially either support CORS or provide a proxy that enables it.
 
 **Good.**
 

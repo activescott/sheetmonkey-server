@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="style.css" rel="stylesheet">
+    <script src="index_dist.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+  </head>
+  <body>
+    <!-- Catches the csrf token -->
+    <input id="jwt" type="hidden" value="{{jwt}}" />
+    <div id="main"></div>
+  </body> 
+</html>

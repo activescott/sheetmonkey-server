@@ -53,7 +53,8 @@ module.exports.jwt = (event, context, callback) => {
 }
 
 module.exports.staticfile = (event, context, callback) => {
-  return new StaticFileHandler().get(event, context)
+  const clientFilesPath = path.join(__dirname, './data/public/');
+  return new StaticFileHandler(clientFilesPath).get(event, context)
     .then(result => callback(null, result))
     .catch(err => callback(err));
 };

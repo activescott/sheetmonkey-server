@@ -1,8 +1,18 @@
 {
+  "scripts": {
+    "test": "mocha ./test/test.js",
+    "pretest_old": "rollup test.js --format cjs --output testbundle.js",
+    "pretest_old": "rollup npm run build",
+    "build_old": "rollup -c"
+  },
   "dependencies": {
     "bluebird": "^3.5.0",
     "jwt-simple": "^0.5.1",
     "mustache": "^2.3.0",
     "vandium": "^3.3.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
   }
 }
