@@ -2,9 +2,9 @@
 const BbPromise = require('bluebird');
 const fs = require('fs');
 const path = require('path');
-const Handler = require('./handler');
+const Handler = require('./Handler');
 const Mustache = require('mustache');
-const TokenHandler = require('./tokenHandler');
+const JwtHandler = require('./JwtHandler');
 const Diag = require('../diag');
 
 const D = new Diag('StaticFileHandler');
@@ -78,7 +78,7 @@ class StaticFileHandler extends Handler {
       }
       return fs.readFileAsync(filePath).then(stream => {
         let file = stream.toString('utf8');
-        const viewData = { csrftoken: TokenHandler.newToken() };
+        const viewData = { csrftoken: JwtHandler.newToken() };
         file = Mustache.render(file, viewData);
         
         let response = {

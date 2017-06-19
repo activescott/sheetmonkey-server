@@ -1,6 +1,6 @@
 'use strict';
 const expect = require('chai').expect;
-const StaticFileHandler = require('../lib/handlers/staticFileHandler.js');
+const StaticFileHandler = require('../lib/handlers/StaticFileHandler.js');
 
 describe('StaticFileHandler', function() {
   describe('constructor', function() {

@@ -2,8 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const vandiumInst = require('vandium').createInstance();
-const StaticFileHandler = require('./lib/handlers/staticFileHandler');
-const TokenHandler = require('./lib/handlers/tokenHandler');
+const StaticFileHandler = require('./lib/handlers/StaticFileHandler');
+const JwtHandler = require('./lib/handlers/JwtHandler');
 
 const crt = fs.readFileSync(__dirname + '/data/private/test-key.crt').toString('ascii');
 
@@ -48,7 +48,7 @@ module.exports.ping = vandium( (event, context, callback) => {
 });
 
 module.exports.jwt = (event, context, callback) => {
-  return new TokenHandler().get(event, context)
+  return new JwtHandler().get(event, context)
     .then(result => callback(null, result))
     .catch(err => callback(err));
 }

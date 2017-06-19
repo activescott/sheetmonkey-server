@@ -1,14 +1,14 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const Handler = require('./handler');
+const Handler = require('./Handler');
 const jwt = require('jwt-simple');
 const Diag = require('../diag');
 const BbPromise = require('bluebird');
 
-const D = new Diag('TokenHandler');
+const D = new Diag('JwtHandler');
 
-class TokenHandler extends Handler {
+class JwtHandler extends Handler {
   static newToken() {
     const pemPath = path.join(__dirname, '../../data/private/test-key-private.pem');
     const crtPath = path.join(__dirname, '../../data/private/test-key.crt');
@@ -25,9 +25,9 @@ class TokenHandler extends Handler {
       iat: nowSeconds,
       exp: expireSeconds
     };
-    D.log('encoding token... with key:"', pem, '".');
+    D.log('encoding jwt... with key:"', pem, '".');
     const token = jwt.encode(payload, pem, alg);
-    D.log('encoding token complete.');
+    D.log('encoding jwt complete.');
     return token;
   }
 
@@ -36,7 +36,7 @@ class TokenHandler extends Handler {
       const response = {
         statusCode: 200,
         body: JSON.stringify({
-          token: TokenHandler.newToken(),
+          token: JwtHandler.newToken(),
         }),
       };
       resolve(response);
@@ -44,4 +44,4 @@ class TokenHandler extends Handler {
   }
 }
 
-module.exports = TokenHandler;
+module.exports = JwtHandler;
