@@ -24,6 +24,32 @@ class StaticFileHandler extends Handler {
     this.clientFilesPath = clientFilesPath;
   }
 
+  static getMimeType(filePath) {
+    const typeMap = {
+          'html': 'text/html',
+          'css': 'text/css',
+          'js': 'application/javascript',
+          'png': 'image/png',
+          'jpg': 'image/jpeg',
+          'jpeg': 'image/jpeg',
+          'gif': 'image/gif',
+          'json': 'application/json',
+          'xml': 'application/xml',
+          'zip': 'application/zip',
+          'pdf': 'application/pdf',
+          'mp4': 'audio/mpeg',
+          'm4a': 'audio/mpeg',
+          'ico': 'image/x-icon'
+        };
+    let parts = filePath.split('.');
+    var mimeType = '';
+    if (parts.length > 0) {
+      let extension = parts[parts.length-1];
+      if (typeMap.hasOwnProperty(extension))
+        mimeType = typeMap[extension];
+    }
+    return mimeType;
+  }
   get(event, context) {
     return new BbPromise((resolve, reject) => {
       D.log('event:',event);
@@ -44,16 +70,21 @@ class StaticFileHandler extends Handler {
       let postfix = event.path.substring(prefix.length); 
       let basePath = this.clientFilesPath;
       let filePath = path.join(basePath, postfix);
-
+      let mimeType = StaticFileHandler.getMimeType(filePath);
+      if (!mimeType) {
+        let msg = 'Unrecognized MIME type for file ' + filePath;
+        D.error(msg);
+        reject(new Error(msg));
+      }
       return fs.readFileAsync(filePath).then(stream => {
         let file = stream.toString('utf8');
-        const viewData = { jwt: TokenHandler.newToken() };
+        const viewData = { csrftoken: TokenHandler.newToken() };
         file = Mustache.render(file, viewData);
-
+        
         let response = {
           statusCode: 200,
           headers: {
-            "Content-Type": "text/html"
+            "Content-Type": mimeType,
           },
           body: file
         };
@@ -61,7 +92,7 @@ class StaticFileHandler extends Handler {
       })
       .catch(err => {
         D.error('unable to read client file. err:', err);
-        throw err;
+        reject(err);
       });
     });
   }

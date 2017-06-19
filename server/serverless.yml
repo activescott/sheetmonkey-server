@@ -19,7 +19,7 @@ service: sheetmonkey-authserver # NOTE: update this with your service name
 
 provider:
   name: aws
-  runtime: nodejs4.3
+  runtime: nodejs6.10
   stage: beta
   region: us-west-2
 
@@ -114,16 +114,58 @@ functions:
   jwt:
     handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
 
-  testhtml:
+  indexhtml:
     handler: handler.staticfile
     events:
       - http:
-          path: test.html
+          path: index.html
           method: get
   
-  testjs:
+  bootstrapcss:
     handler: handler.staticfile
     events:
       - http:
-          path: test.js
+          path: bootstrap.min.css
+          method: get
+  
+  bootstrapjs:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: bootstrap.min.js
+          method: get
+
+  indexdistjs:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: index_dist.js
+          method: get
+
+  indexjs:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: index.js
+          method: get
+
+  jquery:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: jquery.min.js
+          method: get
+
+  stylecss:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: style.css
+          method: get
+
+  sveltecss:
+    handler: handler.staticfile
+    events:
+      - http:
+          path: svelte.css
           method: get

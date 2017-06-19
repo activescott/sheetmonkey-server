@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs');
+const path = require('path');
 const vandiumInst = require('vandium').createInstance();
 const StaticFileHandler = require('./lib/handlers/staticFileHandler');
 const TokenHandler = require('./lib/handlers/tokenHandler');
@@ -12,7 +13,7 @@ vandiumInst.configure({
     algorithm: 'RS256',
     public_key: crt
   },
-  stripErrors: true, //setting this to false just keeps stack trace out of the logs. Doesn't send them back in payload either way.
+  stripErrors: false, //setting this to false just keeps stack trace out of the logs. Doesn't send them back in payload either way.
   lambdaProxy: true
 });
 

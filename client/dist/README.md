@@ -1,0 +1,1 @@
+This directory is empty and is populated with the distributable client libraries when the client project is built.

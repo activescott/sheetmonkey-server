@@ -5,4 +5,4 @@ clear;
 . $THISDIR/jwt-refresh.sh
 SLSDATA="{ \"headers\": { \"jwt\": \"$JWT\" } }"
 echo invoking w/ data: $SLSDATA
-sls invoke local -f ping --data "$SLSDATA" | jq
+env SLS_DEBUG=true sls invoke local -f ping --data "$SLSDATA" | jq

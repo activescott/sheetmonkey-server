@@ -6,7 +6,7 @@
     <form>
       <span class="">Login with your Smartsheet Account to register a plugin.</span>
       <div class="form-group">
-        <button id="login" class="btn btn-default center-block">Loginx with Smartsheet</button>
+        <button id="login" type="button" class="btn btn-default center-block">Loginx with Smartsheet</button>
       </div>
     </form>
   </div>
@@ -18,12 +18,11 @@ import $ from 'jquery';
 
 export default {
   oncreate() {
-    console.log('Login domloaded');
-    let token = $('#jwt').val();
+    console.log('Login DOM Loaded');
+    let token = $('#csrftoken').val();
 
     $('#login').click(function () {
-      console.log('login click');
-      let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=XXXX&scope=READ_SHEETS&state=' + token;
+      let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=1fh67w5l0mt6ofuempg&scope=READ_SHEETS&state=' + encodeURIComponent(token);
       console.log('locx:', loc);
       window.location.href = loc;
     });

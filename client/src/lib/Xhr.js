@@ -15,7 +15,7 @@ class Xhr {
           xhr.onreadystatechange = () => {
               if (xhr.readyState == 4) {
                   if (xhr.status < 200 || xhr.status >= 300)
-                      return reject(new Error(`Server at url '${url}' returned error status '${xhr.status}'. StatusText: '${xhr.statusText}'`));
+                      return reject(new Error(`Server at url '${url}' returned error status '${xhr.status}'. StatusText: '${xhr.statusText}'. ResponseText: ${xhr.responseText}`));
                   try {
                       return resolve(JSON.parse(xhr.responseText));
                   } catch (e) {

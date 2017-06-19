@@ -3,4 +3,4 @@ THISDIR=$(cd $(dirname "$0"); pwd) #this script's directory
 
 . $THISDIR/jwt-refresh.sh
 clear
-sls invoke local -f testhtml -p $THISDIR/path.json
+env SLS_DEBUG=true sls invoke local -f indexhtml -p $THISDIR/path.json

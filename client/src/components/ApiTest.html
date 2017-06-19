@@ -1,4 +1,4 @@
-<button id="apitest">Test API</button>
+<button id="apitest" type="button" class="btn btn-default center-block">Test API</button>
 <div id="response"></div>
 
 <script>
@@ -9,8 +9,8 @@ import Xhr from '../lib/Xhr.js';
 export default {
   methods: {
     pingApi: function () {
-      let token = $('#jwt').val();
-      console.log('token:', token);
+      let token = $('#csrftoken').val();
+      console.log('csrftoken:', token);
       let p = $('<p>');
       p.text(`Calling the API with a token from this file...`);
       $('#response').empty().append(p);

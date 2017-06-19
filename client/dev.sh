@@ -6,8 +6,8 @@ cp -v ./src/*.html ./dist/
 cp -v ./src/*.css ./dist/
 cp -v ./src/*.js ./dist/
 
+
 echo "Running rollup..."
-rollup --config
+##rollup --config 
+npm run dev
 echo "Running rollup complete."
-rm -rfd ../server/data/public/*
-cp -v ./dist/* ../server/data/public/

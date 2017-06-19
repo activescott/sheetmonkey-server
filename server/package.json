@@ -1,7 +1,6 @@
 {
   "scripts": {
     "test": "mocha ./test/test.js",
-    "pretest_old": "rollup test.js --format cjs --output testbundle.js",
     "pretest_old": "rollup npm run build",
     "build_old": "rollup -c"
   },
