@@ -60,3 +60,19 @@ module.exports.staticfile = (event, context, callback) => {
     .catch(err => callback(err));
 };
 
+module.exports.defaultredirect = (event, context, callback) => {
+  const redirect = false;
+  if (redirect) {
+    const response = {
+      statusCode: 302,
+      headers: {
+        "Location": 'index.html',
+      },
+      body: ''
+    };
+    callback(null, response);
+  } else {
+    event.path = '/index.html';
+    return module.exports.staticfile(event, context, callback);
+  }
+};

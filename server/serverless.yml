@@ -114,6 +114,13 @@ functions:
   jwt:
     handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
 
+  defaultredir:
+    handler: handler.defaultredirect
+    events:
+      - http:
+          path: /
+          method: get
+
   indexhtml:
     handler: handler.staticfile
     events:
