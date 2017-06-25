@@ -1,24 +1,39 @@
 'use strict';
-const uuid = require('uuid');
+const Promise = require('bluebird');
+const assert = require('assert');
 
+const REQUIRED_USER_INPUT_PROPS = ['id', 'email'];
+const ALL_USER_PROPS = ['id', 'email', 'createdAt', 'updatedAt', 'access_token', 'expires_at', 'refresh_token'];
 
 class DB {
-  constructor(ddb) {
+  constructor(ddb, usersTableName) {
+    assert(ddb, 'ddb arg required');
     this.ddb = ddb;
+    this.usersTableName = usersTableName;
   }
 
-  addUser(userObj) {
-    userObj.id = uuid.v1();
+  addUser(user) {
+    return Promise.try(() => {
+      console.log('saving user: ', user);
+      REQUIRED_USER_INPUT_PROPS.forEach(attr => assert(attr in user, `user missing required attribute ${attr}`));
 
-    user.createdAt = String(Date.now());
-    user.updatedAt = String(Date.now());
+      user.createdAt = String(Date.now());
+      user.updatedAt = String(Date.now());
 
-    let putItem = ddb.put({
-      TableName: usersTable,
-      Item: userObj
+      let putItem = this.ddb.put({
+        TableName: this.usersTableName,
+        Item: user
+      });
+
+      return putItem.then(() => user);
     });
+  }
 
-    return putItem.then(() => userObj);
+  list() {
+    return this.ddb.scan({
+      TableName: this.usersTableName,
+      ProjectionExpression: ALL_USER_PROPS.join(', ')
+    }).then(result => result.Items);
   }
 }
 
