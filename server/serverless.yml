@@ -22,6 +22,7 @@ provider:
   runtime: nodejs6.10
   stage: beta
   region: us-west-2
+  versionFunctions: false
 
 # you can overwrite defaults here
 #  stage: dev
@@ -46,7 +47,9 @@ provider:
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
-
+  environment:
+    SS_CLIENT_ID: ${file(data/private/ss-oauth.json):clientID}
+    SS_CLIENT_SECRET: ${file(data/private/ss-oauth.json):secret}
 # you can add packaging information here
 #package:
 #  include:
@@ -113,6 +116,16 @@ functions:
   
   jwt:
     handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
+  
+  env:
+    handler: handler.env #NOTE: don't add an http event to this! This is just for testing locally.
+
+  oauthcodecatcher:
+    handler: handler.handleOAuthRedirect
+    events:
+      - http:
+          path: api/oauth/codecatcher
+          method: get
 
   defaultredir:
     handler: handler.defaultredirect

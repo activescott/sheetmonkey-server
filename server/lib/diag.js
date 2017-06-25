@@ -5,26 +5,31 @@
 class Diag {
   constructor(prefix) { this._prefix = prefix; }
 
-  log() { 
-    let args = [`${this._prefix}:`].concat(arguments);
-    console.log.apply(args);
+  log() {
+    //convert arguments to array
+    var args = Array.prototype.slice.call(arguments); 
+    args = [`${this._prefix}:`].concat(args);
+    console.log.apply(null, args);
   }
 
   warn() {
-    let args = [`${this._prefix}:`].concat(arguments);
-    console.warn.apply(args);
+    var args = Array.prototype.slice.call(arguments); 
+    args = [`${this._prefix}:`].concat(args);
+    console.warn.apply(null, args);
   }
 
   error() {
-    let args = [`${this._prefix}:`].concat(arguments);
-    console.error.apply(args);
+    var args = Array.prototype.slice.call(arguments); 
+    args = [`${this._prefix}:`].concat(args);
+    console.error.apply(null, args);
   }
 
   assert() {
-    let args = [arguments[0]]; //the "test" argument
+    var args = Array.prototype.slice.call(arguments);
+    args = [args[0]]; //the "test" argument
     args = args.concat([`${this._prefix}:`]);
-    args = args.concat(arguments.slice(1));
-    console.assert.apply(args);
+    args = args.concat(args.slice(1));
+    console.assert.apply(null, args);
   }
 }
 

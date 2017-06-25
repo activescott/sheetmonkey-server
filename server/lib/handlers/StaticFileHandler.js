@@ -1,5 +1,5 @@
 'use strict';
-const BbPromise = require('bluebird');
+const Promise = require('bluebird');
 const fs = require('fs');
 const path = require('path');
 const Handler = require('./Handler');
@@ -9,7 +9,7 @@ const Diag = require('../diag');
 
 const D = new Diag('StaticFileHandler');
 
-BbPromise.promisifyAll(fs);
+Promise.promisifyAll(fs);
 
 class StaticFileHandler extends Handler {
   /**
@@ -50,14 +50,13 @@ class StaticFileHandler extends Handler {
     }
     return mimeType;
   }
-  get(event, context) {
-    return new BbPromise((resolve, reject) => {
-      D.log('event:',event);
+  get(event, context, callback) {
+    return Promise.try(() => {
       if (!event) {
-        return reject(new Error('event object not specified.'));
+        throw new Error('event object not specified.');
       }
       if (!event.path) {
-        return reject(new Error('Empty path.'));
+        throw new Error('Empty path.');
       }
       // NOTE: We're not enforcing/validate a prefix path for content on the public endpoint here. Instead the serverless.yml is entirely responsible for only routing requests here that should be valid content.
       /*
@@ -70,30 +69,40 @@ class StaticFileHandler extends Handler {
       let postfix = event.path.substring(prefix.length); 
       let basePath = this.clientFilesPath;
       let filePath = path.join(basePath, postfix);
+      return StaticFileHandler.readFileAsResponse(filePath, {}, event, context).then(response => {
+        return response;
+      }).catch(err => {
+        throw new Error(`Unable to read client file '${postfix}'. Error: ${err}`);
+      });
+    });
+  }
+
+  /**
+   * Loads the specified file's content and returns a response that can be called back to lambda for sending the file as the http response.
+   */
+  static readFileAsResponse(filePath, viewData) {
+    return fs.readFileAsync(filePath).then(stream => {
       let mimeType = StaticFileHandler.getMimeType(filePath);
       if (!mimeType) {
         let msg = 'Unrecognized MIME type for file ' + filePath;
         D.error(msg);
-        reject(new Error(msg));
+        throw new Error(msg);
       }
-      return fs.readFileAsync(filePath).then(stream => {
-        let file = stream.toString('utf8');
-        const viewData = { csrftoken: JwtHandler.newToken() };
-        file = Mustache.render(file, viewData);
-        
-        let response = {
-          statusCode: 200,
-          headers: {
-            "Content-Type": mimeType,
-          },
-          body: file
-        };
-        return resolve(response);
-      })
-      .catch(err => {
-        D.error('unable to read client file. err:', err);
-        reject(err);
-      });
+      let file = stream.toString('utf8');
+      if (!viewData) {
+        viewData = {};
+      }
+      viewData.csrftoken = JwtHandler.newToken();
+      file = Mustache.render(file, viewData);
+      
+      let response = {
+        statusCode: 200,
+        headers: {
+          "Content-Type": mimeType,
+        },
+        body: file
+      };
+      return response;
     });
   }
 }
