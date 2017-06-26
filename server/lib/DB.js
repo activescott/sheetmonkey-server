@@ -29,7 +29,7 @@ class DB {
     });
   }
 
-  list() {
+  listUsers() {
     return this.ddb.scan({
       TableName: this.usersTableName,
       ProjectionExpression: ALL_USER_PROPS.join(', ')

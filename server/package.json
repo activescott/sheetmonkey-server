@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "mocha ./test/test.js",
+    "test": "mocha ./test/all.js",
     "deploy": "./deploy.sh",
     "pretest_old": "rollup npm run build",
     "build_old": "rollup -c"
