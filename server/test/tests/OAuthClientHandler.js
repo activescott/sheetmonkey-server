@@ -5,6 +5,7 @@ const expect = require("chai").expect;
 const JwtHandler = require('../../lib/handlers/JwtHandler');
 const OAuthClientHandler = require('../../lib/handlers/OAuthClientHandler.js');
 const SmartsheetApiMock = require('../mocks/SmartsheetApiMock');
+const DBMock = require('../mocks/DBMock');
 
 describe('OAuthClientHandler', function() {
   before(function() {
@@ -25,12 +26,10 @@ describe('OAuthClientHandler', function() {
         }
       };
 
-      return new OAuthClientHandler(new SmartsheetApiMock()).handleOAuthRedirect(event, null).then(response => {
-        console.log('response:', response);
-        console.log('callback');
+      return new OAuthClientHandler(new SmartsheetApiMock(), new DBMock()).handleOAuthRedirect(event, null).then(response => {
         expect(response).to.have.property('statusCode', 200);
         expect(response).to.have.property('body');
-        expect(response.body).to.match(/Success!/);
+        expect(response.body).to.match(/Login succeeded/);
       });
     });
     

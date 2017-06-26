@@ -31,8 +31,7 @@ class UsersHandler extends Handler {
       const data = JSON.parse(event.body);
       if (typeof data.id !== 'string' 
           || typeof data.email !== 'string') {
-        D.error('Validation Failed');
-        throw new Error('Couldn\'t create the user.');
+        throw new Error('Missing required fields to create user');
       }
 
       return this.db.addUser(data).then(user => {

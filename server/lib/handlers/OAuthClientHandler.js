@@ -12,10 +12,12 @@ const assert = require('assert');
 const D = new Diag('OAuthClientHandler');
 
 class OAuthClientHandler extends Handler {
-  constructor(smartsheetApi) {
+  constructor(smartsheetApi, db) {
     super();
     assert(smartsheetApi, 'smartsheetApi required');
     this.smartsheetApi = smartsheetApi;
+    assert(db, 'db arg required');
+    this.db = db;
   }
   /**
    * Handles the OAuth redirect with the Authorization Code ala http://smartsheet-platform.github.io/api-docs/#obtaining-the-authorization-code
@@ -26,7 +28,6 @@ class OAuthClientHandler extends Handler {
     return Promise.try(() => {
       // extract paramters code, expires_in, state, and error:
       let params = event.queryStringParameters || {};
-      D.log('OAuth redirect params:', params);
 
       if (!('state' in params)) {
         return OAuthClientHandler.writeError('Login failed: no state.');
@@ -43,22 +44,44 @@ class OAuthClientHandler extends Handler {
 
       // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
       //TODO: refactor the SS API calls out into their its own API class to support mocking.
-      return this.smartsheetApi.getToken(params.code, null).then(tokens => {
-        // save access token, expire time, and refresh token to DDB (note, we may already have a token for this user)
-
+      return this.smartsheetApi.refreshToken(params.code, null).then(tokens => {
         // TODO: Get the user_id and put it in a jwt that will go in the cookie
+        return this.smartsheetApi.me().then(ssUser => {
+          // save access token, expire time, and refresh token to DB:
+          const userObj = {};
+          // copy over token and user properties we want:
+          const tokenProps = ['access_token', 'refresh_token', 'expires_at'];
+          const userProps = ['id', 'email'];         
+          tokenProps.forEach(p => {
+            userObj[p] = tokens[p];
+          });
+          userProps.forEach(p => {
+            userObj[p] = ssUser[p];
+          });
 
-        // TODO: write cookie to authenticate user with cookie from here on out.
-        
-        // Now redirect to index??
-        const response = {
-          statusCode: 200,
-          headers: {
-            Location: 'index.html',
-          },
-          body: `Success! Tokens: ${JSON.stringify(tokens)}`
-        };
-        return response;
+          return this.db.addUser(userObj).then(addedUser => {
+            D.log('Saved user:', addedUser);
+            
+            
+            
+            // TODO: write cookie to authenticate user with cookie from here on out.
+            const MINUTES = 60;
+            const DAYS = MINUTES*60*24;
+            const cookieJwt = JwtHandler.newToken(addedUser.id, 1*DAYS);
+
+            // Now redirect to index??
+            const response = {
+              statusCode: 200,
+              headers: {
+                'Set-Cookie': `jwt=${cookieJwt}`,
+                'Content-Type': 'text/html',
+                'Refresh': '3; url=index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
+              },
+              body: `<p>Login succeeded! Redirecting to <a href="index.html">Home</a>...</p>`
+            };
+            return response;
+          });
+        });
       }).catch(err => {
         return OAuthClientHandler.writeError(`Login failed: Error getting token: ${err}`);
       });

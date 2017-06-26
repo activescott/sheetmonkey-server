@@ -23,10 +23,11 @@ describe('StaticFileHandler', function() {
 
     it('should return index.html', function() {
         let event = { path: 'index.html' };
-        let h = new StaticFileHandler(path.join(__dirname, '../data/public/'));
+        let h = new StaticFileHandler(path.join(__dirname, '../../data/public/'));
         let response = h.get(event, null);
         expect(response).to.eventually.have.property('statusCode', 200);
         expect(response).to.eventually.have.property('body').to.match(/^<\!DOCTYPE html>/);
+        return response;
     });
 
   })

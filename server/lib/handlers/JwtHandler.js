@@ -21,16 +21,26 @@ class JwtHandler extends Handler {
     return 'RS256';
   }
 
-  static newToken() {
+  /**
+   * Issues a new signed JWT.
+   * @param {*Number} userID (optional) The ID of the user/principal to save in the jwt
+   * @param {*Number} expiresInSeconds (optional) The number of seconds before the token will expire.
+   */
+  static newToken(userID, expiresInSeconds) {
     // JWT NumericDate = number of seconds from 1970-01-01T00:00:00Z UTC
     const nowSeconds = Date.now() / 1000;
-    const expireSeconds = nowSeconds + (15*60);
-
+    const MINUTES = 60;
+    const DAYS = MINUTES*60*24;
+    if (!expiresInSeconds) {
+      expiresInSeconds = nowSeconds + (15*MINUTES);
+    }
     const payload = {
-      foo: 'bar',
       iat: nowSeconds,
-      exp: expireSeconds
+      exp: expiresInSeconds
     };
+    if (userID) {
+      payload.prn = userID;// prn == principal - https://openid.net/specs/draft-jones-json-web-token-07.html#anchor4
+    }
     const token = jwt.encode(payload, JwtHandler.pem, JwtHandler.alg);
     return token;
   }
@@ -43,7 +53,6 @@ class JwtHandler extends Handler {
       let decoded = jwt.decode(token, JwtHandler.crt);
       return true;
     } catch (e) {
-      D.log('isValidJwtSignature decode failed:', e);
       return false;
     }
   }

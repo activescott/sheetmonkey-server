@@ -2,14 +2,14 @@
   // Use IntelliSense to learn about possible Node.js debug attributes.
   // Hover to view descriptions of existing attributes.
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
-  "configurations": [
+    "configurations": [
     {
-      "name": "Run mocha",
+      "name": "test",
       "type": "node",
+      "protocol": "inspector",
       "program": "/usr/local/bin/_mocha",
       "cwd": "${workspaceRoot}",
-      "args": ["server/test/test.js"]
+      "args": ["server/test/all.js"]
     }
   ]
 }
