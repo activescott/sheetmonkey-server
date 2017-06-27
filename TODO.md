@@ -9,12 +9,18 @@
   - [+] roundtrip jwt in a test call
   - [ ] [redux](http://redux.js.org/docs/introduction/CoreConcepts.html)
 - [ ] Setup developer login via SS
-  - [ ] store developer tokens & user id in DynamoDB
+  - [x] store developer tokens & user id in DynamoDB
+  - [x] fix: add user is creating a new user, not updating existing (createdAt==updatedAt!)
+  - [ ] fix: add user is overwriting ALL attributes of an existing user rather than just updating existing attributes (createdAt is missing!)
+  - [ ] fix: expires_at not set in DDB
+  - [ ] remove vandium and validate tokens in api calls manually.
   - [ ] show user info on content pages
-- [ ] Need mocha tests for server.
+  - [ ] Refresh token automatically in SmartsheetApi.
+  - [x] Need mocha tests for server.
 - [ ] Need mocha tests for client.
 - [ ] UI to CRUD clients + secrets
   - [ ] via DynamoDB
+- [ ] add favico
 - [ ] Enable redirect flow to extension for clients.
   - [ ] redirect endpoint.
   - [ ] fail if unknown client id
@@ -24,5 +30,5 @@
   - [ ] cloudfront setup in aws.
   - [ ] how to keep agig from creating a new API??
 - [ ] Can content page paths be added to serverless.yml via a script (based on all files in a dir)? How about with an import?
-
+npm 
 - [ ] Break out the StaticFileHandler, JwtHandler, and necessary parts of vandium to provide a boilerplate/starter for a serverless web app backend.

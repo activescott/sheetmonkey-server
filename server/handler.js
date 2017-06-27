@@ -6,6 +6,8 @@ const StaticFileHandler = require('./lib/handlers/StaticFileHandler');
 const JwtHandler = require('./lib/handlers/JwtHandler');
 const OAuthClientHandler = require('./lib/handlers/OAuthClientHandler');
 const SmartsheetApi = require('./lib/SmartsheetApi');
+const DB = require('./lib/DB');
+const DynamoDB = require('./lib/DynamoDB');
 
 const crt = fs.readFileSync(__dirname + '/data/private/test-key.crt').toString('ascii');
 
@@ -93,7 +95,10 @@ module.exports.defaultredirect = (event, context, callback) => {
 };
 
 module.exports.handleOAuthRedirect = (event, context, callback) => {
-  return new OAuthClientHandler(new SmartsheetApi()).handleOAuthRedirect(event, context)
+  const isLocal = process.env.IS_LOCAL=='true';
+  const api = new SmartsheetApi();
+  const db = new DB(new DynamoDB(isLocal), process.env.DDB_USERS_TABLE);
+  return new OAuthClientHandler(api, db).handleOAuthRedirect(event, context)
     .then(response => callback(null, response))
     .catch(err => callback(err));
 };

@@ -7,7 +7,7 @@
 #
 # Happy Coding!
 
-service: sheetmonkey-authserver
+service: sheetmonkey-server
 
 plugins:
   - serverless-dynamodb-local
@@ -50,7 +50,7 @@ resources:
         TableName: ${self:provider.environment.DDB_USERS_TABLE}
         AttributeDefinitions:
           - AttributeName: id
-            AttributeType: S
+            AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH

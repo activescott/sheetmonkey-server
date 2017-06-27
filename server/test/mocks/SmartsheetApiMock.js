@@ -1,6 +1,6 @@
 'use strict';
 const Promise = require('bluebird');
-const uuid = require('uuid');
+const randomUserID = require('../support/tools').randomUserID;
 
 class SmartsheetApiMock {
   constructor() {
@@ -11,11 +11,11 @@ class SmartsheetApiMock {
       access_token: "aaa",
       token_type: "bearer",
       refresh_token: "bbb",
-      expires_in: 604799
+      expires_at: "2019-06-26T04:14:57.567Z"
     });
   }
   me() {
-    const id = uuid.v1();
+    const id = randomUserID();
     return Promise.resolve({
       id: id,
       email: `${id}@SmartsheetApiMock.com` 

@@ -12,7 +12,7 @@ const http_post = (options) => {
 };
 //https://www.npmjs.com/package/request#requestoptions-callback
 const http_request = (options) => {
-  return Promise.fromCallback(cb => request.request(options, cb), { multiArgs:true });
+  return Promise.fromCallback(cb => request(options, cb), { multiArgs:true });
 };
 
 const D = new Diag('SmartsheetApi');
@@ -22,16 +22,19 @@ const BASE_URL = 'https://api.smartsheet.com/2.0';
 class SmartsheetApi {
   /**
    * Initializes a new SmartsheetApi instance.
-   * @param {*object} tokens An object with `access_token`, `refresh_token`, and `expires_at` values.
+   * @param {*object} tokens (optional) An object with `access_token`, `refresh_token`, and `expires_at` values.
    */
   constructor(tokens) {
-    if (!tokens)
-      throw new Error('tokens arg required');
-    for (let p of ['access_token', 'refresh_token', 'expires_at']) {
-      if (!tokens.hasOwnProperty(p))
-        throw new Error(`tokens arg required to have property ${p}`);
-    }
-    this._tokens = tokens;
+    // Caller may not provide tokens (as he'll get them via this.refreshTokens later, so we'll start with some expired tokens to keep the rest of the code happy)
+    this._tokens = tokens || SmartsheetApi.createExpiredTokens();
+  }
+
+  static createExpiredTokens() {
+    return {
+      access_token: 'xxx',
+      refresh_token: 'xxx',
+      expires_at: JSON.stringify(new Date(Date.now()-10000))
+    };
   }
 
   /**
@@ -77,11 +80,12 @@ class SmartsheetApi {
         if (httpResponse.statusCode != 200) {
           throw new Error(`Smartsheet returned an error. Status code: ${httpResponse.statusCode}. Status message: ${httpResponse.statusMessage}. Body:${body}`);
         }
-        D.log('token body:', body);
+        body = JSON.parse(body);
         let response = {};
         ['access_token', 'token_type', 'refresh_token'].forEach(p => response[p] = body[p]);
         // Note Smartsheet's API returns expires_in which is in seconds. We convert to a Date here:
         response.expires_at = new Date(Date.now() + body.expires_in * 1000);
+        D.log('transformed token response:', response);
         this._tokens = response;
         return response;
       });
@@ -89,7 +93,10 @@ class SmartsheetApi {
 
   httpGet(path) {
     return Promise.try(() => {
+
+
       // TODO: check validity of token and refresh if needed. Also need to raise an event so caller can save the new tokens.
+
 
       // https://www.npmjs.com/package/request#requestoptions-callback
       const options = {
@@ -99,7 +106,7 @@ class SmartsheetApi {
           'Authorization': `Bearer ${this._tokens.access_token}`
         }
       };
-
+      D.log('sending request: ', options);
       return http_request(options).spread((httpResponse, body) => {
         if (httpResponse.statusCode < 200 || httpResponse.statusCode >= 300)
           throw new Error(`Unexpected statusCode from Smartsheet:${httpResponse.statusCode}. Response body:${httpResponse.body}`);
@@ -113,7 +120,14 @@ class SmartsheetApi {
    */
   me() {
     return this.httpGet('/users/me').then(httpResponse => {
-      return httpResponse.body;
+      let meResponse;
+      try {
+        meResponse = JSON.parse(httpResponse.body);
+      } catch (e) {
+        D.log('me: Error parsing JSON response:', httpResponse.body);
+        throw new Error('me: Error parsing JSON response');
+      }
+      return meResponse;
     });
   }
 }

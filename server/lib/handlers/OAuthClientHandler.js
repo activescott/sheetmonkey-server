@@ -45,7 +45,7 @@ class OAuthClientHandler extends Handler {
       // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
       //TODO: refactor the SS API calls out into their its own API class to support mocking.
       return this.smartsheetApi.refreshToken(params.code, null).then(tokens => {
-        // TODO: Get the user_id and put it in a jwt that will go in the cookie
+        D.log('tokens:', tokens);
         return this.smartsheetApi.me().then(ssUser => {
           // save access token, expire time, and refresh token to DB:
           const userObj = {};
@@ -60,22 +60,20 @@ class OAuthClientHandler extends Handler {
           });
 
           return this.db.addUser(userObj).then(addedUser => {
-            D.log('Saved user:', addedUser);
-            
-            
-            
-            // TODO: write cookie to authenticate user with cookie from here on out.
+            D.log('User saved:', addedUser);
+            // write cookie to authenticate user with cookie from here on out.
             const MINUTES = 60;
             const DAYS = MINUTES*60*24;
-            const cookieJwt = JwtHandler.newToken(addedUser.id, 1*DAYS);
-
+            const expiresInSeconds = 10*MINUTES;
+            const cookieJwt = JwtHandler.newToken(addedUser.id, expiresInSeconds);
+            const cookieExpiresStr = new Date(Date.now() + expiresInSeconds*1000).toUTCString();
             // Now redirect to index??
             const response = {
               statusCode: 200,
               headers: {
-                'Set-Cookie': `jwt=${cookieJwt}`,
+                'Set-Cookie': `jwt=${cookieJwt}; Path=/; Expires=${cookieExpiresStr}`,
                 'Content-Type': 'text/html',
-                'Refresh': '3; url=index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
+                'Refresh': '3; url=/index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
               },
               body: `<p>Login succeeded! Redirecting to <a href="index.html">Home</a>...</p>`
             };

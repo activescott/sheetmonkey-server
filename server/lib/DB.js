@@ -1,6 +1,9 @@
 'use strict';
 const Promise = require('bluebird');
 const assert = require('assert');
+const Diag = require('./diag');
+
+const D = new Diag('DB');
 
 const REQUIRED_USER_INPUT_PROPS = ['id', 'email'];
 const ALL_USER_PROPS = ['id', 'email', 'createdAt', 'updatedAt', 'access_token', 'expires_at', 'refresh_token'];
@@ -8,21 +11,25 @@ const ALL_USER_PROPS = ['id', 'email', 'createdAt', 'updatedAt', 'access_token',
 class DB {
   constructor(ddb, usersTableName) {
     assert(ddb, 'ddb arg required');
+    assert(usersTableName, 'usersTableName arg required');
     this.ddb = ddb;
     this.usersTableName = usersTableName;
   }
 
   addUser(user) {
     return Promise.try(() => {
-      REQUIRED_USER_INPUT_PROPS.forEach(attr => assert(attr in user, `user missing required attribute ${attr}`));
+      REQUIRED_USER_INPUT_PROPS.forEach(attr => assert(attr in user && user[attr], `user missing required property ${attr}`));
 
       return this.getUser(user.id).then(existingUser => {
-        // put will update an existing user. Only set createdAt if he doesn't exist.
+        const now = String(Date.now());
         if (!existingUser) {
-          user.createdAt = String(Date.now());
+          D.log(`adding new user with id "${user.id}"`);
+          user.createdAt = now;
+        } else {
+          D.log(`attempting to add existing user with id ${user.id}. User will be updated.`);
         }
 
-        user.updatedAt = String(Date.now());
+        user.updatedAt = now;
 
         let putItem = this.ddb.put({
           TableName: this.usersTableName,
@@ -45,17 +52,26 @@ class DB {
    * Returns the user or null.
    */
   getUser(id) {
-    return this.ddb.query({
+    // our schema requires a number.
+    if (!id || typeof id != 'number') {
+      D.log('getUser: invalid id, indicating user not found');
+      return Promise.resolve(null);
+    }
+    let params = {
       TableName: this.usersTableName,
-      KeyConditionExpression: 'id = :id',
+      Key: { id: id },
       ProjectionExpression: ALL_USER_PROPS.join(', '),
-      ExpressionAttributeValues: {
-        ':id': id
-      }
-    }).then(result => {
-      if (!result.Items || result.Items.length <= 0)
-        return null;
-      return result.Items[0];
+      ConsistentRead: true
+    };
+    return this.ddb.get(params).then(result => {
+      if (result && result.Item)
+        return result.Item;
+      else
+        D.log(`getUser: user with id ${id} not found. Result:`, result);
+      return null;
+    }).catch(err => {
+      //more detail to the error
+      throw new Error(`getUser error: ${err}`);
     });
   }
 }

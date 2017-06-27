@@ -1,6 +1,7 @@
 {
   "scripts": {
     "test": "mocha ./test/all.js",
+    "pretest": "./dev/start-dynamodb.sh",
     "deploy": "./deploy.sh",
     "pretest_old": "rollup npm run build",
     "build_old": "rollup -c"
@@ -11,7 +12,6 @@
     "jwt-simple": "^0.5.1",
     "mustache": "^2.3.0",
     "request": "^2.81.0",
-    "uuid": "^3.1.0",
     "vandium": "^3.3.0"
   },
   "devDependencies": {

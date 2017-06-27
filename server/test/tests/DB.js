@@ -4,7 +4,7 @@ const expect = require("chai").expect;
 
 const DB = require('../../lib/DB');
 const DynamoDB = require('../../lib/DynamoDB');
-const uuid = require('uuid');
+const randomUserID = require('../support/tools').randomUserID;
 
 function expectUserProps(user) {
   const expectProps = ['id', 'email', 'updatedAt', 'createdAt'];
@@ -16,16 +16,42 @@ describe('DB', function() {
 
     before(function() {
       // runs before all tests in this block
-      db = new DB(new DynamoDB(true), 'sheetmonkey-authserver-beta-users');
+      db = new DB(new DynamoDB(true), 'sheetmonkey-server-beta-users');
     });
 
     describe('addUser', function() {
       this.timeout(5000);
 
-      it('should add a user', function() {
-        
+      it('should not add a user without an id', function() {
         const testUser = {
-          id: uuid.v1(), 
+          not_id: randomUserID(), 
+          email: 'addUser@test.com'
+        };
+        let p = db.addUser(testUser);
+        return expect(p).to.eventually.be.rejectedWith(/user missing required property id/);
+      });
+
+      it('should not add a user with a null', function() {
+        const testUser = {
+          id: null, 
+          email: 'addUser@test.com'
+        };
+        let p = db.addUser(testUser);
+        return expect(p).to.eventually.be.rejectedWith(/user missing required property id/);
+      });
+
+      it('should not add a user with a undefined', function() {
+        const testUser = {
+          id: undefined, 
+          email: 'addUser@test.com'
+        };
+        let p = db.addUser(testUser);
+        return expect(p).to.eventually.be.rejectedWith(/user missing required property id/);
+      });
+
+      it('should add a user', function() {
+        const testUser = {
+          id: randomUserID(), 
           email: 'addUser@test.com'
         };
         return db.addUser(testUser).then(u => {
@@ -40,29 +66,55 @@ describe('DB', function() {
         })
       });
 
+      it('should update an existing user', function() {
+        //i.e. ensure createdAt is not overwritten
+        const testUser = {
+          id: randomUserID(), 
+          email: 'addUser@test.com',
+          access_token: 'CREATED'
+        };
+        return db.addUser(testUser).then(newUser => {
+          let testUser2 = Object.assign({}, testUser);
+          testUser2.access_token = 'UPDATED';
+          return db.addUser(testUser2).then(updatedUser => {
+            expect(newUser.createdAt, 'createdAt').to.equal(updatedUser.createdAt);
+            expect(newUser.updatedAt, 'updatedAt').to.not.equal(updatedUser.updatedAt);
+            expect(newUser.access_token).to.equal('CREATED');
+            expect(updatedUser.access_token).to.equal('UPDATED');
+          });
+        });
+      });
+
   });
 
   describe('getUser', function() {
     
+    it('should return null if id null', function() {
+      let got = db.getUser(null);
+      return expect(got).to.eventually.be.null;
+    });
+
+    it('should return null if id not number', function() {
+      let got = db.getUser('999');
+      return expect(got).to.eventually.be.null;
+    });
+
     it('should return null if no user', function() {
-      let got = db.getUser(uuid.v1());
-      expect(got).to.eventually.be.null;
+      let got = db.getUser(randomUserID());
+      return expect(got).to.eventually.be.null;
     });
 
     it('should return user if valid input', function() {
       const testUser = {
-        id: uuid.v1(), 
+        id: randomUserID(), 
         email: 'getUser@test.com'
       };
       return db.addUser(testUser).then(u => {
-        let got = db.getUser(testUser.id);
-        expect(got).to.eventually.have.property('id', testUser.id)
-          .notify(gotResolved => {
-            expectUserProps(gotResolved);
-          });
-        
+        return db.getUser(testUser.id).then(u => {
+          expect(u).to.have.property('id', testUser.id);
+          return expectUserProps(u);
+        });
       });
     });
-
   });
 });

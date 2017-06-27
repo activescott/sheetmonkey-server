@@ -12,7 +12,7 @@ const D = new Diag('DynamoDB');
 class DDB {
   constructor(doLocal) {
     //NOTE: Lambda functions don't need explicit creds: http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-lambda.html
-    assert(typeof doLocal == 'boolean', '')
+    assert(typeof doLocal == 'boolean', 'doLocal must be boolean')
     let dynamoConfig;
     if (doLocal) {
       dynamoConfig = {
