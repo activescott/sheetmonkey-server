@@ -26,41 +26,40 @@
 <div id="appcontent"></div>
 
 <script>
-  import $ from "jquery";
-  import Login from './Login.html';
-  import ApiTest from './ApiTest.html';
+  import $ from 'jquery'
+  import Login from './Login.html'
+  import ApiTest from './ApiTest.html'
 
   export default {
     methods: {
-      setContent(content) {
-        let old = this.get('currentContent');
+      setContent (content) {
+        let old = this.get('currentContent')
         if (old) {
           try {
-            old.destroy();
-          }
-          catch (e) {
+            old.destroy()
+          } catch (e) {
           }
         }
-        this.set({currentContent: content});
+        this.set({ currentContent: content })
       }
     },
-    oncreate() {
-      let target = $('#appcontent').get(0);
+    oncreate () {
+      let target = $('#appcontent').get(0)
       $('#gologin').click(() => {
         this.setContent(new Login({
           target: target
-        }));
-      });
+        }))
+      })
 
       $('#goapitest').click(() => {
         this.setContent(new ApiTest({
           target: target
-        }));
-      });
+        }))
+      })
 
       $('#brand').click(() => {
-        this.setContent(null);
-      });
+        this.setContent(null)
+      })
     }
   }
 </script>

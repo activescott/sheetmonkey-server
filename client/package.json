@@ -2,18 +2,27 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "build.sh",
-    "dev": "nodemon -e js,html,svelte --ignore dist/ --exec 'rollup --config'"
+    "dev": "nodemon -e js,html,svelte --ignore dist/ --exec 'rollup --config'",
+    "lint": "./node_modules/.bin/standard --plugin html './src/**/*.html' './src/**/*.js'"
   },
   "devDependencies": {
+    "eslint-plugin-html": "^3.0.0",
     "rollup": "^0.41.5",
     "rollup-plugin-commonjs": "^7.1.0",
     "rollup-plugin-node-resolve": "^2.0.0",
     "rollup-plugin-svelte": "^2.0.2",
-    "rollup-watch": "^4.0.0"
+    "rollup-watch": "^4.0.0",
+    "standard": "^10.0.2"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
     "bootstrap": "3",
     "jquery": "^3.2.1"
+  },
+  "standard": {
+    "ignore": [
+      "./dist/"
+    ],
+    "plugins": [ "html" ]
   }
 }

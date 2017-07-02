@@ -13,15 +13,18 @@
   - [x] fix: add user is creating a new user, not updating existing (createdAt==updatedAt!)
   - [x] fix: expires_at not set in DDB
   
-  - [ ] fix: add user is overwriting ALL attributes of an existing user rather than just updating existing attributes (createdAt is missing!)
-    - [ ] Use `ConditionExpression: 'attribute_not_exists(id)'`, and an error occurs if it exists. Then update it instead (in the app layer, not DB).
-
-  
-
-  - [ ] remove vandium and validate tokens in api calls manually (consider just allowing cookie auth!)
+  - [x] fix: add user is overwriting ALL attributes of an existing user rather than just updating existing attributes (createdAt is missing!)
+    - [x] Use `ConditionExpression: 'attribute_not_exists(id)'`, and an error occurs if it exists. Then update it instead (in the app layer, not DB).
+   
   - [ ] show user info on content pages
   - [ ] Refresh token automatically in SmartsheetApi.
-  - [x] Need mocha tests for server.
+  
+  - [ ] Separate out oauth & user login/logout stuff into a boiler plate serverless+svelt.
+    - [ ] Remove vandium and validate tokens in api calls manually (consider just allowing cookie auth!)
+      - [ ] replace with simple vandium style authorizer or an APIG authorizer.
+    - [ ] StaticFileHandler into its own package?
+    - [ ] Standard lint
+    - [x] Need mocha tests for server.
 
 - [ ] Need mocha tests for client.
 - [ ] UI to CRUD clients + secrets

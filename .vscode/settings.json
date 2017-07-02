@@ -1,0 +1,12 @@
+{
+  "standard.enable": true,
+  "standard.validate": [
+    "javascript",
+    "html"
+  ],
+  "standard.options": {
+    "plugins": [
+      "html"
+    ]
+  }
+}
