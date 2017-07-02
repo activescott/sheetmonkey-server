@@ -5,7 +5,7 @@
     "deploy": "./deploy.sh",
     "pretest_old": "rollup npm run build",
     "build_old": "rollup -c",
-    "watch": "nodemon -w ./src -w ./test --exec 'npm test'"
+    "watch": "nodemon -w ./ --exec 'npm test'"
   },
   "dependencies": {
     "aws-sdk": "^2.77.0",
