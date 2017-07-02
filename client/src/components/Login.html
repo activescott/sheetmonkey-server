@@ -6,26 +6,25 @@
     <form>
       <span class="">Login with your Smartsheet Account to register a plugin.</span>
       <div class="form-group">
-        <button id="login" type="button" class="btn btn-default center-block">Loginx with Smartsheet</button>
+        <button id="login" type="button" class="btn btn-default center-block">Login with Smartsheet</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-import Promise from 'bluebird';
-import $ from 'jquery';
+import $ from 'jquery'
 
 export default {
-  oncreate() {
-    console.log('Login DOM Loaded');
-    let token = $('#csrftoken').val();
+  oncreate () {
+    console.log('Login DOM Loaded')
+    let token = $('#csrftoken').val()
 
     $('#login').click(function () {
-      let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=1fh67w5l0mt6ofuempg&scope=READ_SHEETS&state=' + encodeURIComponent(token);
-      console.log('locx:', loc);
-      window.location.href = loc;
-    });
+      let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=1fh67w5l0mt6ofuempg&scope=READ_SHEETS&state=' + encodeURIComponent(token)
+      console.log('locx:', loc)
+      window.location.href = loc
+    })
   }
 }
 </script>

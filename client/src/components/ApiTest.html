@@ -2,36 +2,35 @@
 <div id="response"></div>
 
 <script>
-import Promise from 'bluebird';
-import $ from 'jquery';
-import Xhr from '../lib/Xhr.js';
+  import $ from 'jquery'
+  import Xhr from '../lib/Xhr.js'
 
-export default {
-  methods: {
-    pingApi: function () {
-      let token = $('#csrftoken').val();
-      console.log('csrftoken:', token);
-      let p = $('<p>');
-      p.text(`Calling the API with a token from this file...`);
-      $('#response').empty().append(p);
+  export default {
+    methods: {
+      pingApi: function () {
+        let token = $('#csrftoken').val()
+        console.log('csrftoken:', token)
+        let p = $('<p>')
+        p.text(`Calling the API with a token from this file...`)
+        $('#response').empty().append(p)
 
-      let apiResponse = Xhr.getJSON('api/ping', {"jwt":token}).then(response => {
-          console.log('xhr response:', response);
-          let div = $('<div>');
-          div.append($('<p>API response is:</p>'));
-          div.append($('<pre>').text(JSON.stringify(response)));
-          $('#response').append(div);
-      }).catch(e => {
-          $('#response').append($(`<p>Error calling API: ${e}</p>`));
+        return Xhr.getJSON('api/ping', { 'jwt': token }).then(response => {
+          console.log('xhr response:', response)
+          let div = $('<div>')
+          div.append($('<p>API response is:</p>'))
+          div.append($('<pre>').text(JSON.stringify(response)))
+          $('#response').append(div)
+        }).catch(e => {
+          $('#response').append($(`<p>Error calling API: ${e}</p>`))
+        })
+      }
+    },
+
+    oncreate () {
+      $('#apitest').click(() => {
+        this.pingApi()
       })
     }
-  },
 
-  oncreate() {
-    $('#apitest').click(() => {
-      this.pingApi();
-    });
   }
-  
-}
 </script>
