@@ -4,6 +4,12 @@ const randomUserID = require('../support/tools').randomUserID;
 
 class SmartsheetApiMock {
   constructor() {
+    const id = randomUserID();
+    this.setMeValue({
+      id: id,
+      email: `${id}@SmartsheetApiMock.com` 
+    });
+
   }
 
   refreshToken(code, refreshToken) {
@@ -11,15 +17,19 @@ class SmartsheetApiMock {
       access_token: "aaa",
       token_type: "bearer",
       refresh_token: "bbb",
-      expires_at: "2019-06-26T04:14:57.567Z"
+      expires_at: "1498549175394"
     });
   }
+
   me() {
-    const id = randomUserID();
-    return Promise.resolve({
-      id: id,
-      email: `${id}@SmartsheetApiMock.com` 
-    });
+    return Promise.resolve(this._me);
+  }
+
+  /**
+   * Specifies the value for the next time me() is called.
+   */
+  setMeValue(me) {
+    this._me = me;
   }
 }
 

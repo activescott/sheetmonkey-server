@@ -12,7 +12,7 @@ describe('SmartsheetApi', function() {
     access_token:"aaa",
     token_type:"bearer",
     refresh_token:"rrr",
-    expires_at:"2019-06-26T04:14:57.567Z"
+    expires_at:"1498549175394"
   };
 
   let API = new SmartsheetApi(testTokens);

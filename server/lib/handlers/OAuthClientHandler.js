@@ -43,9 +43,7 @@ class OAuthClientHandler extends Handler {
       }
 
       // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
-      //TODO: refactor the SS API calls out into their its own API class to support mocking.
       return this.smartsheetApi.refreshToken(params.code, null).then(tokens => {
-        D.log('tokens:', tokens);
         return this.smartsheetApi.me().then(ssUser => {
           // save access token, expire time, and refresh token to DB:
           const userObj = {};
@@ -59,13 +57,24 @@ class OAuthClientHandler extends Handler {
             userObj[p] = ssUser[p];
           });
 
-          return this.db.addUser(userObj).then(addedUser => {
-            D.log('User saved:', addedUser);
+          const updateUserIfExists = addUserResult => {
+            if (addUserResult) {
+              return addUserResult;
+            }
+            D.log('User already exists. Updating...');
+            return this.db.updateUser(userObj).then(updatedUser => {
+              return updatedUser;
+            });
+          };
+
+          const handleAddedOrUpdatedUser = addUserResult => {
+
+            D.log('User saved:', addUserResult);
             // write cookie to authenticate user with cookie from here on out.
             const MINUTES = 60;
             const DAYS = MINUTES*60*24;
             const expiresInSeconds = 10*MINUTES;
-            const cookieJwt = JwtHandler.newToken(addedUser.id, expiresInSeconds);
+            const cookieJwt = JwtHandler.newToken(addUserResult.id, expiresInSeconds);
             const cookieExpiresStr = new Date(Date.now() + expiresInSeconds*1000).toUTCString();
             // Now redirect to index??
             const response = {
@@ -78,7 +87,12 @@ class OAuthClientHandler extends Handler {
               body: `<p>Login succeeded! Redirecting to <a href="index.html">Home</a>...</p>`
             };
             return response;
-          });
+
+          }
+
+          return this.db.addUser(userObj)
+            .then(updateUserIfExists)
+            .then(handleAddedOrUpdatedUser);
         });
       }).catch(err => {
         return OAuthClientHandler.writeError(`Login failed: Error getting token: ${err}`);

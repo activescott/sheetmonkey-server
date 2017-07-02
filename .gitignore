@@ -7,3 +7,5 @@ node_modules/
 # These are put in by building the client. Don't check them into git:
 /server/data/public/
 /client/dist/
+
+/server/junk/

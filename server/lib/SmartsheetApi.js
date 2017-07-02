@@ -33,7 +33,7 @@ class SmartsheetApi {
     return {
       access_token: 'xxx',
       refresh_token: 'xxx',
-      expires_at: JSON.stringify(new Date(Date.now()-10000))
+      expires_at: String(Date.now()-10000)
     };
   }
 
@@ -43,7 +43,7 @@ class SmartsheetApi {
    *   "access_token":"xxxxx",
    *   "token_type":"bearer",
    *   "refresh_token":"xxxx",
-   *   "expires_at":"2017-06-26T04:14:57.567Z"
+   *   "expires_at":"1498549175394"
    *  }
    * Also sets the current object's tokens value with the returned tokens.
    * 
@@ -84,7 +84,7 @@ class SmartsheetApi {
         let response = {};
         ['access_token', 'token_type', 'refresh_token'].forEach(p => response[p] = body[p]);
         // Note Smartsheet's API returns expires_in which is in seconds. We convert to a Date here:
-        response.expires_at = new Date(Date.now() + body.expires_in * 1000);
+        response.expires_at = String(Date.now() + body.expires_in * 1000);
         D.log('transformed token response:', response);
         this._tokens = response;
         return response;

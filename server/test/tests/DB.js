@@ -66,25 +66,38 @@ describe('DB', function() {
         })
       });
 
-      it('should update an existing user', function() {
+      it('should update an existing user, not overwrite', function() {
         //i.e. ensure createdAt is not overwritten
         const testUser = {
           id: randomUserID(), 
           email: 'addUser@test.com',
-          access_token: 'CREATED'
+          access_token: 'CREATED',
+          refresh_token: 'xxx',
+          expires_at: String(Date.now())
         };
         return db.addUser(testUser).then(newUser => {
-          let testUser2 = Object.assign({}, testUser);
-          testUser2.access_token = 'UPDATED';
+          const testUser2 = {
+            id: testUser.id, 
+            email: 'addUser@test.com',
+            access_token: 'UPDATED',
+            refresh_token: 'xxx',
+            expires_at: testUser.expires_at
+          };
+          
           return db.addUser(testUser2).then(updatedUser => {
-            expect(newUser.createdAt, 'createdAt').to.equal(updatedUser.createdAt);
-            expect(newUser.updatedAt, 'updatedAt').to.not.equal(updatedUser.updatedAt);
-            expect(newUser.access_token).to.equal('CREATED');
-            expect(updatedUser.access_token).to.equal('UPDATED');
+            expect(updatedUser).to.be.null;
+            return db.updateUser(testUser2).then(updatedUser => {
+              expect(updatedUser).to.not.be.null;
+              // now make sure that the update didn't overwrite /all/ existing attributes:
+              return db.getUser(testUser.id).then(found => {
+                console.log('found:', found);
+                expect(found).to.have.property('createdAt', newUser.createdAt);
+                expect(found).to.have.property('expires_at', testUser.expires_at);
+              })
+            });
           });
         });
       });
-
   });
 
   describe('getUser', function() {

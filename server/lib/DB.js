@@ -5,8 +5,10 @@ const Diag = require('./diag');
 
 const D = new Diag('DB');
 
-const REQUIRED_USER_INPUT_PROPS = ['id', 'email'];
 const ALL_USER_PROPS = ['id', 'email', 'createdAt', 'updatedAt', 'access_token', 'expires_at', 'refresh_token'];
+const REQUIRED_USER_ADD_PROPS = ['id', 'email'];
+const REQUIRED_USER_UPDATE_PROPS = ['id', 'email', 'access_token', 'expires_at', 'refresh_token'];
+
 
 class DB {
   constructor(ddb, usersTableName) {
@@ -17,27 +19,54 @@ class DB {
   }
 
   addUser(user) {
+    user = Object.assign({}, user); //don't modify the input user obj
     return Promise.try(() => {
-      REQUIRED_USER_INPUT_PROPS.forEach(attr => assert(attr in user && user[attr], `user missing required property ${attr}`));
+      REQUIRED_USER_ADD_PROPS.forEach(attr => assert(attr in user && user[attr], `user missing required property ${attr}`));
+      const now = String(Date.now())
 
-      return this.getUser(user.id).then(existingUser => {
-        const now = String(Date.now());
-        if (!existingUser) {
-          D.log(`adding new user with id "${user.id}"`);
-          user.createdAt = now;
-        } else {
-          D.log(`attempting to add existing user with id ${user.id}. User will be updated.`);
-        }
+      if ('access_token' in user) {
+        assert('expires_at' in user, 'when providing access_token expires_at must also be provided');
+      }
+      
+      user.createdAt = now;
+      user.updatedAt = now;
+      
+      let putItem = this.ddb.put({
+        TableName: this.usersTableName,
+        Item: user,
+        ConditionExpression: 'attribute_not_exists(id)' // <- ensure user isn't overwritten if exists
+      })
+      return putItem.then(() => user);
+    }).catch(err => {
+      //if user exists, just return null; if another error, rethrow
+      if (err.name && err.name === 'ConditionalCheckFailedException') {
+        return null;
+      }
+      throw err;
+    })
 
-        user.updatedAt = now;
+  }
 
-        let putItem = this.ddb.put({
-          TableName: this.usersTableName,
-          Item: user
-        });
+  updateUser(user) {
+    return Promise.try(() => {
+      REQUIRED_USER_UPDATE_PROPS.forEach(attr => assert(attr in user && user[attr], `user missing required property ${attr}`));
+      const now = String(Date.now())
 
-        return putItem.then(() => user);
-      });
+      return this.ddb.update({
+        TableName: this.usersTableName,
+        Key: { id: user.id },
+        UpdateExpression: 'SET email = :email, access_token = :access_token, expires_at = :expires_at, refresh_token = :refresh_token, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':email': user.email,
+          ':access_token': user.access_token,
+          ':expires_at': user.expires_at,
+          ':refresh_token': user.refresh_token,
+          ':updatedAt': now
+        },
+        ReturnValues: 'ALL_NEW'
+      }).then(result => {
+        return result.Attributes;
+      })
     });
   }
 

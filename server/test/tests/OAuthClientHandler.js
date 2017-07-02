@@ -6,6 +6,7 @@ const JwtHandler = require('../../lib/handlers/JwtHandler');
 const OAuthClientHandler = require('../../lib/handlers/OAuthClientHandler.js');
 const SmartsheetApiMock = require('../mocks/SmartsheetApiMock');
 const DBMock = require('../mocks/DBMock');
+const randomUserID = require('../support/tools').randomUserID;
 
 describe('OAuthClientHandler', function() {
   let handler;
@@ -59,5 +60,43 @@ describe('OAuthClientHandler', function() {
       return obj;
     }
     
-  });
+  })
+
+  describe('handleOAuthRedirect - update (refresh or re-login)', function() {
+    
+    it('should update users tokens', function() {
+
+      // Config the API to return a an expected user:
+      const ssApi = new SmartsheetApiMock();
+      let id = randomUserID();
+      const testUser = {
+        id: id,
+        email: `${id}@SmartsheetApiMock.com` 
+      };
+      ssApi.setMeValue(testUser);
+      
+      handler = new OAuthClientHandler(ssApi, new DBMock());
+      
+      // add the user once to get him in the app:
+      let event = {
+        queryStringParameters: {
+          code: 'abcdefghijklmnop',
+          expires_in: 599781,
+          state: JwtHandler.newToken()
+        }
+      };
+
+      return handler.handleOAuthRedirect(event, null).then(response => {
+        console.log('\nresponse 1:', response)
+        expect(response.body).to.match(/Login succeeded/);
+        // now add the same user again (since the mock API will return the same user again):
+        return handler.handleOAuthRedirect(event, null).then(response => { 
+          console.log('\nresponse 2:', response)
+          expect(response.body).to.match(/Login succeeded/);
+        });
+      });
+     
+    });
+
+  })
 });
