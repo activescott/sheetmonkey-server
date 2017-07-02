@@ -3,8 +3,6 @@
     "test": "mocha ./test/all.js",
     "pretest": "./dev/start-dynamodb.sh",
     "deploy": "./deploy.sh",
-    "pretest_old": "rollup npm run build",
-    "build_old": "rollup -c",
     "watch": "nodemon -w ./ --exec 'npm test'"
   },
   "dependencies": {
