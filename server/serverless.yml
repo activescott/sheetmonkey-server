@@ -86,6 +86,13 @@ functions:
           path: api/oauth/codecatcher
           method: get
 
+  users_me:
+    handler: handler.users_me
+    events:
+      - http:
+          path: api/users/me
+          method: get
+
   defaultredir:
     handler: handler.defaultredirect
     events:

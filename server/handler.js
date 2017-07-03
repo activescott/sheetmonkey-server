@@ -10,8 +10,12 @@ const DynamoDB = require('./lib/DynamoDB')
 
 const crt = fs.readFileSync(path.join(__dirname, '/data/private/test-key.crt')).toString('ascii')
 const LambdaAuthorizer = require('./lib/auth/LambdaAuthorizer')
+const UsersHandler = require('./lib/handlers/UsersHandler')
 
 const authorizer = new LambdaAuthorizer(crt)
+const isLocal = process.env.IS_LOCAL === 'true'
+const api = new SmartsheetApi()
+const db = new DB(new DynamoDB(isLocal), process.env.DDB_USERS_TABLE)
 
 module.exports.echo = (event, context, callback) => {
   const response = {
@@ -82,10 +86,12 @@ module.exports.defaultredirect = (event, context, callback) => {
 }
 
 module.exports.handleOAuthRedirect = (event, context, callback) => {
-  const isLocal = process.env.IS_LOCAL=='true'
-  const api = new SmartsheetApi()
-  const db = new DB(new DynamoDB(isLocal), process.env.DDB_USERS_TABLE)
   return new OAuthClientHandler(api, db).handleOAuthRedirect(event, context)
     .then(response => callback(null, response))
     .catch(err => callback(err))
 };
+
+module.exports.users_me = authorizer.protectHandler((event, context, callback) => {
+  const usersHandler = new UsersHandler(db, process.env.DDB_USERS_TABLE)
+  return usersHandler.me(event, context)
+})

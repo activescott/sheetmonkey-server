@@ -1,0 +1,66 @@
+
+  {{#if user.loggedIn}}
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{user.email}} <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#">Another action</a></li>
+        <li role="separator" class="divider"></li>
+        <li><a id="logout" href="#doLogout">Logout</a></li>
+      </ul>
+    </li>
+  {{else}}
+    <a id="login" href="#doLogin">Login</a>
+  {{/if}}
+
+
+<script>
+import $ from 'jquery'
+import Backend from '../lib/Backend'
+
+export default {
+  methods: {
+    authUser: function () {
+      this.backend.me().then(response => {
+        const user = Object.assign({ loggedIn: true }, response)
+        this.set({ user: user })
+      }).catch(e => {
+        console.error(`Error calling me API: ${e}`)
+      })
+    }
+  },
+
+  data () {
+    return {
+      user: { logedIn: false }
+    }
+  },
+
+  oncreate () {
+    console.log('ProfileButton DOM Loaded')
+    this.backend = Backend.build()
+    $(document).click(e => {
+      let target = $(e.target)
+      // console.log('doc click:', target)
+      if (target.attr('id') === 'login') {
+        let token = $('#csrftoken').val()
+        console.log('token:', token)
+        let loc = 'https://app.smartsheet.com/b/authorize?response_type=code&client_id=1fh67w5l0mt6ofuempg&scope=READ_SHEETS&state=' + encodeURIComponent(token)
+        console.log('loc:', loc)
+        window.location.href = loc
+      } else if (target.attr('id') === 'logout') {
+        console.log('logout')
+        // delete cookie:
+        document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+        // for dev:
+        this.backend = Backend.build({ me: {} })
+        this.set({ user: { loggedIn: false } })
+      }
+    })
+    this.authUser()
+
+    this.observe('user', user => {
+      console.log('observed user:', user)
+    })
+  }
+}
+</script>

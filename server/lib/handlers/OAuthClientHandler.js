@@ -83,7 +83,7 @@ class OAuthClientHandler extends Handler {
                 'Content-Type': 'text/html',
                 'Refresh': '3; url=/index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
               },
-              body: `<p>Login succeeded! Redirecting to <a href="index.html">Home</a>...</p>`
+              body: `<p>Login succeeded! Redirecting to <a href="/index.html">Home</a>...</p>`
             };
             return response;
 

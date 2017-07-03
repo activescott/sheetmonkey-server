@@ -2,30 +2,14 @@
 /* eslint-disable padded-blocks */
 'use strict'
 require('../support/setup.js')
-const expect = require('chai').expect;
+const expect = require('chai').expect
 
 const Promise = require('bluebird')
-const path = require('path')
-const fs = require('fs')
-const jwt = require('jwt-simple')
-
-class Config {
-  static get pem () {
-    const pemPath = path.join(__dirname, '../../data/private/test-key-private.pem')
-    return fs.readFileSync(pemPath).toString('ascii')
-  }
-  static get crt () {
-    const crtPath = path.join(__dirname, '../../data/private/test-key.crt')
-    return fs.readFileSync(crtPath).toString('ascii')
-  }
-  static get alg () {
-    return 'RS256'
-  }
-}
+const TokenTool = require('../support/TokenTool')
 
 const LambdaAuthorizer = require('../../lib/auth/LambdaAuthorizer')
 
-const authorizer = new LambdaAuthorizer(Config.crt)
+const authorizer = new LambdaAuthorizer(TokenTool.crt)
 module.exports.myFunc = authorizer.protectHandler((event, context, callback) => {
   console.log(context.protected.claims)
   return Promise.resolve({ body: 'hello world' })
@@ -45,6 +29,7 @@ describe('LambdaAuthorizer', function () {
     const result = boundHandler(event, context, (errForAwsLambda, responseForAwsLambda) => {
       // note, here we are esentially mocking AWS Lambda calling into the handlers:
       // console.log('invoked, errForAwsLambda:', errForAwsLambda, ' responseForAwsLambda:', responseForAwsLambda)
+      expect(responseForAwsLambda.body).to.be.a('string')
       expect(responseForAwsLambda).to.have.property('statusCode', expectedStatusCode)
       return 'handler invoked.'
     })
@@ -73,12 +58,30 @@ describe('LambdaAuthorizer', function () {
     const payload = {
       prn: 123
     }
-    const tok = jwt.encode(payload, Config.pem, Config.alg)
+    const tok = TokenTool.newToken(payload)
 
     const event = { headers: { 'Authorization': `Bearer ${tok}` } }
     const context = {}
     const boundProtectedHandler = authorizer.protectHandler(dummyHandler)
     return expectResponseWithStatusCode(200, event, context, boundProtectedHandler)
+  })
+
+  it('should add prn claim to context', function (done) {
+    const payload = {
+      prn: 123
+    }
+    const tok = TokenTool.newToken(payload)
+
+    const event = { headers: { 'Authorization': `Bearer ${tok}` } }
+    const context = {}
+    const boundProtectedHandler = authorizer.protectHandler((event, context, callback) => {
+      return callback(null, `prn:${context.protected.claims.prn}`)
+    })
+    boundProtectedHandler(event, context, (errForAwsLambda, responseForAwsLambda) => {
+      // we're essentially aws lambda here, just expect cb_result to get called and have result boo
+      expect(responseForAwsLambda).to.equal('prn:123')
+      done()
+    })
   })
 
   it('should work with handler returns a promise (should "then" it)', function () {
@@ -89,7 +92,7 @@ describe('LambdaAuthorizer', function () {
     const payload = {
       prn: 123
     }
-    const tok = jwt.encode(payload, Config.pem, Config.alg)
+    const tok = TokenTool.newToken(payload)
 
     const event = { headers: { 'Authorization': `Bearer ${tok}` } }
     const context = {}
@@ -108,7 +111,7 @@ describe('LambdaAuthorizer', function () {
     const payload = {
       prn: 123
     }
-    const tok = jwt.encode(payload, Config.pem, Config.alg)
+    const tok = TokenTool.newToken(payload)
 
     const event = { headers: { 'Authorization': `Bearer ${tok}` } }
     const context = {}
@@ -119,9 +122,8 @@ describe('LambdaAuthorizer', function () {
 
     boundProtectedHandler(event, context, (errForAwsLambda, responseForAwsLambda) => {
       // we're essentially aws lambda here, just expect cb_result to get called and have result boo
-      expect(responseForAwsLambda).to.be.undefined
+      expect(responseForAwsLambda).to.be.undefined // eslint-disable-line
       done()
     })
   })
-
 })

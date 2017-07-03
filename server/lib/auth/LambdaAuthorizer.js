@@ -86,6 +86,7 @@ class LambdaAuthorizer {
       let decoded
       try {
         decoded = jwt.decode(tokenVal, this.jwtCert)
+        console.log('decoded claims:', decoded)
         context.protected = {
           claims: decoded
         }
@@ -107,7 +108,7 @@ class LambdaAuthorizer {
         'Content-Type': 'application/json',
         'WWW-Authenticate': 'Bearer'
       },
-      body: { message: errMsg }
+      body: JSON.stringify({ message: errMsg })
     }
     return callback(null, response)
   }

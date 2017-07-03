@@ -12,8 +12,6 @@ cd $THISDIR
 
 clear;
 
-npm run lint || die '\nlint failed!\n\n'
-
 ./clean.sh
 
 [[ -d ./dist ]] || mkdir ./dist

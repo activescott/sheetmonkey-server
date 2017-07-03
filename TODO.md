@@ -16,9 +16,9 @@
   - [x] fix: add user is overwriting ALL attributes of an existing user rather than just updating existing attributes (createdAt is missing!)
     - [x] Use `ConditionExpression: 'attribute_not_exists(id)'`, and an error occurs if it exists. Then update it instead (in the app layer, not DB).
    
-  - [ ] show user info on content pages
-    - [ ] Create a "me" endpoint to see if we're authed. If authed, get profile. If not, error
-      - Auth via cookie+Authorization header. Client Requests can extract token from cookie and add it as an Auth header in API. 
+  - [x] show user info on content pages
+    - [x] Create a "me" endpoint to see if we're authed. If authed, get profile. If not, error
+      - [x] Auth via cookie+Authorization header. Client Requests can extract token from cookie and add it as an Auth header in API. 
     - [ ] Bring in redux+reducers to incorporate user's profile and auth status.
     
   - [ ] Refresh token automatically in SmartsheetApi.

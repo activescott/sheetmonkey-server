@@ -17,7 +17,7 @@
         <li><a id="goapitest" href="#do">API Test</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a id="gologin" href="#do">Login</a></li>
+        <li><ProfileButton /></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -29,10 +29,13 @@
 
 <script>
   import $ from 'jquery'
-  import Login from './Login.html'
   import ApiTest from './ApiTest.html'
+  import ProfileButton from './ProfileButton.html'
 
   export default {
+    components: {
+      ProfileButton
+    },
     methods: {
       setContent (content) {
         let old = this.get('currentContent')
@@ -47,11 +50,6 @@
     },
     oncreate () {
       let target = $('#appcontent').get(0)
-      $('#gologin').click(() => {
-        this.setContent(new Login({
-          target: target
-        }))
-      })
 
       $('#goapitest').click(() => {
         this.setContent(new ApiTest({

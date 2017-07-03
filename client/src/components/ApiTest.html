@@ -3,43 +3,28 @@
 
 <script>
   import $ from 'jquery'
-  import Xhr from '../lib/Xhr.js'
+  import Backend from '../lib/Backend'
 
   export default {
     methods: {
-      cookieCutter: function (cookieHeaderVal) {
-        // a cookie has multiple key=value pairs separated by semicolons:
-        let obj = {}
-        if (cookieHeaderVal) {
-          const pairs = cookieHeaderVal.split(';')
-          for (let p of pairs) {
-            let kv = p.split('=')
-            obj[kv[0].trim()] = kv[1].trim()
-          }
-        }
-        return obj
-      },
       pingApi: function () {
-        let cookies = this.cookieCutter(document.cookie)
-        let token = ('jwt' in cookies) ? cookies.jwt : ''
-        console.log('api token:', token)
         let p = $('<p>')
         p.text(`Calling the API with a token...`)
         $('#response').empty().append(p)
 
-        return Xhr.getJSON('api/ping', { 'Authorization': `Bearer ${token}` }).then(response => {
-          console.log('xhr response:', response)
+        this.backend.ping().then(response => {
           let div = $('<div>')
           div.append($('<p>API response is:</p>'))
           div.append($('<pre>').text(JSON.stringify(response)))
           $('#response').append(div)
         }).catch(e => {
-          $('#response').append($(`<p>Error calling API: ${e}</p>`))
+          $('#response').append($(`<p>Error calling Backend API: ${e}</p>`))
         })
       }
     },
 
     oncreate () {
+      this.backend = Backend.build()
       $('#apitest').click(() => {
         this.pingApi()
       })
