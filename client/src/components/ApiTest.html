@@ -7,14 +7,27 @@
 
   export default {
     methods: {
+      cookieCutter: function (cookieHeaderVal) {
+        // a cookie has multiple key=value pairs separated by semicolons:
+        let obj = {}
+        if (cookieHeaderVal) {
+          const pairs = cookieHeaderVal.split(';')
+          for (let p of pairs) {
+            let kv = p.split('=')
+            obj[kv[0].trim()] = kv[1].trim()
+          }
+        }
+        return obj
+      },
       pingApi: function () {
-        let token = $('#csrftoken').val()
-        console.log('csrftoken:', token)
+        let cookies = this.cookieCutter(document.cookie)
+        let token = ('jwt' in cookies) ? cookies.jwt : ''
+        console.log('api token:', token)
         let p = $('<p>')
-        p.text(`Calling the API with a token from this file...`)
+        p.text(`Calling the API with a token...`)
         $('#response').empty().append(p)
 
-        return Xhr.getJSON('api/ping', { 'jwt': token }).then(response => {
+        return Xhr.getJSON('api/ping', { 'Authorization': `Bearer ${token}` }).then(response => {
           console.log('xhr response:', response)
           let div = $('<div>')
           div.append($('<p>API response is:</p>'))

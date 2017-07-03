@@ -7,6 +7,7 @@ const OAuthClientHandler = require('../../lib/handlers/OAuthClientHandler.js');
 const SmartsheetApiMock = require('../mocks/SmartsheetApiMock');
 const DBMock = require('../mocks/DBMock');
 const randomUserID = require('../support/tools').randomUserID;
+const cookieCutter = require('../../lib/cookieCutter.js')
 
 describe('OAuthClientHandler', function() {
   let handler;
@@ -42,23 +43,14 @@ describe('OAuthClientHandler', function() {
         // validate cookie was set:
         expect(response.headers).to.have.property('Set-Cookie');
         let cookie = response.headers['Set-Cookie'];
-        let cookieObj = cookieToObj(cookie);
+        let cookieObj = cookieCutter(cookie);
         ['jwt', 'Expires'].forEach(p => expect(cookieObj).to.have.property(p));
         let expireDate = Date.parse(cookieObj.Expires);
         expect(expireDate).to.be.greaterThan(Date.now());
       });
     });
 
-    function cookieToObj(cookie) {
-      // cookie has multiple key=value pairs separated by semicolons:
-      let obj = {};
-      const pairs = cookie.split(';');
-      for (let p of pairs) {
-        let kv = p.split('=');
-        obj[kv[0].trim()] = kv[1].trim();
-      }
-      return obj;
-    }
+    
     
   })
 

@@ -68,7 +68,6 @@ class OAuthClientHandler extends Handler {
           };
 
           const handleAddedOrUpdatedUser = addUserResult => {
-
             D.log('User saved:', addUserResult);
             // write cookie to authenticate user with cookie from here on out.
             const MINUTES = 60;
