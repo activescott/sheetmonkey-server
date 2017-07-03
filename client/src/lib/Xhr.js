@@ -25,6 +25,7 @@ class Xhr {
     let token = ('jwt' in cookies) ? cookies.jwt : ''
     if (!token) {
       console.log('token not found. not authorizing xhr')
+      return
     }
     if (!('Authorization' in headers)) {
       headers['Authorization'] = `Bearer ${token}`

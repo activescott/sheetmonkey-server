@@ -9,10 +9,8 @@ die () {
 
 npm run lint || die '\nlint failed!\n\n'
 
-cp -v ./src/*.html ./dist/
-cp -v ./src/*.css ./dist/
-cp -v ./src/*.js ./dist/
+./build.sh
 
 open ./dist/index.html
 
-npm run dev
+nodemon -e js,html,svelte --ignore dist/ --exec './build.sh'

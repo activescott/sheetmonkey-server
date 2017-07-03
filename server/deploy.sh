@@ -9,6 +9,6 @@ npm test
 
 pushd .
 cd ../client
-./build.sh
+./deploy.sh
 popd
 sls deploy --verbose

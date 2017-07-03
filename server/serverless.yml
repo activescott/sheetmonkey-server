@@ -65,6 +65,9 @@ functions:
       - http:
           path: api/echo
           method: get
+      - http:
+          path: api/echo/{url}
+          method: get
 
   ping:
     handler: handler.ping
@@ -100,58 +103,27 @@ functions:
           path: /
           method: get
 
-  indexhtml:
+  staticfiles:
     handler: handler.staticfile
     events:
       - http:
           path: index.html
           method: get
-  
-  bootstrapcss:
-    handler: handler.staticfile
-    events:
       - http:
-          path: bootstrap.min.css
+          path: vendor/{url}
           method: get
-  
-  bootstrapjs:
-    handler: handler.staticfile
-    events:
       - http:
           path: bootstrap.min.js
           method: get
-
-  indexdistjs:
-    handler: handler.staticfile
-    events:
       - http:
           path: index_dist.js
           method: get
-
-  indexjs:
-    handler: handler.staticfile
-    events:
       - http:
           path: index.js
           method: get
-
-  jquery:
-    handler: handler.staticfile
-    events:
-      - http:
-          path: jquery.min.js
-          method: get
-
-  stylecss:
-    handler: handler.staticfile
-    events:
       - http:
           path: style.css
           method: get
-
-  sveltecss:
-    handler: handler.staticfile
-    events:
       - http:
           path: svelte.css
           method: get
