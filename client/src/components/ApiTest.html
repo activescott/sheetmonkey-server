@@ -1,4 +1,4 @@
-<button id="apitest" type="button" class="btn btn-default center-block">Test API</button>
+<button type="button" class="btn btn-default center-block" on:click="onTestApiClick(event)">Test API</button>
 <div id="response"></div>
 
 <script>
@@ -20,14 +20,15 @@
         }).catch(e => {
           $('#response').append($(`<p>Error calling Backend API: ${e}</p>`))
         })
+      },
+      onTestApiClick (event) {
+        console.log('onTestApiClick:', event)
+        this.backend = Backend.build()
+        this.pingApi()
       }
     },
 
     oncreate () {
-      this.backend = Backend.build()
-      $('#apitest').click(() => {
-        this.pingApi()
-      })
     }
 
   }
