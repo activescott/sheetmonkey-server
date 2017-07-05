@@ -1,19 +1,36 @@
 import $ from 'jquery'
 import App from './Components/App.html'
 
-$(() => {
-  var currentComponent
-  console.log('init app.')
+import { createStore } from 'redux'
+import rootReducer from './reducers/index.js'
+import appState from './appState'
+
+function initStore () {
+  // appStore is the redux store: http://redux.js.org/#the-gist
+  // Its API is { subscribe, dispatch, getState }:
+  //   subscribe() to update the UI in response to state changes
+  //   dispatch() an action to mutate the state of the store
+  console.log('initializing store...')
+  const store = createStore(rootReducer, appState)
+  console.log('initializing store complete.')
+  return store
+}
+
+function initComponent (store) {
+  console.log('initializing App component...')
+  if (!store) throw Error('store required')
   let target = $('#main').get(0)
-  console.assert(target, 'no target!')
-
-  currentComponent = new App({
+  const app = new App({ // eslint-disable-line no-unused-vars
     target: target,
-    data: { name: 'world' }
+    data: {
+      store: store,
+      user: store.getState().user
+    }
   })
+  console.log('initializing App component complete.')
+}
 
-  setTimeout(() => {
-    console.log('everyone...')
-    currentComponent.set({name: 'everyone'})
-  }, 1000)
+$(() => {
+  const store = initStore()
+  initComponent(store)
 })

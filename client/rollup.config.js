@@ -1,4 +1,5 @@
 import commonjs from 'rollup-plugin-commonjs'
+import replace from 'rollup-plugin-replace'
 import resolve from 'rollup-plugin-node-resolve'
 import svelte from 'rollup-plugin-svelte'
 
@@ -9,8 +10,16 @@ export default {
   entry: 'src/index.js',
   format: 'iife',
   plugins: [
-    commonjs(),
-    resolve({ browser: true }),
+    commonjs({
+      include: 'node_modules/**'
+    }),
+    resolve({
+      browser: true
+    }),
+    // Replace is to shut up redux
+    replace({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+    }),
     svelte({
       // By default, all .html and .svelte files are compiled
       extensions: ['.my-custom-extension', '.html', '.svelte'],

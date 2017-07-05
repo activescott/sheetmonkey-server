@@ -17,7 +17,7 @@
         <li><a href="#do" on:click="apiTestButtonClick(event)">API Test</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <ProfileButton />
+        <ProfileButton user='{{user}}' store='{{store}}' />
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -60,6 +60,13 @@
       }
     },
     oncreate () {
+      const store = this.get('store')
+      console.log('App intialized with store: ', store ? store.getState() : 'null store!')
+      this.set(store.getState())
+      store.subscribe(() => {
+        console.log('App subscribe')
+        this.set(store.getState())
+      })
     }
   }
 </script>

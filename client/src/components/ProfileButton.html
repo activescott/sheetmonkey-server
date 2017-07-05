@@ -14,14 +14,20 @@
 
 <script>
 import $ from 'jquery'
+import Actions from '../actions'
 import Backend from '../lib/Backend'
 
 export default {
   methods: {
-    authUser: function () {
+    authUser () {
+      console.log('authUser...')
       this.backend.me().then(response => {
+        console.log('authUser backend response:', response)
         const user = Object.assign({ loggedIn: true }, response)
-        this.set({ user: user })
+        // TODO: Reset with redux action instead!
+        // this.set({ user: user })
+        const action = Actions.setUser(user)
+        this.get('store').dispatch(action)
       }).catch(e => {
         console.error(`Error calling me API: ${e}`)
       })
@@ -40,25 +46,30 @@ export default {
       console.log('logonLogoutClickout')
       // delete cookie:
       document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-      // for dev:
+      // for dev purposes (Backend.build will be a mock when run locally):
       this.backend = Backend.build({ me: {} })
-      this.set({ user: { loggedIn: false } })
+      const action = Actions.setUser({ loggedIn: false })
+      this.get('store').dispatch(action)
     }
   },
-
   data () {
+    // note: Data supplied at instantiation (i.e. new Component(...)) takes priority over defaults.
     return {
-      user: { logedIn: false }
+      user: { loggedIn: false },
+      store: null
     }
   },
-
   oncreate () {
-    console.log('ProfileButton DOM Loaded')
+    const store = this.get('store')
+    console.log('ProfileButton DOM Loaded with store:', store)
+    console.assert(store, 'redux store must be provided by initializer of this component!')
     this.backend = Backend.build()
     this.authUser()
+    /*
     this.observe('user', user => {
-      console.log('observed user:', user)
+      console.log('ProbileButton observed user:', user)
     })
+    */
   }
 }
 </script>

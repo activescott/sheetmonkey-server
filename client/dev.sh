@@ -9,8 +9,6 @@ die () {
 
 npm run lint || die '\nlint failed!\n\n'
 
-./build.sh
-
 open ./dist/index.html
 
 nodemon -e js,html,svelte --ignore dist/ --exec './build.sh'

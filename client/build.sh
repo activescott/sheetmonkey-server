@@ -17,14 +17,16 @@ clear;
 [[ -d ./dist ]] || mkdir ./dist
 
 rollup --config
-if [ $? -eq 0 ] ; then
-
-  cp -v ./src/*.html ./dist/
-  cp -v ./src/*.css ./dist/
-  cp -v ./src/*.js ./dist/
-  cp -rv ./src/vendor ./dist/
-
+result=$?
+echo "rollup result: $result"
+if [[ result -ne 0 ]]; then 
+	popd
+	die '\nrollup build failed!\n\n'
 fi
 
+cp -v ./src/*.html ./dist/  || die 'copy failed: html'
+cp -v ./src/*.css ./dist/   || die 'copy failed: css'
+cp -v ./src/*.js ./dist/    || die 'copy failed: js'
+cp -rv ./src/vendor ./dist/ || die 'copy failed: vendor'
 
 popd
