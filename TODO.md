@@ -23,7 +23,7 @@
 
 
 - [ ] Enable developer to register a plugin with optional API Client ID and Secret: Provide a unique redirect URL.
-  - [ ] redux now?
+  - [x] redux now?
 
 - [ ] Enable redirect flow to extension for clients.
   - [ ] redirect endpoint.
