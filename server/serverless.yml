@@ -30,6 +30,7 @@ provider:
     SS_CLIENT_ID: ${file(data/private/ss-oauth.json):clientID}
     SS_CLIENT_SECRET: ${file(data/private/ss-oauth.json):secret}
     DDB_USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
+    DDB_PLUGINS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-plugins
 
   iamRoleStatements:
     - Effect: Allow
@@ -41,6 +42,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DDB_USERS_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DDB_PLUGINS_TABLE}"
 
 resources:
   Resources:
@@ -57,6 +67,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    pluginsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DDB_PLUGINS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: manifestUrl
+            AttributeType: S
+        KeySchema:
+          - AttributeName: manifestUrl
+            KeyType: HASH          
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1          
 
 functions:
   echo:

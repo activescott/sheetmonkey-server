@@ -49,7 +49,7 @@ class LambdaAuthorizer {
 
       if (isAuthenticated) {
         let result = postAuthorizationHandler(event, context, callback)
-        D.log('response from postAuthorizationHandler:', result)
+        // D.log('response from postAuthorizationHandler:', result)
         const isPromise = obj => obj && 'then' in obj // <- https://stackoverflow.com/a/27746324/51061
         if (isPromise(result)) {
           return result

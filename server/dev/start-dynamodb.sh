@@ -12,6 +12,8 @@ if [[ $? -eq 0 ]] ; then
   echo 'DDB Local is already running.'
 else
   echo 'DDB Local not running. Starting...'
+  # first just install it, I've seen this suspiciously not be installed multiple times - maybe yarn does it??
+  sls dynamodb install
   sls dynamodb start --migrate &
   # wait a few secs to let DDB start then open the DDB shell (to let the user know what's going on)
   sleep 3s && open http://localhost:8000/shell

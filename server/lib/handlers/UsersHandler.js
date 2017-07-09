@@ -35,7 +35,7 @@ class UsersHandler extends Handler {
   }
 
   post (event, context) {
-    return Promise.try(() => {     
+    return Promise.try(() => {
       const data = JSON.parse(event.body)
       if (typeof data.id !== 'string' ||
           typeof data.email !== 'string') {
@@ -69,13 +69,8 @@ class UsersHandler extends Handler {
   }
 
   me (event, context) {
-    return Promise.try(() => {
-      assert(context, 'context required')
-      assert(context.protected && context.protected.claims, 'protected claims required. ensure authorized')
-      assert(context.protected.claims.prn, 'prn claim required')
-      let prn = context.protected.claims.prn
-      assert(typeof prn === 'number', `unexpected prn type:${typeof prn}`)
-      return this.getPublicUserFromID(prn).then(user => this.responseAsJson(user))
+    return this.getRequestPrincipal(event, context).then(principalID => {
+      return this.getPublicUserFromID(principalID).then(user => this.responseAsJson(user))
     })
   }
 }

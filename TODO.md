@@ -22,8 +22,24 @@
 
 
 
-- [ ] Enable developer to register a plugin with optional API Client ID and Secret: Provide a unique redirect URL.
+- [ ] Enable developer to register a plugin with optional API Client ID and Secret
   - [x] redux now?
+  - Backend:
+    - [ ] Create
+    - [ ] Read
+    - [ ] Update
+    - [ ] Delete
+  - Client Integration:
+    - [ ] Create and save plugin
+    - [ ] View/list plugins in a table
+    - [ ] Edit some values for a plugin
+    - [ ] Delete plugin
+    
+
+  - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
+    - [ ] catch token on backend and send to extension
+    - [ ] route token from extension to plugin
+
 
 - [ ] Enable redirect flow to extension for clients.
   - [ ] redirect endpoint.
@@ -47,6 +63,7 @@
   - [ ] Just consider storing pages in S3 and setting custom domain. Since the APIs require manual authorization and don't use cookies, the csrf isn't that big of a risk. See references:
     - https://github.com/serverless/examples/tree/master/aws-node-single-page-app-via-cloudfront
     - http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/sample-templates-services-us-west-2.html#w2ab2c21c48c13c31 (see Amazon S3 website)
+    - https://rynop.com/2017/04/20/howto-serve-angular2-app-from-s3-and-cloudfront-with-free-https/
   - [ ] Add cache-control headers to the content served (maybe aggressively cached css, images, but not cached html & js)
   - [ ] cloudfront setup in aws.
   - [ ] how to keep agig from creating a new API??

@@ -35,7 +35,6 @@ describe('LambdaAuthorizer', function () {
     })
     return Promise.resolve(result)
       .then(result => {
-        console.log('result of boundHandler:', result)
         return expect(result).to.equal('handler invoked.')
       })
   }

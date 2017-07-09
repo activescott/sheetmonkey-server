@@ -1,4 +1,7 @@
 'use strict'
+const Promise = require('bluebird')
+const assert = require('assert')
+const validateInput = require('../ValidationTools').validateInput
 
 class Handler {
     /**
@@ -15,6 +18,25 @@ class Handler {
     }
     return response
   }
-}
 
+  /**
+   * Returns the UserID/principal ID of the request as a promise
+   * If the request is not being made by an authenticated user, then an error will be raised.
+   */
+  getRequestPrincipal (event, context) {
+    return Promise.try(() => {
+      assert(context, 'context required')
+      assert(context.protected && context.protected.claims, 'protected claims required. ensure authorized')
+      assert(context.protected.claims.prn, 'prn claim required')
+      let prn = context.protected.claims.prn
+      assert(typeof prn === 'number', `unexpected prn type:${typeof prn}`)
+      return prn
+    })
+  }
+
+  validateInput (expectation, event) {
+    const body = JSON.parse(event.body)
+    return validateInput(expectation, body)
+  }
+}
 module.exports = Handler

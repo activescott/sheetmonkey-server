@@ -1,12 +1,15 @@
 'use strict'
 const Promise = require('bluebird')
+const assert = require('assert')
 
 class DBMock {
   constructor () {
     this._users = []
+    this._plugins = []
   }
 
   get users () { return this._users }
+  get plugins () { return this._plugins }
 
   addUser (user) {
     return Promise.try(() => {
@@ -34,9 +37,43 @@ class DBMock {
     })
   }
 
-  listUsers (id) {
+  listUsers () {
     return Promise.try(() => {
       return this.users
+    })
+  }
+
+  addPlugin (plugin) {
+    return Promise.try(() => {
+      if (this.plugins.find(elem => elem.id === plugin.id)) {
+        console.log('\n\nDBMock plugin exists:', plugin.id)
+        return null // plugin exists
+      }
+      this.plugins.push(plugin)
+      return plugin
+    })
+  }
+
+  updatePlugin (plugin, callerID) {
+    return Promise.try(() => {
+      let idx = this.plugins.findIndex(elem => elem.manifestUrl === plugin.manifestUrl)
+      // console.log('found plugin:', this.plugins[idx])
+      assert(callerID === this.plugins[idx].ownerID, 'DBMock: Unauthorized; caller must be owner of plugin!')
+      this.plugins[idx] = plugin
+      return plugin
+    })
+  }
+
+  getPlugin (id) {
+    return Promise.try(() => {
+      let idx = this.plugins.findIndex(elem => elem.id === id)
+      return this.plugins[idx]
+    })
+  }
+
+  listPlugins () {
+    return Promise.try(() => {
+      return this.plugins
     })
   }
 }
