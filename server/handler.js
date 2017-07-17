@@ -95,3 +95,35 @@ module.exports.users_me = authorizer.protectHandler((event, context, callback) =
   const usersHandler = new UsersHandler(db, process.env.DDB_USERS_TABLE)
   return usersHandler.me(event, context)
 })
+
+module.exports.plugins_post = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.post(event, context)
+})
+
+module.exports.plugins_listPublic = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.listPublic(event, context)
+})
+
+module.exports.plugins_listPrivate = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.listPrivate(event, context)
+})
+
+module.exports.plugins_get = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.get(event, context)
+})
+
+module.exports.plugins_put = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.put(event, context)
+})
+
+module.exports.plugins_delete = authorizer.protectHandler((event, context, callback) => {
+  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.delete(event, context)
+})
+
+module.exports.plugins_get

@@ -6,11 +6,14 @@ const assert = require('assert')
 const path = require('path')
 const D = new Diag(path.parse(__filename).name)
 
-const pluginArgsSchema = {
+const createPluginArgsSchema = {
   manifestUrl: { type: 'string', required: true },
   // ownerID: { type: 'number', required: true }, // << Note that the ownerID should be retreived from the caller's authenticated principalID
   apiClientID: { type: 'string', required: false },
   apiClientSecret: { type: 'string', required: false }
+}
+const getPluginArgsSchema = {
+  manifestUrl: { type: 'string', required: true }
 }
 
 class PluginsHandler extends Handler {
@@ -22,7 +25,7 @@ class PluginsHandler extends Handler {
 
   post (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      let args = this.validateInput(pluginArgsSchema, event)
+      let args = this.validateInput(createPluginArgsSchema, event)
       // establish the ownerID based on the authenticated caller:
       args = Object.assign(args, { ownerID: principalID })
       return this.db.addPlugin(args).then(plugin => {
@@ -33,12 +36,19 @@ class PluginsHandler extends Handler {
 
   get (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      // TODO: list should provide all PUBLIC & private information for a plugin - BUT ONLY for the authenciated caller.
-      throw new Error('not yet implemented')
+      let args = this.validateInput(getPluginArgsSchema, event)
+      return this.db.getPlugin(args.manifestUrl).then(p => {
+        if (p.ownerID !== principalID) {
+          throw new Error('Delete failed. caller does not own the plugin')
+        }
+        return this.db.getPlugin(args.manifestUrl).then(p => {
+          return this.responseAsJson(p)
+        })
+      })
     })
   }
 
-  listPluginsPrivate (event, context) {
+  listPrivate (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
       // NOTE: Only owner's plugins, but all information
       return this.db.listPlugins().then(plugins => {
@@ -48,7 +58,7 @@ class PluginsHandler extends Handler {
     })
   }
 
-  listPluginsPublic (event, context) {
+  listPublic (event, context) {
     // NOTE: ONLY PUBLIC information for a plugin - (no auth details)
     return this.db.listPlugins().then(plugins => {
       const payload = plugins.map(p => Object.assign({}, { manifestUrl: p.manifestUrl }))
@@ -58,7 +68,7 @@ class PluginsHandler extends Handler {
 
   put (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      const args = this.validateInput(pluginArgsSchema, event)
+      const args = this.validateInput(createPluginArgsSchema, event)
       return this.db.updatePlugin(args, principalID).then(plugin => {
         return this.responseAsJson(plugin)
       })
@@ -67,7 +77,13 @@ class PluginsHandler extends Handler {
 
   delete (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      throw new Error('not yet implemented')
+      let args = this.validateInput(getPluginArgsSchema, event)
+      return this.db.getPlugin(args.manifestUrl).then(p => {
+        if (p.ownerID !== principalID) {
+          throw new Error('Delete failed. caller does not own the plugin')
+        }
+        return this.db.deletePlugin(args.manifestUrl)
+      })
     })
   }
 }

@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "test": "mocha ./test/all.js",
+    "test": "./node_modules/.bin/_mocha ./test/all.js",
     "pretest": "./dev/start-dynamodb.sh",
     "deploy": "./deploy.sh",
-    "watch": "nodemon -w ./ --exec 'npm test'"
+    "watch": "./node_modules/.bin/_mocha -w ./test/all.js"
   },
   "dependencies": {
     "aws-sdk": "^2.77.0",

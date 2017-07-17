@@ -76,6 +76,14 @@ class DBMock {
       return this.plugins
     })
   }
+
+  deletePlugin (manifestUrl) {
+    return Promise.try(() => {
+      let index = this.plugins.findIndex(elem => elem.manifestUrl === manifestUrl)
+      if (index >= 0)
+        this.plugins.splice(index, 1)
+    })
+  }
 }
 
 module.exports = DBMock

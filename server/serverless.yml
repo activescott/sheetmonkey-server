@@ -119,6 +119,43 @@ functions:
           path: api/users/me
           method: get
 
+  plugins_post:
+    handler: handler.plugins_post
+    events:
+      - http:
+        path: /plugins
+        method: post
+  plugins_listPublic:
+    handler: handler.plugins_listPublic
+    events:
+      - http:
+        path: /plugins
+        method: get
+  plugins_listPrivate:
+    handler: handler.plugins_listPrivate
+    events:
+      - http:
+        path: /plugins/mine
+        method: get
+  plugins_get:
+      handler: handler.plugins_get
+      events:
+        - http:
+          path: plugins/{manifestUrl}
+          method: get
+  plugins_put:
+      handler: handler.plugins_put
+      events:
+        - http:
+          path: /plugins/{manifestUrl}
+          method: put
+  plugins_delete:
+        handler: handler.plugins_delete
+        events:
+          - http:
+            path: /plugins/{manifestUrl}
+            method: delete
+
   defaultredir:
     handler: handler.defaultredirect
     events:
@@ -150,3 +187,4 @@ functions:
       - http:
           path: svelte.css
           method: get
+  

@@ -69,7 +69,6 @@ describe('PluginsHandler', function () {
       const results = testCases.map(event => {
         const testCase = JSON.parse(event.body)
         return handler.post(event, authorizedContext).then(handlerResponse => {
-          // console.log('handlerResponse:', handlerResponse)
           const responseBody = JSON.parse(handlerResponse.body)
           return expect(responseBody).to.have.property('manifestUrl', testCase.manifestUrl, 'ownerID', testCase.ownerID)
         })
@@ -95,7 +94,7 @@ describe('PluginsHandler', function () {
       let event = {
         body: JSON.stringify({})
       }
-      return expect(handler.listPluginsPrivate(event, emptyContext)).to.eventually.rejectedWith(/protected claims required. ensure authorized/)
+      return expect(handler.listPrivate(event, emptyContext)).to.eventually.rejectedWith(/protected claims required. ensure authorized/)
     })
 
     it('should list user\'s plugins with private info', function() {
@@ -115,7 +114,7 @@ describe('PluginsHandler', function () {
         }
         const context = buildAuthorizedContext(testUserID)
 
-        return handler.listPluginsPrivate(event, context).then(response => {
+        return handler.listPrivate(event, context).then(response => {
           expect(response.body).to.be.a('string')
           let plugins = JSON.parse(response.body)
           expect(plugins).to.have.lengthOf(2)
@@ -135,10 +134,9 @@ describe('PluginsHandler', function () {
             body: {}
           }
 
-          return handler.listPluginsPublic(event, context).then(response => {
+          return handler.listPublic(event, context).then(response => {
             expect(response.body).to.be.a('string')
             let plugins = JSON.parse(response.body)
-            console.log('plugins:', plugins);
             expect(plugins).to.have.lengthOf(2)
             expect(plugins[0]).to.have.property('manifestUrl', testPlugin.manifestUrl)
             expect(plugins[1]).to.have.property('manifestUrl', testPlugin2.manifestUrl)
@@ -156,6 +154,24 @@ describe('PluginsHandler', function () {
         body: JSON.stringify({id: '123456', email: 'a@b.com'})
       }
       return expect(handler.get(event, emptyContext)).to.eventually.rejectedWith(/protected claims required. ensure authorized/)
+    })
+
+    it('should return the specified plugin', function () {
+      const testUserID = randomUserID()
+      const testPlugin = { manifestUrl: `https://blah.com/${testUserID}.json`, ownerID: testUserID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPlugin)
+        }
+        const context = buildAuthorizedContext(testUserID)
+        return handler.get(event, context).then(handlerResponse => {
+          expect(handlerResponse).to.have.property('body').that.is.a('string')
+          const body = JSON.parse(handlerResponse.body)
+          return expect(body).to.be.deep.equal(testPlugin)
+        })
+      })
+      
     })
 
   })
@@ -177,13 +193,7 @@ describe('PluginsHandler', function () {
         const event = {
           body: JSON.stringify(testPlugin)
         }
-        const context = {
-          protected: {
-            claims: {
-              prn: randomUserID() // <- Note different ownerID
-            }
-          }
-        }
+        const context = buildAuthorizedContext(randomUserID()) // note deliberately different userID
 
         const handlerResponse = handler.put(event, context)
 
@@ -201,6 +211,35 @@ describe('PluginsHandler', function () {
         body: JSON.stringify({id: '123456', email: 'a@b.com'})
       }
       return expect(handler.delete(event, emptyContext)).to.eventually.rejectedWith(/protected claims required. ensure authorized/)
+    })
+
+    it('should not let non-owner delete plugin', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${randomUserID()}.json`, ownerID: randomUserID() }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPlugin)
+        }
+        const context = buildAuthorizedContext(randomUserID()) // note deliberately different userID
+
+        const handlerResponse = handler.delete(event, context)
+
+        return expect(handlerResponse).to.eventually.be.rejectedWith(/Delete failed. caller does not own the plugin/)
+      })
+    })
+    
+    it('should delete a plugin', function () {
+      const testUserID = randomUserID()
+      const testPlugin = { manifestUrl: `https://blah.com/${testUserID}.json`, ownerID: testUserID }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPlugin)
+        }
+        const context = buildAuthorizedContext(testUserID) // note deliberately different userID
+
+        const handlerResponse = handler.delete(event, context)
+
+        return expect(handlerResponse).to.eventually.be.fulfilled
+      })
     })
 
   })

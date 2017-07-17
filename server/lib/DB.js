@@ -167,7 +167,7 @@ class DB {
 
   getPlugin (manifestUrl) {
     if (!manifestUrl || typeof manifestUrl !== 'string') {
-      D.log('getPlugin: invalid manifestUrl, indicating plugin not found')
+      D.log('getPlugin: invalid manifestUrl')
       return Promise.resolve(null)
     }
     let params = {
@@ -183,6 +183,21 @@ class DB {
       }
       return null
     }).catch(err => {
+      // more detail to the error
+      throw new Error(`getPlugin error: ${err}`)
+    })
+  }
+
+  deletePlugin (manifestUrl) {
+    if (!manifestUrl || typeof manifestUrl !== 'string') {
+      D.log('getPlugin: invalid manifestUrl')
+      return Promise.resolve(null)
+    }
+    let params = {
+      TableName: this.pluginsTableName,
+      Key: { manifestUrl: manifestUrl }
+    }
+    return this.ddb.delete(params).catch(err => {
       // more detail to the error
       throw new Error(`getPlugin error: ${err}`)
     })
