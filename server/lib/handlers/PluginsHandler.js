@@ -38,10 +38,21 @@ class PluginsHandler extends Handler {
     })
   }
 
-  listPlugins (event, context) {
+  listPluginsPrivate (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      // TODO: list should list all PUBLIC information for a plugin
-      throw new Error('not yet implemented')
+      // NOTE: Only owner's plugins, but all information
+      return this.db.listPlugins().then(plugins => {
+        const payload = plugins.filter(p => p.ownerID == principalID)
+        return this.responseAsJson(payload)
+      })
+    })
+  }
+
+  listPluginsPublic (event, context) {
+    // NOTE: ONLY PUBLIC information for a plugin - (no auth details)
+    return this.db.listPlugins().then(plugins => {
+      const payload = plugins.map(p => Object.assign({}, { manifestUrl: p.manifestUrl }))
+      return this.responseAsJson(payload)
     })
   }
 

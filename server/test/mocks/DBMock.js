@@ -45,8 +45,8 @@ class DBMock {
 
   addPlugin (plugin) {
     return Promise.try(() => {
-      if (this.plugins.find(elem => elem.id === plugin.id)) {
-        console.log('\n\nDBMock plugin exists:', plugin.id)
+      if (this.plugins.find(elem => elem.manifestUrl === plugin.manifestUrl)) {
+        console.log('\n\nDBMock plugin exists:', plugin.manifestUrl)
         return null // plugin exists
       }
       this.plugins.push(plugin)
@@ -64,9 +64,9 @@ class DBMock {
     })
   }
 
-  getPlugin (id) {
+  getPlugin (manifestUrl) {
     return Promise.try(() => {
-      let idx = this.plugins.findIndex(elem => elem.id === id)
+      let idx = this.plugins.findIndex(elem => elem.manifestUrl === manifestUrl)
       return this.plugins[idx]
     })
   }

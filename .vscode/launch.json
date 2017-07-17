@@ -7,9 +7,9 @@
       "name": "test",
       "type": "node",
       "protocol": "inspector",
-      "program": "/usr/local/bin/_mocha",
+      "program": "${workspaceRoot}/server/node_modules/.bin/_mocha",
       "cwd": "${workspaceRoot}",
-      "args": ["server/test/all.js"]
+      "args": ["-w", "server/test/all.js"]
     }
   ]
 }

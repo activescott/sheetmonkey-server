@@ -18,15 +18,20 @@ describe('PluginsHandler', function () {
   beforeEach(function () {
     // runs before each test in this block
     db = new DBMock()
-    authorizedContext = {
+    authorizedContext = buildAuthorizedContext()
+    handler = new PluginsHandler(db)
+  })
+
+  function buildAuthorizedContext (userID) {
+    if (!userID) userID = randomUserID()
+    return {
       protected: {
         claims: {
-          prn: randomUserID()
+          prn: userID
         }
       }
     }
-    handler = new PluginsHandler(db)
-  })
+  }
 
   describe('create', function () {
 
@@ -82,6 +87,68 @@ describe('PluginsHandler', function () {
 
   })
 
+  describe('list', function () {
+    // GET /plugins        <-- public
+    // GET /plugins/mine ?  <-- private
+    
+    it('should require auth', function() {
+      let event = {
+        body: JSON.stringify({})
+      }
+      return expect(handler.listPluginsPrivate(event, emptyContext)).to.eventually.rejectedWith(/protected claims required. ensure authorized/)
+    })
+
+    it('should list user\'s plugins with private info', function() {
+      let event = {
+        body: JSON.stringify({})
+      }
+
+      let testUserID = randomUserID()
+      const testPlugin = { manifestUrl: `https://blah.com/${testUserID}.json`, ownerID: testUserID }
+      const testPlugin2 = { manifestUrl: `https://blah.com/${testUserID}2.json`, ownerID: testUserID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        db.addPlugin(testPlugin2)
+      }).then(() => {
+        const event = {
+          body: {}
+        }
+        const context = buildAuthorizedContext(testUserID)
+
+        return handler.listPluginsPrivate(event, context).then(response => {
+          expect(response.body).to.be.a('string')
+          let plugins = JSON.parse(response.body)
+          expect(plugins).to.have.lengthOf(2)
+          expect(plugins[0]).eql(testPlugin) 
+          expect(plugins[1]).eql(testPlugin2)
+        })
+      })
+    })
+
+    it('should list ALL plugins with public info', function() {
+      const testPlugin = { manifestUrl: `https://blah.com/aaa.json`, ownerID: randomUserID() }
+      const testPlugin2 = { manifestUrl: `https://blah.com/bbb.json`, ownerID: randomUserID() }
+
+      return db.addPlugin(testPlugin).then(() => {
+        return db.addPlugin(testPlugin2).then(() => {
+          const event = {
+            body: {}
+          }
+
+          return handler.listPluginsPublic(event, context).then(response => {
+            expect(response.body).to.be.a('string')
+            let plugins = JSON.parse(response.body)
+            console.log('plugins:', plugins);
+            expect(plugins).to.have.lengthOf(2)
+            expect(plugins[0]).to.have.property('manifestUrl', testPlugin.manifestUrl)
+            expect(plugins[1]).to.have.property('manifestUrl', testPlugin2.manifestUrl)
+          })
+        })
+      })
+    })
+
+  })
+
   describe('read', function () {
 
     it('should require auth', function () {
@@ -106,7 +173,7 @@ describe('PluginsHandler', function () {
 
       const testPlugin = { manifestUrl: `https://blah.com/${randomUserID()}.json`, ownerID: randomUserID() }
 
-      db.addPlugin(testPlugin).then(() => {
+      return db.addPlugin(testPlugin).then(() => {
         const event = {
           body: JSON.stringify(testPlugin)
         }
