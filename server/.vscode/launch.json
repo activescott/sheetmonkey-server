@@ -9,7 +9,7 @@
       "protocol": "inspector",
       "program": "/usr/local/bin/_mocha",
       "cwd": "${workspaceRoot}",
-      "args": ["test/all.js"]
+      "args": []
     }
   ]
 }

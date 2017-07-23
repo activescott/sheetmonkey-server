@@ -9,7 +9,7 @@
       "protocol": "inspector",
       "program": "${workspaceRoot}/server/node_modules/.bin/_mocha",
       "cwd": "${workspaceRoot}",
-      "args": ["-w", "server/test/all.js"]
+      "args": ["-w"]
     }
   ]
 }

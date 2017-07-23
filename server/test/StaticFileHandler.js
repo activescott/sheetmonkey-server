@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks */
 'use strict'
-require('../support/setup.js')
+require('./support/setup.js')
 const expect = require('chai').expect
 
 const path = require('path')
 
-const StaticFileHandler = require('../../lib/handlers/StaticFileHandler.js')
+const StaticFileHandler = require('../lib/handlers/StaticFileHandler.js')
 
 describe('StaticFileHandler', function () {
   describe('constructor', function () {
@@ -22,7 +22,7 @@ describe('StaticFileHandler', function () {
   describe('get', function () {
     it('should return index.html', function () {
       let event = { path: 'index.html' }
-      let h = new StaticFileHandler(path.join(__dirname, '../../data/public/'))
+      let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
       let response = h.get(event, null)
       expect(response).to.eventually.have.property('statusCode', 200)
       expect(response).to.eventually.have.property('body').to.match(/^<!DOCTYPE html>/)
@@ -31,7 +31,7 @@ describe('StaticFileHandler', function () {
 
     it('should return a mime/type of application/octet-stream for .map files', function () {
       let event = { path: 'vendor/bootstrap.min.css.map' }
-      let h = new StaticFileHandler(path.join(__dirname, '../../data/public/'))
+      let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
       return h.get(event, null)
         .then(response => {
           console.log('response.headers', response.headers)

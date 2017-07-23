@@ -105,6 +105,13 @@ class DB {
     })
   }
 
+  listPlugins () {
+    return this.ddb.scan({
+      TableName: this.pluginsTableName,
+      ProjectionExpression: ALL_PLUGIN_PROPS.join(', ')
+    }).then(result => result.Items)
+  }
+
   addPlugin (plugin) {
     return Promise.try(() => {
       const addPluginSpec = {
@@ -123,10 +130,13 @@ class DB {
         Item: plugin,
         ConditionExpression: 'attribute_not_exists(ownerID)' // <- ensure isn't overwritten if exists
       })
-      .then(() => plugin)
+      .then(() => {
+        return plugin
+      })
       .catch(err => {
         // if already exists, just return null; if another error, rethrow
         if (err.name && err.name === 'ConditionalCheckFailedException') {
+          console.log('plugin exists!')
           return null
         }
         throw err
@@ -200,6 +210,20 @@ class DB {
     return this.ddb.delete(params).catch(err => {
       // more detail to the error
       throw new Error(`getPlugin error: ${err}`)
+    })
+  }
+
+  deleteAllPlugins () {
+    return this.listPlugins().then(plugins => {
+      let promises = plugins.map(p => this.deletePlugin(p.manifestUrl))
+      return Promise.all(promises)
+    })
+  }
+
+  deleteAllUsers () {
+    return this.listUsers().then(users => {
+      let promises = users.map(u => this.deleteUser(u.id))
+      return Promise.all(promises)
     })
   }
 }

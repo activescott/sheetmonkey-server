@@ -52,7 +52,7 @@ class PluginsHandler extends Handler {
     return this.getRequestPrincipal(event, context).then(principalID => {
       // NOTE: Only owner's plugins, but all information
       return this.db.listPlugins().then(plugins => {
-        const payload = plugins.filter(p => p.ownerID == principalID)
+        const payload = plugins.filter(p => p.ownerID === principalID)
         return this.responseAsJson(payload)
       })
     })
@@ -60,6 +60,7 @@ class PluginsHandler extends Handler {
 
   listPublic (event, context) {
     // NOTE: ONLY PUBLIC information for a plugin - (no auth details)
+    console.log('plugins.listPublic')
     return this.db.listPlugins().then(plugins => {
       const payload = plugins.map(p => Object.assign({}, { manifestUrl: p.manifestUrl }))
       return this.responseAsJson(payload)
@@ -71,6 +72,12 @@ class PluginsHandler extends Handler {
       const args = this.validateInput(createPluginArgsSchema, event)
       return this.db.updatePlugin(args, principalID).then(plugin => {
         return this.responseAsJson(plugin)
+      }).catch(err => {
+        // if user exists, just return null; if another error, rethrow
+        if (err.name && err.name === 'ConditionalCheckFailedException') {
+          return this.responseAsError(403, 'Forbidden')
+        }
+        throw err
       })
     })
   }
@@ -80,9 +87,11 @@ class PluginsHandler extends Handler {
       let args = this.validateInput(getPluginArgsSchema, event)
       return this.db.getPlugin(args.manifestUrl).then(p => {
         if (p.ownerID !== principalID) {
-          throw new Error('Delete failed. caller does not own the plugin')
+          return this.responseAsError(403, 'Forbidden, caller does not own the plugin')
         }
-        return this.db.deletePlugin(args.manifestUrl)
+        return this.db.deletePlugin(args.manifestUrl).then(() => {
+          return this.responseAsJson()
+        })
       })
     })
   }

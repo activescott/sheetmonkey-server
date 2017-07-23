@@ -1,13 +1,13 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks */
 'use strict'
-require('../support/setup.js')
+require('./support/setup.js')
 const expect = require('chai').expect
 
 const Promise = require('bluebird')
-const TokenTool = require('../support/TokenTool')
+const TokenTool = require('./support/TokenTool')
 
-const LambdaAuthorizer = require('../../lib/auth/LambdaAuthorizer')
+const LambdaAuthorizer = require('../lib/auth/LambdaAuthorizer')
 
 const authorizer = new LambdaAuthorizer(TokenTool.crt)
 module.exports.myFunc = authorizer.protectHandler((event, context, callback) => {

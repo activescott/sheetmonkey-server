@@ -1,8 +1,8 @@
 'use strict';
-require('../support/setup.js');
+require('./support/setup.js');
 const expect = require("chai").expect;
 
-const JwtHandler = require('../../lib/handlers/JwtHandler');
+const JwtHandler = require('../lib/handlers/JwtHandler');
 
 describe('JwtHandler', function() {
 

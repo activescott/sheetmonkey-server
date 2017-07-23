@@ -1,9 +1,17 @@
 {
+  "name": "sheetmonkey-server",
+  "description": "A backend server for Sheetmonkey",
+  "author": "scott@willeke.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/activescott/sheetmonkey-server.git"
+  },
   "scripts": {
-    "test": "./node_modules/.bin/_mocha ./test/all.js",
+    "test": "clear; ./node_modules/.bin/_mocha",
     "pretest": "./dev/start-dynamodb.sh",
     "deploy": "./deploy.sh",
-    "watch": "./node_modules/.bin/_mocha -w ./test/all.js"
+    "watch": "clear; ./node_modules/.bin/_mocha -w"
   },
   "dependencies": {
     "aws-sdk": "^2.77.0",
@@ -18,7 +26,9 @@
     "eslint-plugin-html": "^3.0.0",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
+    "serverless": "^1.18.0",
     "serverless-dynamodb-local": "^0.2.22",
+    "serverless-http-invoker": "^0.1.1",
     "standard": "^10.0.2"
   }
 }

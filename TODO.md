@@ -25,20 +25,22 @@
 - [ ] Enable developer to register a plugin with optional API Client ID and Secret
   - [x] redux now?
   - Backend:
-    - [ ] Create
+    - [x] Create
     - [ ] Read
     - [ ] Update
     - [ ] Delete
   - Client Integration:
+    - [ ] upgrade to [LiveReload](http://livereload.com)
     - [ ] Create and save plugin
     - [ ] View/list plugins in a table
     - [ ] Edit some values for a plugin
     - [ ] Delete plugin
-    
-
   - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
     - [ ] catch token on backend and send to extension
     - [ ] route token from extension to plugin
+
+
+- [ ] Secure client secret detail so it isn't exposed in cloudformation and console. Like this: http://forum.serverless.com/t/storing-database-credentials-securely/1370/9?u=activescott
 
 
 - [ ] Enable redirect flow to extension for clients.

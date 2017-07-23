@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 'use strict'
-require('../support/setup.js')
+require('./support/setup.js')
 const expect = require('chai').expect
 
-const DB = require('../../lib/DB')
-const DynamoDB = require('../../lib/DynamoDB')
-const randomUserID = require('../support/tools').randomUserID
+const DB = require('../lib/DB')
+const DynamoDB = require('../lib/DynamoDB')
+const randomUserID = require('./support/tools').randomUserID
 
 function expectUserProps (user) {
   const expectProps = ['id', 'email', 'updatedAt', 'createdAt']
@@ -18,7 +18,7 @@ describe('DB', function () {
 
   before(function () {
       // runs before all tests in this block
-    db = new DB(new DynamoDB(true), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins')
+    db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins')
   })
 
   describe('addUser', function () {

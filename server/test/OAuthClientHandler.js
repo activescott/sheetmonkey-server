@@ -1,13 +1,13 @@
 'use strict';
-require('../support/setup.js');
+require('./support/setup.js');
 const expect = require("chai").expect;
 
-const JwtHandler = require('../../lib/handlers/JwtHandler');
-const OAuthClientHandler = require('../../lib/handlers/OAuthClientHandler.js');
-const SmartsheetApiMock = require('../mocks/SmartsheetApiMock');
-const DBMock = require('../mocks/DBMock');
-const randomUserID = require('../support/tools').randomUserID;
-const cookieCutter = require('../../lib/cookieCutter.js')
+const JwtHandler = require('../lib/handlers/JwtHandler');
+const OAuthClientHandler = require('../lib/handlers/OAuthClientHandler.js');
+const SmartsheetApiMock = require('./mocks/SmartsheetApiMock');
+const DBMock = require('./mocks/DBMock');
+const randomUserID = require('./support/tools').randomUserID;
+const cookieCutter = require('../lib/cookieCutter.js')
 
 describe('OAuthClientHandler', function() {
   let handler;

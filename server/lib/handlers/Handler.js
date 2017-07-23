@@ -9,12 +9,24 @@ class Handler {
      * @param {*any} jsonBody
      */
   responseAsJson (jsonBody) {
+    jsonBody = jsonBody || '{}'
     let response = {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(jsonBody)
+    }
+    return response
+  }
+
+  responseAsError (statusCode, message) {
+    let response = {
+      statusCode: statusCode,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({message: message})
     }
     return response
   }

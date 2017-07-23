@@ -86,7 +86,6 @@ class LambdaAuthorizer {
       let decoded
       try {
         decoded = jwt.decode(tokenVal, this.jwtCert)
-        console.log('decoded claims:', decoded)
         context.protected = {
           claims: decoded
         }

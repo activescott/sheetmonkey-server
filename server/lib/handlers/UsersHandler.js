@@ -25,32 +25,15 @@ class UsersHandler extends Handler {
   }
 
   listUsers (event, context) {
-    return this.db.listUsers().then(users => {
-      let publicUsers = []
-      for (let u of users) {
-        publicUsers.push(UsersHandler.sanitizeUserProps(u))
-      }
-      return this.responseAsJson(publicUsers)
-    })
+    throw 'todo: why would we ever list all users?'
   }
 
   post (event, context) {
-    return Promise.try(() => {
-      const data = JSON.parse(event.body)
-      if (typeof data.id !== 'string' ||
-          typeof data.email !== 'string') {
-        throw new Error('Missing required fields to create user')
-      }
-
-      return this.db.addUser(data).then(user => {
-        return this.responseAsJson(user)
-      })
-    })
+    throw 'todo: why could a user create another user? this should only be possible via oauth?'
   }
 
   put (event, context) {
-    return Promise.try(() => {
-    })
+    throw 'todo: no need for this (since the current user cannot update anything about himself, only via oauth'
   }
 
   static sanitizeUserProps (user) {

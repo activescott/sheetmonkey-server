@@ -11,11 +11,11 @@ const DynamoDB = require('./lib/DynamoDB')
 const crt = fs.readFileSync(path.join(__dirname, '/data/private/test-key.crt')).toString('ascii')
 const LambdaAuthorizer = require('./lib/auth/LambdaAuthorizer')
 const UsersHandler = require('./lib/handlers/UsersHandler')
+const PluginsHandler = require('./lib/handlers/PluginsHandler')
 
 const authorizer = new LambdaAuthorizer(crt)
-const isLocal = process.env.IS_LOCAL === 'true'
 const api = new SmartsheetApi()
-const db = new DB(new DynamoDB(isLocal), process.env.DDB_USERS_TABLE)
+const db = new DB(new DynamoDB(), process.env.DDB_USERS_TABLE, process.env.DDB_PLUGINS_TABLE)
 
 module.exports.echo = (event, context, callback) => {
   const response = {
@@ -46,7 +46,7 @@ module.exports.env = (event, context, callback) => {
   let body = {
     env: process.env
   }
-  
+
   const response = {
     statusCode: 200,
     body: JSON.stringify(body)
@@ -89,7 +89,7 @@ module.exports.handleOAuthRedirect = (event, context, callback) => {
   return new OAuthClientHandler(api, db).handleOAuthRedirect(event, context)
     .then(response => callback(null, response))
     .catch(err => callback(err))
-};
+}
 
 module.exports.users_me = authorizer.protectHandler((event, context, callback) => {
   const usersHandler = new UsersHandler(db, process.env.DDB_USERS_TABLE)
@@ -97,32 +97,32 @@ module.exports.users_me = authorizer.protectHandler((event, context, callback) =
 })
 
 module.exports.plugins_post = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.post(event, context)
 })
 
 module.exports.plugins_listPublic = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.listPublic(event, context)
 })
 
 module.exports.plugins_listPrivate = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.listPrivate(event, context)
 })
 
 module.exports.plugins_get = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.get(event, context)
 })
 
 module.exports.plugins_put = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.put(event, context)
 })
 
 module.exports.plugins_delete = authorizer.protectHandler((event, context, callback) => {
-  const pluginsHandler = new PLuginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.delete(event, context)
 })
 
