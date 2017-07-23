@@ -4,8 +4,7 @@ import Xhr from './Xhr.js'
 
 class Backend {
   static build (options) {
-    const isDevEnvironment = document.location.protocol === 'file:' || document.hostname === 'localhost'
-    console.log('isDevEnvironment:', isDevEnvironment)
+    const isDevEnvironment = document.location.protocol === 'file:' || document.location.hostname === 'localhost'
     if (isDevEnvironment) {
       return new BackendMock(options)
     } else {
@@ -35,7 +34,6 @@ class BackendImpl {
 
 class BackendMock {
   constructor (options) {
-    this._ping = { message: 'boo' }
     this._me = {
       id: 123456,
       email: 'john@doe.com'
@@ -54,7 +52,10 @@ class BackendMock {
   }
 
   ping () {
-    return Promise.try(() => this._ping)
+    return Promise.try(() => {
+      if (this._ping) return this._ping
+      return { message: 'boo ' + new Date() }
+    })
   }
 }
 

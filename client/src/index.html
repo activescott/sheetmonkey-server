@@ -10,10 +10,19 @@
     <script src="index_dist.js"></script>
     <script src="vendor/jquery.min.js"></script>
     <script src="vendor/bootstrap.min.js"></script>
+    <script>
+      const isDevEnvironment = document.location.protocol === 'file:' || document.location.hostname === 'localhost'
+      if (isDevEnvironment) {
+        console.log('initializing LiveReload!')
+        document.write('<script src="http://' + (document.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
+      }
+    </script>
   </head>
   <body>
     <!-- Catches the csrf token -->
     <input id="csrftoken" type="hidden" value="{{csrftoken}}" />
-    <div id="main"></div>
+    <div id="main">
+    </div>
+    <p>hi</p>
   </body> 
 </html>

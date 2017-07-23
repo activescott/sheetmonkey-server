@@ -21,16 +21,15 @@
       - [x] Auth via cookie+Authorization header. Client Requests can extract token from cookie and add it as an Auth header in API. 
 
 
-
 - [ ] Enable developer to register a plugin with optional API Client ID and Secret
   - [x] redux now?
   - Backend:
     - [x] Create
-    - [ ] Read
-    - [ ] Update
-    - [ ] Delete
+    - [x] Read
+    - [x] Update
+    - [x] Delete
   - Client Integration:
-    - [ ] upgrade to [LiveReload](http://livereload.com)
+    - [x] upgrade to [LiveReload](http://livereload.com)
     - [ ] Create and save plugin
     - [ ] View/list plugins in a table
     - [ ] Edit some values for a plugin

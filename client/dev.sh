@@ -1,4 +1,5 @@
 #!/bin/bash
+THISDIR=$(cd $(dirname "$0"); pwd) #this script's directory
 clear;
 ./clean.sh
 
@@ -9,6 +10,4 @@ die () {
 
 npm run lint || die '\nlint failed!\n\n'
 
-open ./dist/index.html
-
-nodemon -e js,html,svelte --ignore dist/ --exec './build.sh'
+nodemon -e js,html,svelte --ignore dist/ --exec './build.sh && echo "\n\nNow run ./serve.sh from another shell window to serve the site locally.\n\n"'
