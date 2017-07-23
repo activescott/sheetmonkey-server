@@ -7,11 +7,13 @@ import { combineReducers } from 'redux'
 
 import userReducer from './userReducer'
 import nameReducer from './nameReducer'
+import pluginsReducer from './pluginsReducer'
 
 // combineReducers: http://redux.js.org/docs/api/combineReducers.html#combinereducersreducers
 const rootReducer = combineReducers({
   user: userReducer,
-  name: nameReducer
+  name: nameReducer,
+  plugins: pluginsReducer
 })
 
 export default rootReducer

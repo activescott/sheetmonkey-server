@@ -24,8 +24,6 @@ export default {
       this.backend.me().then(response => {
         console.log('authUser backend response:', response)
         const user = Object.assign({ loggedIn: true }, response)
-        // TODO: Reset with redux action instead!
-        // this.set({ user: user })
         const action = Actions.setUser(user)
         this.get('store').dispatch(action)
       }).catch(e => {

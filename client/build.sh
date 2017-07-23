@@ -12,8 +12,6 @@ cd $THISDIR
 
 clear;
 
-./clean.sh
-
 [[ -d ./dist ]] || mkdir ./dist
 
 ./node_modules/.bin/rollup --config
@@ -28,5 +26,6 @@ cp -v ./src/*.html ./dist/  || die 'copy failed: html'
 cp -v ./src/*.css ./dist/   || die 'copy failed: css'
 cp -v ./src/*.js ./dist/    || die 'copy failed: js'
 cp -rv ./src/vendor ./dist/ || die 'copy failed: vendor'
+cp -rv ./src/vendor-fonts ./dist/fonts || die 'copy failed: fonts'
 
 popd

@@ -30,6 +30,14 @@ class BackendImpl {
       return response
     })
   }
+
+  getPlugins (userID) {
+    let url = `api/users/${userID}/plugins`
+    return this.xhr.getJSON(url).then(response => {
+      console.log(`${url} response:`, response)
+      return response
+    })
+  }
 }
 
 class BackendMock {
@@ -56,6 +64,13 @@ class BackendMock {
       if (this._ping) return this._ping
       return { message: 'boo ' + new Date() }
     })
+  }
+
+  getPlugins (userID) {
+    return Promise.try(() => [
+      { manifestUrl: `https://m${userID}.com/manifest1.json` },
+      { manifestUrl: `https://m${userID}.com/manifest2.json` }
+    ])
   }
 }
 

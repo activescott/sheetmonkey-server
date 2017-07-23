@@ -3,6 +3,9 @@ export default class Actions {
   static get setUser () {
     return makeActionCreator('SET_USER', 'user')
   }
+  static get setPlugins () {
+    return makeActionCreator('SET_PLUGINS', 'plugins')
+  }
 }
 
 function makeActionCreator (actionType, ...argNames) {

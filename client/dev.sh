@@ -1,7 +1,6 @@
 #!/bin/bash
 THISDIR=$(cd $(dirname "$0"); pwd) #this script's directory
 clear;
-./clean.sh
 
 die () {
 	printf >&2 "$@"
