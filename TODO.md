@@ -31,8 +31,8 @@
   - Client Integration:
     - [x] upgrade to [LiveReload](http://livereload.com)
     - [ ] Create and save plugin
-    - [ ] View/list plugins in a table
-    - [ ] Edit some values for a plugin
+    - [x] View/list plugins in a table
+    - [x] Edit some values for a plugin
     - [ ] Delete plugin
   - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
     - [ ] catch token on backend and send to extension

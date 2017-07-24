@@ -1,4 +1,12 @@
 {
+  "name": "sheetmonkey-server-frontend",
+  "description": "The front end for the backend server for Sheetmonkey.",
+  "author": "scott@willeke.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/activescott/sheetmonkey-server.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "build.sh",

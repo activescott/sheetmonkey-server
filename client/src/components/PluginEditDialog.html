@@ -1,0 +1,65 @@
+<style type="text/css">
+  #dialog {
+    width:      200px;
+    margin:     auto;
+    padding:    10px;
+    border:     thin solid black;
+    background: lightgreen;
+  }
+  .hidden {
+    display: none;
+  }
+</style>
+<div id="dialog" class="hidden">
+  <div class="message">foobar</div>
+  <input type="text" id="inputManifestUrl">
+  <div>
+    <button class="ok">Ok</button>
+    <button class="cancel">Cancel</button>
+  </div>
+</div>
+
+
+<script>
+import $ from 'jquery'
+import Promise from 'bluebird'
+
+export default {
+  methods: {
+    prompt (plugin) {
+      let domLoaded = Promise.resolve()
+      return domLoaded.then(() => {
+        let dialog = $('#dialog')
+        let inputManifestUrl = $('#inputManifestUrl')
+        let okButton = $('button.ok')
+        let cancelButton = $('button.cancel')
+        plugin = this.deepClone(plugin)
+        inputManifestUrl.val(plugin.manifestUrl)
+        dialog.removeClass('hidden')
+        return new Promise((resolve, reject) => {
+          dialog.click(e => {
+            if (e.target === okButton.get(0) || e.target === cancelButton.get(0)) {
+              dialog.addClass('hidden')
+              this.destroy()
+              if (e.target === okButton.get(0)) {
+                plugin.manifestUrl = inputManifestUrl.val()
+                resolve(plugin)
+              } else {
+                reject(new Error('user clicked cancel'))
+              }
+            }
+          })
+        })
+      })
+    },
+    deepClone (arr) {
+      if (!arr) return arr
+      let s = JSON.stringify(arr)
+      return JSON.parse(s)
+    }
+  },
+  oncreate () {
+    this.set({isCreated: true})
+  }
+}
+</script>

@@ -36,9 +36,20 @@ class Xhr {
     headers = Object.assign({}, headers)
     this.addAuthorizationHeader(headers)
 
+    return Xhr.xhrPromise('GET', url, headers)
+  }
+
+  putJSON (url, headers, data) {
+    headers = Object.assign({}, headers)
+    this.addAuthorizationHeader(headers)
+
+    return Xhr.xhrPromise('PUT', url, headers, data)
+  }
+
+  static xhrPromise (method, url, headers, data) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest()
-      xhr.open('GET', url, true)
+      xhr.open(method, url, true)
       if (headers) {
         for (var header in headers) {
           console.log('found header:', header, '=', headers[header])
@@ -57,7 +68,8 @@ class Xhr {
           }
         }
       }
-      xhr.send()
+      if (data) xhr.send(data)
+      else xhr.send()
     })
   }
 }

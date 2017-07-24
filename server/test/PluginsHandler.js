@@ -21,7 +21,6 @@ describe('PluginsHandler', function () {
   var invoker = new ServerlessInvoker()
 
   before(function () {
-    //process.env.AWS_REGION = 'LOCAL'
     db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins')
   })
 
@@ -184,13 +183,14 @@ describe('PluginsHandler', function () {
 
   })
 
-  describe('update', function () {
+  describe.only('update', function () {
 
     it('should require auth', function () {
       let event = {
         body: JSON.stringify({ manifestUrl: `https://blah.com/${userID}.json` })
       }
-      return invoker.invoke(`put api/plugins/http://blah.co/manifest.json`, event).then(response => {
+      let pluginID = encodeURIComponent('http://blah.co/manifest.json')
+      return invoker.invoke(`put api/plugins/${pluginID}`, event).then(response => {
         expect(response).to.have.property('statusCode', 401)
       })
     })
@@ -204,7 +204,8 @@ describe('PluginsHandler', function () {
           body: JSON.stringify(testPlugin),
           headers: buildAuthorizedHeaders(randomUserID()) // note deliberately different userID
         }
-        return invoker.invoke(`put api/plugins/http://blah.co/manifest.json`, event).then(response => {
+        let pluginID = encodeURIComponent('http://blah.co/manifest.json')
+        return invoker.invoke(`put api/plugins/${pluginID}`, event).then(response => {
           expect(response).to.have.property('statusCode', 403)
         })
       })

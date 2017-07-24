@@ -10,14 +10,11 @@ function initStore () {
   // Its API is { subscribe, dispatch, getState }:
   //   subscribe() to update the UI in response to state changes
   //   dispatch() an action to mutate the state of the store
-  console.log('initializing store...')
   const store = createStore(rootReducer, appState)
-  console.log('initializing store complete.')
   return store
 }
 
 function initComponent (store) {
-  console.log('initializing App component...')
   if (!store) throw Error('store required')
   let target = $('#main').get(0)
   const app = new App({ // eslint-disable-line no-unused-vars
@@ -27,7 +24,6 @@ function initComponent (store) {
       user: store.getState().user
     }
   })
-  console.log('initializing App component complete.')
 }
 
 $(() => {

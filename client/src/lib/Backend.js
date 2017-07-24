@@ -38,6 +38,15 @@ class BackendImpl {
       return response
     })
   }
+
+  updatePlugin (plugin, userID) {
+    let url = `api/users/${userID}/plugins`
+    plugin = Object.assign({}, plugin, {ownerID: userID})
+    return this.xhr.putJSON(url, {}, plugin).then(response => {
+      console.log(`${url} response:`, response)
+      return response
+    })
+  }
 }
 
 class BackendMock {
@@ -71,6 +80,11 @@ class BackendMock {
       { manifestUrl: `https://m${userID}.com/manifest1.json` },
       { manifestUrl: `https://m${userID}.com/manifest2.json` }
     ])
+  }
+
+  updatePlugin (plugin, userID) {
+    return Promise.try(() => {
+    })
   }
 }
 

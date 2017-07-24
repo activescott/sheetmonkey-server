@@ -20,7 +20,6 @@ import Backend from '../lib/Backend'
 export default {
   methods: {
     authUser () {
-      console.log('authUser...')
       this.backend.me().then(response => {
         console.log('authUser backend response:', response)
         const user = Object.assign({ loggedIn: true }, response)
@@ -59,7 +58,6 @@ export default {
   },
   oncreate () {
     const store = this.get('store')
-    console.log('ProfileButton DOM Loaded with store:', store)
     console.assert(store, 'redux store must be provided by initializer of this component!')
     this.backend = Backend.build()
     this.authUser()
