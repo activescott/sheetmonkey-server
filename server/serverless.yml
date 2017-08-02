@@ -140,9 +140,7 @@ functions:
   plugins_put:
       handler: handler.plugins_put
       events:
-        - http:
-            path: api/plugins/{manifestUrl}
-            method: put
+        - http: PUT api/plugins/{manifestUrl}
   plugins_delete:
         handler: handler.plugins_delete
         events:

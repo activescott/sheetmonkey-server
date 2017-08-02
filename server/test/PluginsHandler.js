@@ -183,7 +183,7 @@ describe('PluginsHandler', function () {
 
   })
 
-  describe.only('update', function () {
+  describe('update', function () {
 
     it('should require auth', function () {
       let event = {
