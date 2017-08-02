@@ -12,8 +12,8 @@ cd $THISDIR
 
 clear;
 
-[[ -d ./dist ]] || (mkdir ./dist && mkdir ./dist/fonts)
-
+[[ -d ./dist ]] || mkdir ./dist
+[[ -d ./dist/fonts ]] || mkdir ./dist/fonts
 
 ./node_modules/.bin/rollup --config
 result=$?

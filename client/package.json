@@ -16,6 +16,7 @@
   "devDependencies": {
     "eslint-plugin-html": "^3.0.0",
     "http-server": "^0.10.0",
+    "nodemon": "^1.11.0",
     "rollup": "^0.45.2",
     "rollup-plugin-commonjs": "^7.1.0",
     "rollup-plugin-node-resolve": "^2.0.0",
