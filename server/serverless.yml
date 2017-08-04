@@ -119,34 +119,30 @@ functions:
           path: api/users/me
           method: get
 
-  plugins_post:
-    handler: handler.plugins_post
-    events:
-      - http:
-          path: api/plugins
-          method: post
   plugins_listPublic:
     handler: handler.plugins_listPublic
     events:
       - http: GET api/plugins
+  plugins_post:
+    handler: handler.plugins_post
+    events:
+      - http: POST api/users/{userID}/plugins
   plugins_listPrivate:
     handler: handler.plugins_listPrivate
     events:
       - http: GET api/users/{userID}/plugins
   plugins_get:
-      handler: handler.plugins_get
-      events:
-        - http: GET api/plugins/{manifestUrl}
+    handler: handler.plugins_get
+    events:
+      - http: GET api/users/{userID}/plugins/{manifestUrl}
   plugins_put:
-      handler: handler.plugins_put
-      events:
-        - http: PUT api/plugins/{manifestUrl}
+    handler: handler.plugins_put
+    events:
+      - http: PUT api/users/{userID}/plugins/{manifestUrl}
   plugins_delete:
-        handler: handler.plugins_delete
-        events:
-          - http:
-              path: api/plugins/{manifestUrl}
-              method: delete
+    handler: handler.plugins_delete
+    events:
+      - http: DELETE api/users/{userID}/plugins/{manifestUrl}
 
   defaultredir:
     handler: handler.defaultredirect
