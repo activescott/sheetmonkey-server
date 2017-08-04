@@ -47,6 +47,15 @@ class BackendImpl {
       return response
     })
   }
+
+  addPlugin (plugin, userID) {
+    let url = `api/users/${userID}/plugins`
+    plugin = Object.assign({}, plugin, {ownerID: userID})
+    return this.xhr.postJSON(url, {}, plugin).then(response => {
+      console.log(`${url} response:`, response)
+      return response
+    })
+  }
 }
 
 class BackendMock {
@@ -85,6 +94,10 @@ class BackendMock {
   updatePlugin (plugin, userID) {
     return Promise.try(() => {
     })
+  }
+
+  addPlugin (plugin) {
+    return Promise.try(() => plugin)
   }
 }
 

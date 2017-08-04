@@ -19,7 +19,7 @@
     "nodemon": "^1.11.0",
     "rollup": "^0.45.2",
     "rollup-plugin-commonjs": "^7.1.0",
-    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-svelte": "^2.0.2",
     "rollup-watch": "^4.0.0",
@@ -29,7 +29,8 @@
     "bluebird": "^3.5.0",
     "bootstrap": "3",
     "jquery": "^3.2.1",
-    "redux": "^3.7.1"
+    "redux": "^3.7.1",
+    "url": "^0.11.0"
   },
   "standard": {
     "ignore": [

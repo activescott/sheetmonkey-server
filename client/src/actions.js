@@ -6,11 +6,9 @@ export default class Actions {
   static get setPlugins () {
     return makeActionCreator('SET_PLUGINS', 'plugins')
   }
-  /*
-  static get editPlugin () {
-    return makeActionCreator('EDIT_PLUGIN', 'plugins', 'pluginIndex', 'plugin')
+  static addPlugin (plugin) {
+    return makeActionCreator('ADD_PLUGIN', 'plugin')(plugin)
   }
-  */
   static editPlugin (plugins, pluginIndex, plugin) {
     return makeActionCreator('EDIT_PLUGIN', 'plugins', 'pluginIndex', 'plugin')(plugins, pluginIndex, plugin)
   }

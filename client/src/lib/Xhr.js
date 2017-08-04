@@ -46,6 +46,13 @@ class Xhr {
     return Xhr.xhrPromise('PUT', url, headers, data)
   }
 
+  postJSON (url, headers, data) {
+    headers = Object.assign({}, headers)
+    this.addAuthorizationHeader(headers)
+
+    return Xhr.xhrPromise('POST', url, headers, data)
+  }
+
   static xhrPromise (method, url, headers, data) {
     return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest()

@@ -30,30 +30,45 @@
     - [x] Delete
   - Client Integration:
     - [x] upgrade to [LiveReload](http://livereload.com)
-    - [ ] Create and save plugin
+    - [x] Create and save plugin
     - [x] View/list plugins in a table
     - [x] Edit some values for a plugin
+    - [x] Validate edit/add plugin manifest url is a valid url
+      - [ ] Validate edit/add plugin manifest content
     - [ ] Delete plugin
+
+  - [ ] Display gallery in extension+server
+    - [ ] manifest changes 
+      - remove id (use the url, escaped if necessary)
+      - name # The name of the plugin that will be displayed in the extension's Plugins page (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
+      - subtitle # A concise, compelling summary of the plugin to appear below the plugin's name (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
+      - icon # A url to an image that should be used for your plugin. Make it square. For inspiration, see https://developer.apple.com/ios/human-interface-guidelines/graphics/app-icon/
+      - description # An informative, engaging description that highlights the features and functionality of the plugin. For inspiration see https://developer.apple.com/app-store/product-page/
+    - [ ] Preview plugin on server add/edit pages too
+
   - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
     - [ ] catch token on backend and send to extension
     - [ ] route token from extension to plugin
 
+- [ ] Give sheetmonkey server some style:
+  - Icon: http://game-icons.net/lorc/originals/monkey.html
+  - Color Pallet: 
+      - http://paletton.com/#uid=53z0B0kygSv00++2pQU++Oi++Gn
 
 - [ ] Secure client secret detail so it isn't exposed in cloudformation and console. Like this: http://forum.serverless.com/t/storing-database-credentials-securely/1370/9?u=activescott
-
 
 - [ ] Enable redirect flow to extension for clients.
   - [ ] redirect endpoint.
   - [ ] fail if unknown client id
   - [ ] get code=>tokens, store tokens, redirect token to extension.
 
-
 - [ ] Refresh token automatically in SmartsheetApi.
+  - [ ] Why?
 
+- [ ] Break out LambdaAuthorizer into its own npm package
 - [ ] Separate out oauth & user login/logout stuff into a boiler plate serverless+svelt.
   - [x] Remove vandium and validate tokens in api calls manually (consider just allowing cookie auth!)
     - [x] replace with simple vandium style authorizer or an APIG authorizer.
-  - [ ] StaticFileHandler into its own package?
   - [ ] Standard lint
   - [x] Need mocha tests for server.
 

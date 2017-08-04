@@ -1,1 +1,1 @@
-This directory is empty and should be populated from the client-side project in the ../../../client folder.
+This directory is empty and is populated with the distributable client libraries when the client project is built.

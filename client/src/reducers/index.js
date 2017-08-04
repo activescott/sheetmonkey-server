@@ -6,13 +6,11 @@ import { combineReducers } from 'redux'
 // The best explanation of reducers in: http://redux.js.org/docs/introduction/CoreConcepts.html#core-concepts
 
 import userReducer from './userReducer'
-import nameReducer from './nameReducer'
 import pluginsReducer from './pluginsReducer'
 
 // combineReducers: http://redux.js.org/docs/api/combineReducers.html#combinereducersreducers
 const rootReducer = combineReducers({
   user: userReducer,
-  name: nameReducer,
   plugins: pluginsReducer
 })
 

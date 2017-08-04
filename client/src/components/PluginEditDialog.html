@@ -1,56 +1,76 @@
-<style type="text/css">
-  #dialog {
-    width:      200px;
-    margin:     auto;
-    padding:    10px;
-    border:     thin solid black;
-    background: lightgreen;
-  }
-  .hidden {
-    display: none;
-  }
-</style>
-<div id="dialog" class="hidden">
-  <div class="message">foobar</div>
-  <input type="text" id="inputManifestUrl">
-  <div>
-    <button class="ok">Ok</button>
-    <button class="cancel">Cancel</button>
+<div id="dialog" class="dialog-disabled-background hidden" tabindex="-1" role="dialog">
+  <div class="dialog-modal panel panel-default" role="document">
+    <div class="panel-heading">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <h4 class="modal-title">Dialog title</h4>
+    </div>
+    <form>
+      <div class="dialog-body form-group">
+        <p class="message help-block">dialog message</p>
+        <label for="inputManifestUrl">Manifest URL</label>
+        <input type="url" id="inputManifestUrl" class="form-control" pattern="https://.+" placeholder="https://yourdomain.com/yourmanifest.json" required>
+      </div>
+      <div class="dialog-footer panel-footer">
+        <!-- <button class="save btn btn-primary">Save</button> -->
+        <input type="submit" value="Save" class="save btn btn-primary" />
+        <button class="cancel btn btn-default">Cancel</button>
+      </div>
+    </form>
   </div>
 </div>
-
 
 <script>
 import $ from 'jquery'
 import Promise from 'bluebird'
+import urlmod from 'url'
 
 export default {
   methods: {
-    prompt (plugin) {
+    prompt (plugin, message) {
       let domLoaded = Promise.resolve()
       return domLoaded.then(() => {
         let dialog = $('#dialog')
         let inputManifestUrl = $('#inputManifestUrl')
-        let okButton = $('button.ok')
         let cancelButton = $('button.cancel')
-        plugin = this.deepClone(plugin)
-        inputManifestUrl.val(plugin.manifestUrl)
+        let form = $('#dialog form')
+        inputManifestUrl.on('input', this.validate.bind(this))
+        inputManifestUrl.on('valid')
+        $('.message').text(message)
+        if (plugin) inputManifestUrl.val(plugin.manifestUrl)
         dialog.removeClass('hidden')
         return new Promise((resolve, reject) => {
-          dialog.click(e => {
-            if (e.target === okButton.get(0) || e.target === cancelButton.get(0)) {
-              dialog.addClass('hidden')
-              this.destroy()
-              if (e.target === okButton.get(0)) {
-                plugin.manifestUrl = inputManifestUrl.val()
-                resolve(plugin)
-              } else {
-                reject(new Error('user clicked cancel'))
-              }
-            }
+          form.on('submit', e => {
+            e.preventDefault()
+            console.log('submit:', e)
+            plugin = plugin ? this.deepClone(plugin) : { manifestUrl: '' }
+            plugin.manifestUrl = inputManifestUrl.val()
+            resolve(plugin)
+            this.close()
+          })
+          cancelButton.on('click', e => {
+            this.close()
+            reject(new Error('user clicked cancel'))
           })
         })
       })
+    },
+    close () {
+      this.destroy()
+    },
+    validate () {
+      const inputManifestUrl = $('#inputManifestUrl')
+      console.log('validate')
+      const u = urlmod.parse(inputManifestUrl.val())
+      console.log('parsed url:', u)
+      let msg = ''
+      if (u.protocol !== 'https:') {
+        msg += 'The protocol must be https.\n'
+      }
+      if (!u.host) {
+        msg += 'A host must be specified.'
+      }
+      inputManifestUrl.get(0).setCustomValidity(msg)
+      return msg === ''
     },
     deepClone (arr) {
       if (!arr) return arr

@@ -13,7 +13,7 @@ Visit [beta.sheetmonkey.com](https://beta.sheetmonkey.com) for the beta environm
 The project consists of a server (`server/`) and client (`client/`). The server is entirely built with [Serverless](https://github.com/serverless/serverless) on AWS Lambda, Amazon API Gateway, and AWS DynamoDB. The client is built with [Svelte](https://svelte.technology) & [Redux](http://redux.js.org). ES6 JavaScript is used as much as possible in both server and client.
 
 ## Client
-Build the client with `npm build` or `client/build.sh`. It will be bundled and deployed to `client/dist/`. Currently I am debugging by running `npm run watch` or `client/dev.sh` and then simply opening `client/dist/index.html` locally in the browser. Need to upgrade to [LiveReload](http://livereload.com).
+Build the client with `npm build` or `client/build.sh`. It will be bundled and deployed to `client/dist/`. Debug in your browser with LiveReload by running `client/dev.sh` and then follow instructions displayed in your shell (i.e. run `client/serve.sh` in another shell).
 
 ## Server
-You don't need to build the server locally, but you can run mocha tests with `npm test` or `npm run watch`. To deploy to AWS and run `deploy.sh` or `npm deploy` and [Serverless](https://github.com/serverless/serverless) will do the rest.
+You don't need to build the server locally, but you can run mocha tests with `npm test` or `npm run watch` (tested mostly via [serverless-http-invoker](https://github.com/activescott/serverless-http-invoker)). To deploy to AWS and run `deploy.sh` or `npm deploy` and [Serverless](https://github.com/serverless/serverless) will do the rest.

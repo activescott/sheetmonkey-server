@@ -14,7 +14,8 @@ export default {
       include: 'node_modules/**'
     }),
     resolve({
-      browser: true
+      browser: true,
+      preferBuiltins: false // for url npm module; otherwise rollup assumes node
     }),
     // Replace is to shut up redux
     replace({
