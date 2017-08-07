@@ -14,8 +14,9 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
+        <li><a href="#gallery" on:click="navigateToGallery(event)">Gallery</a></li>
         <li><a href="#apitest" on:click="apiTestButtonClick(event)">API Test</a></li>
-        <li><a href="#plugins" on:click="navigateToPlugins(event)">Plugins</a></li>
+        <li><a href="#plugins" on:click="navigateToPlugins(event)">My Plugins (todo: move this to account menu)</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <ProfileButton user='{{user}}' store='{{store}}' />
@@ -31,6 +32,7 @@
   import ApiTest from './ApiTest.html'
   import Plugins from './Plugins.html'
   import ProfileButton from './ProfileButton.html'
+  import Gallery from './Gallery.html'
 
   export default {
     components: {
@@ -63,6 +65,14 @@
             plugins: this.get('plugins'),
             store: this.get('store')
           }
+        })
+        this.setContent(comp)
+      },
+
+      navigateToGallery (event) {
+        let target = $('#appcontent').get(0)
+        let comp = new Gallery({
+          target: target
         })
         this.setContent(comp)
       },

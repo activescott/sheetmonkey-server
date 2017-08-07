@@ -1,0 +1,71 @@
+<!--
+This is the public gallery of plugins used to install (and uninstall?) plugins.
+Tasks:
+- Detect if extension is installed and if not prompt to install it.
+- Get a list of installed plugins from the extension.
+- List all extensions and show an install link for those not already installed
+- Have an installed tab to show and allow uninstalling installed extensions. Note installed extensions may not always be public.
+-->
+<div class="container-fluid">
+  <div class="row">
+    {{#each publicPlugins as plugin}}
+    <div class="col-md-4">
+      <img src="{{plugin.icon}}" style="width:120px; height:120px" />
+      <h3 class="plugin-name">{{plugin.name}}</h3>
+      <p class="plugin-subtitle">{{plugin.subtitle}}</p>
+      <p class="plugin-description">{{plugin.description}}</p>
+      {{#if plugin.installed}}
+        <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
+      {{else}}
+        <button type="button" class="btn btn-primary btn-xs">Installed</button>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+</div>
+
+<script>
+  /* global chrome */
+  import Promise from 'bluebird'
+
+  export default {
+    methods: {
+      /**
+       * Gets the list of installed plugins from the browser client.
+       */ 
+      getInstalledPlugins () {
+        return Promise.try(() => {
+          if (!chrome || !chrome.runtime) {
+            // not even in chrome browser
+            console.log('not in chrome browser, assuming sheetmonkey not available in client.')
+            return
+          }
+          const sheetmonkeyExtensionID = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
+          const cmd = {
+            sheetmonkey: {
+              cmd: 'getRegisteredPlugins'
+            }
+          }
+          chrome.runtime.connect(sheetmonkeyExtensionID)
+          chrome.runtime.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+            // apparently we are, so get the list of installed plugins
+            console.log('extension present! registered plugins:', response)
+            // for each extensionin the public gallery; if pugin is installed, set .installed = true
+            this.set({installedPlugins: response})
+            return response
+          })
+        })
+      }
+    },
+    oncreate () {
+      console.log('initializing public gallery...')
+      return this.getInstalledPlugins()
+    },
+    data () {
+      return { 
+        publicPlugins: [],
+        installedPlugins: []
+      }
+    }
+  }
+</script>
