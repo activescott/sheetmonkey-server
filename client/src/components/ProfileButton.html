@@ -2,7 +2,7 @@
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{user.email}} <span class="caret"></span></a>
       <ul class="dropdown-menu">
-        <li class="disabled"><a href="#">Another action</a></li>
+        <li><a href="#" on:click="onMyPluginsClick(event)">My Plugins</a></li>
         <li role="separator" class="divider"></li>
         <li><a href="#doLogout" on:click="onLogoutClick(event)">Logout</a></li>
       </ul>
@@ -16,6 +16,7 @@
 import $ from 'jquery'
 import Actions from '../actions'
 import Backend from '../lib/Backend'
+import Plugins from './Plugins.html'
 
 export default {
   methods: {
@@ -47,8 +48,24 @@ export default {
       this.backend = Backend.build({ me: {} })
       const action = Actions.setUser({ loggedIn: false })
       this.get('store').dispatch(action)
+    },
+
+    getTarget () {
+      if (!('rootComponentTarget' in window)) throw new Error('rootComponentTarget state required in redux app state')
+      return window.rootComponentTarget
+    },
+
+    onMyPluginsClick (event) {
+      let comp = new Plugins({
+        target: this.getTarget(),
+        data: {
+          store: this.get('store')
+        }
+      })
+      window.setRootComponent(comp)
     }
   },
+
   data () {
     // note: Data supplied at instantiation (i.e. new Component(...)) takes priority over defaults.
     return {
@@ -56,16 +73,25 @@ export default {
       store: null
     }
   },
+
   oncreate () {
     const store = this.get('store')
     console.assert(store, 'redux store must be provided by initializer of this component!')
     this.backend = Backend.build()
     this.authUser()
-    /*
-    this.observe('user', user => {
-      console.log('ProbileButton observed user:', user)
+    this.unsubscribeStore = store.subscribe(() => {
+      let state = store.getState()
+      console.log('redux state change detected in ProfileButton:', state)
+      // make the 'app' state available to this component as root-level props (note this doesn't overwrite existing props set already)
+      this.set(state)
     })
-    */
+  },
+
+  ondestroy () {
+    if (this.unsubscribeStore) {
+      this.unsubscribeStore()
+      this.unsubscribeStore = null
+    }
   }
 }
 </script>

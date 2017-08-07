@@ -37,13 +37,13 @@
 
   export default {
     methods: {
-      getPlugins () {
+      getUserPlugins () {
         let store = this.get('store')
         let state = store.getState()
         if (!state.user || !state.user.id) {
           throw new Error('User must be logged in to list plugins.')
         }
-        this.backend.getPlugins(state.user.id).then(response => {
+        this.backend.getUserPlugins(state.user.id).then(response => {
           const plugins = response
           const action = Actions.setPlugins(plugins)
           this.get('store').dispatch(action)
@@ -55,7 +55,7 @@
         return dlg.prompt(pluginValue, 'Edit the plugin manifest URL below:').then(editedPlugin => {
           // save the plugin to the server
           let userID = this.get('user').id
-          this.backend.updatePlugin(editedPlugin, userID).then(response => {
+          this.backend.updateUserPlugin(editedPlugin, userID).then(response => {
             // update the plugin in the local model
             const action = Actions.editPlugin(this.get('plugins'), pluginIndex, editedPlugin)
             this.get('store').dispatch(action)
@@ -70,7 +70,7 @@
         return dlg.prompt({}, 'Enter the plugin manifest URL below:').then(editedPlugin => {
           // save the plugin to the server
           let userID = this.get('user').id
-          this.backend.addPlugin(editedPlugin, userID).then(response => {
+          this.backend.addUserPlugin(editedPlugin, userID).then(response => {
             // add the plugin to the local model
             const action = Actions.addPlugin(editedPlugin)
             this.get('store').dispatch(action)
@@ -83,18 +83,29 @@
     },
     data () {
       // note: Data supplied at instantiation (i.e. new Component(...)) takes priority over defaults.
-      return {}
+      return {
+        store: null,
+        plugins: []
+      }
     },
     oncreate () {
       const store = this.get('store')
-      console.assert(store, 'redux store must be provided by initializer of this component!')
+      if (!store) {
+        throw new Error('redux store must be provided by initializer of this component!')
+      }
       this.backend = Backend.build()
-      store.subscribe(() => {
+      this.unsubscribeStore = store.subscribe(() => {
         let state = store.getState()
         this.set(state) // this will not overwrite the existing store property in the local state.
       })
-      this.getPlugins()
-    }
+      this.getUserPlugins()
+    },
 
+    ondestroy () {
+      if (this.unsubscribeStore) {
+        this.unsubscribeStore()
+        this.unsubscribeStore = null
+      }
+    }
   }
 </script>

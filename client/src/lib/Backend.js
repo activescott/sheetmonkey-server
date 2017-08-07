@@ -31,7 +31,7 @@ class BackendImpl {
     })
   }
 
-  getPlugins (userID) {
+  getUserPlugins (userID) {
     let url = `api/users/${userID}/plugins`
     return this.xhr.getJSON(url).then(response => {
       console.log(`${url} response:`, response)
@@ -39,7 +39,7 @@ class BackendImpl {
     })
   }
 
-  updatePlugin (plugin, userID) {
+  updateUserPlugin (plugin, userID) {
     let url = `api/users/${userID}/plugins`
     plugin = Object.assign({}, plugin, {ownerID: userID})
     return this.xhr.putJSON(url, {}, plugin).then(response => {
@@ -48,7 +48,7 @@ class BackendImpl {
     })
   }
 
-  addPlugin (plugin, userID) {
+  addUserPlugin (plugin, userID) {
     let url = `api/users/${userID}/plugins`
     plugin = Object.assign({}, plugin, {ownerID: userID})
     return this.xhr.postJSON(url, {}, plugin).then(response => {
@@ -84,19 +84,19 @@ class BackendMock {
     })
   }
 
-  getPlugins (userID) {
+  getUserPlugins (userID) {
     return Promise.try(() => [
       { manifestUrl: `https://m${userID}.com/manifest1.json` },
       { manifestUrl: `https://m${userID}.com/manifest2.json` }
     ])
   }
 
-  updatePlugin (plugin, userID) {
+  updateUserPlugin (plugin, userID) {
     return Promise.try(() => {
     })
   }
 
-  addPlugin (plugin) {
+  addUserPlugin (plugin) {
     return Promise.try(() => plugin)
   }
 }

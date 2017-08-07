@@ -32,7 +32,7 @@ Tasks:
     methods: {
       /**
        * Gets the list of installed plugins from the browser client.
-       */ 
+       */
       getInstalledPlugins () {
         return Promise.try(() => {
           if (!window.chrome || !chrome.runtime) {
@@ -64,7 +64,7 @@ Tasks:
       return this.getInstalledPlugins()
     },
     data () {
-      return { 
+      return {
         publicPlugins: [],
         installedPlugins: []
       }

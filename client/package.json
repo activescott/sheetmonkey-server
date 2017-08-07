@@ -9,8 +9,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "build.sh",
-    "dev": "dev.sh",
+    "build": "./build.sh",
+    "dev": "./dev.sh",
+    "start": "./dev.sh",
     "lint": "./node_modules/.bin/standard --plugin html './src/**/*.html' './src/**/*.js'"
   },
   "devDependencies": {

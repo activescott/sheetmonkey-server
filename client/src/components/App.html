@@ -16,7 +16,6 @@
       <ul class="nav navbar-nav">
         <li><a href="#gallery" on:click="navigateToGallery(event)">Gallery</a></li>
         <li><a href="#apitest" on:click="apiTestButtonClick(event)">API Test</a></li>
-        <li><a href="#plugins" on:click="navigateToPlugins(event)">My Plugins (todo: move this to account menu)</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <ProfileButton user='{{user}}' store='{{store}}' />
@@ -25,12 +24,11 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-<div id="appcontent"></div>
+<div id="rootComponent"></div>
 
 <script>
   import $ from 'jquery'
   import ApiTest from './ApiTest.html'
-  import Plugins from './Plugins.html'
   import ProfileButton from './ProfileButton.html'
   import Gallery from './Gallery.html'
 
@@ -39,57 +37,78 @@
       ProfileButton
     },
     methods: {
-      setContent (content) {
-        let old = this.get('currentContent')
-        if (old) {
-          try {
-            old.destroy()
-          } catch (e) {
-          }
+
+      queryRootComponentTarget () {
+        let target = $('#rootComponent')
+        if (target.length === 0) {
+          throw new Error('root component container not found!')
         }
-        this.set({ currentContent: content })
+        console.log('queryRootComponentTarget returning:', target.get(0))
+        return target.get(0)
+      },
+
+      getTarget () {
+        const target = window.rootComponentTarget
+        if (!target) {
+          throw new Error('target for creating compnoents required!')
+        }
+        return target
       },
 
       apiTestButtonClick (event) {
-        let target = $('#appcontent').get(0)
-        this.setContent(new ApiTest({
-          target: target
-        }))
-      },
-
-      navigateToPlugins (event) {
-        let target = $('#appcontent').get(0)
-        let comp = new Plugins({
-          target: target,
-          data: {
-            plugins: this.get('plugins'),
-            store: this.get('store')
-          }
+        const comp = new ApiTest({
+          target: this.getTarget()
         })
-        this.setContent(comp)
+        window.setRootComponent(comp)
       },
 
       navigateToGallery (event) {
-        let target = $('#appcontent').get(0)
         let comp = new Gallery({
-          target: target
+          target: this.getTarget()
         })
-        this.setContent(comp)
+        window.setRootComponent(comp)
       },
 
       brandButtonClick (event) {
-        this.setContent(null)
+        window.setRootComponent(null)
+      },
+
+      dispatch (action) {
+        this.get('store').dispatch(action)
       }
     },
+
     oncreate () {
       const store = this.get('store')
       console.log('App intialized with store: ', store ? store.getState() : 'null store!')
       this.set({store: store})
-      store.subscribe(() => {
+
+      // provide these globals to allow other components to replace the root component in the view:
+      window.setRootComponent = function setRootComponent (component) {
+        if ('currentRootComponent' in window && window.currentRootComponent) {
+          if (!Object.is(window.currentRootComponent, component)) {
+            window.currentRootComponent.destroy()
+            window.currentRootComponent = null
+          }
+        }
+        window.currentRootComponent = component
+      }
+      window.rootComponentTarget = this.queryRootComponentTarget()
+
+      // get this components state updated anytime store is updated:
+      this.unsubscribeStore = store.subscribe(() => {
         let state = store.getState()
-        console.log('App subscribe state:', state)
-        this.set(state) // NOTE: this won't overwrite the store property set above.
+        console.log('redux state change detected in App:', state)
+        // make the 'app' state available to this component as root-level props (note this doesn't overwrite existing props set already)
+        this.set(state)
       })
+    },
+
+    ondestroy () {
+      if (this.unsubscribeStore) {
+        this.unsubscribeStore()
+        this.unsubscribeStore = null
+      }
     }
   }
 </script>

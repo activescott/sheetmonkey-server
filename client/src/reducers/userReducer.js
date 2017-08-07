@@ -1,3 +1,4 @@
+'use strict'
 const reducerMap = {}
 
 reducerMap['SET_USER'] = action => {
