@@ -35,7 +35,7 @@ Tasks:
        */ 
       getInstalledPlugins () {
         return Promise.try(() => {
-          if (!chrome || !chrome.runtime) {
+          if (!window.chrome || !chrome.runtime) {
             // not even in chrome browser
             console.log('not in chrome browser, assuming sheetmonkey not available in client.')
             return
@@ -49,9 +49,11 @@ Tasks:
           chrome.runtime.connect(sheetmonkeyExtensionID)
           chrome.runtime.sendMessage(sheetmonkeyExtensionID, cmd, response => {
             // apparently we are, so get the list of installed plugins
-            console.log('extension present! registered plugins:', response)
+            console.log('Chrome is present (not sure about extension yet)! Installed plugins returned from extension:', response)
             // for each extensionin the public gallery; if pugin is installed, set .installed = true
-            this.set({installedPlugins: response})
+            if (response) {
+              this.set({installedPlugins: response})
+            }
             return response
           })
         })
