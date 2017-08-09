@@ -6,30 +6,60 @@ Tasks:
 - List all extensions and show an install link for those not already installed
 - Have an installed tab to show and allow uninstalling installed extensions. Note installed extensions may not always be public.
 -->
-<div class="container-fluid">
-  <div class="row">
-    {{#each publicPlugins as plugin}}
-    <div class="col-md-4">
-      <img src="{{plugin.icon}}" style="width:120px; height:120px" />
-      <h3 class="plugin-name">{{plugin.name}}</h3>
-      <p class="plugin-subtitle">{{plugin.subtitle}}</p>
-      <p class="plugin-description">{{plugin.description}}</p>
-      {{#if plugin.installed}}
-        <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
-      {{else}}
-        <button type="button" class="btn btn-primary btn-xs">Installed</button>
+<div>
+  <!-- Nav tabs -->
+  <ul id='gallery-tabs' class="nav nav-tabs">
+    <li role="presentation" class="active">
+      <a href="#public" on:click="toggleDisplayedPlugins(event)">Public Plugins <span class="badge">{{publicPlugins.length}}</span></a>
+    </li>
+    <li role="presentation">
+      <a href="#installed" on:click="toggleDisplayedPlugins(event)">Installed Plugins <span class="badge">{{installedPlugins.length}}</a>
+    </li>
+  </ul>
+
+  <div class="container-fluid">
+    <div class="row">
+      {{#if displayedPlugins.length === 0}}
+       <small>No plugins available</small>
       {{/if}}
+      {{#each displayedPlugins as plugin}}
+        <div class="col-md-4">
+          <img src="{{plugin.icon}}" style="width:120px; height:120px" />
+          <h3 class="plugin-name">{{plugin.name}}</h3>
+          <h3 class="plugin-id"><small>{{plugin.id}}</small></h3>
+          <h3 class="plugin-subtitle"><small>{{plugin.subtitle}}</small></h3>
+          <p class="plugin-description">{{plugin.description}}</p>
+          {{#if plugin.installed}}
+            <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
+          {{else}}
+            <button type="button" class="btn btn-primary btn-xs">Installed</button>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
     </div>
-    {{/each}}
   </div>
-</div>
 
 <script>
   /* global chrome */
   import Promise from 'bluebird'
+  import $ from 'jquery'
 
   export default {
     methods: {
+      toggleDisplayedPlugins (event) {
+        // i.e. when tab is clicked, toggle displayed plugins
+        const target = $(event.target)
+        // deslect all tabs:
+        $('#gallery-tabs > li').removeClass('active')
+        // select appropriate tab:
+        target.addClass('active')
+        if (target.attr('href') === '#public') {
+          this.set({displayedPlugins: this.get('publicPlugins')})
+        } else {
+          this.set({displayedPlugins: this.get('installedPlugins')})
+        }
+      },
       /**
        * Gets the list of installed plugins from the browser client.
        */
@@ -60,13 +90,15 @@ Tasks:
       }
     },
     oncreate () {
-      console.log('initializing public gallery...')
+      console.log('initializing gallery. public plugins:', this.get('publicPlugins'), 'installedPlugins:' ,this.get('installedPlugins'))
+      
       return this.getInstalledPlugins()
     },
     data () {
       return {
         publicPlugins: [],
-        installedPlugins: []
+        installedPlugins: [],
+        displayedPlugins: []
       }
     }
   }
