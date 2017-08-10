@@ -2,6 +2,9 @@
 const Promise = require('bluebird')
 const assert = require('assert')
 const validateInput = require('../ValidationTools').validateInput
+const Diag = require('../diag')
+
+const D = new Diag('Handler')
 
 class Handler {
     /**
@@ -47,6 +50,7 @@ class Handler {
   }
 
   validateInput (expectation, event) {
+    D.log('validateInput event:', event)
     const body = JSON.parse(event.body)
     return validateInput(expectation, body)
   }

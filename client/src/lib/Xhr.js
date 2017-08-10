@@ -42,6 +42,7 @@ class Xhr {
   putJSON (url, headers, data) {
     headers = Object.assign({}, headers)
     this.addAuthorizationHeader(headers)
+    headers['Content-Type'] = 'application/json'
 
     return Xhr.xhrPromise('PUT', url, headers, data)
   }
@@ -49,6 +50,7 @@ class Xhr {
   postJSON (url, headers, data) {
     headers = Object.assign({}, headers)
     this.addAuthorizationHeader(headers)
+    headers['Content-Type'] = 'application/json'
 
     return Xhr.xhrPromise('POST', url, headers, data)
   }
@@ -75,8 +77,15 @@ class Xhr {
           }
         }
       }
-      if (data) xhr.send(data)
-      else xhr.send()
+      if (data) {
+        if (typeof data !== 'string') {
+          // if already string we assume it's already json, otherwise we stringify it to json
+          data = JSON.stringify(data)
+        }
+        xhr.send(data)
+      } else {
+        xhr.send()
+      }
     })
   }
 }

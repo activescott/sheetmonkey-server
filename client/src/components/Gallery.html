@@ -90,8 +90,7 @@ Tasks:
       }
     },
     oncreate () {
-      console.log('initializing gallery. public plugins:', this.get('publicPlugins'), 'installedPlugins:' ,this.get('installedPlugins'))
-      
+      console.log('initializing gallery. public plugins:', this.get('publicPlugins'), 'installedPlugins:', this.get('installedPlugins'))
       return this.getInstalledPlugins()
     },
     data () {
