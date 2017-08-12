@@ -72,7 +72,7 @@ class OAuthClientHandler extends Handler {
             // write cookie to authenticate user with cookie from here on out.
             const MINUTES = 60;
             const DAYS = MINUTES*60*24;
-            const expiresInSeconds = 10*MINUTES;
+            const expiresInSeconds = 2*DAYS;
             const cookieJwt = JwtHandler.newToken(addUserResult.id, expiresInSeconds);
             const cookieExpiresStr = new Date(Date.now() + expiresInSeconds*1000).toUTCString();
             // Now redirect to index??
@@ -81,7 +81,7 @@ class OAuthClientHandler extends Handler {
               headers: {
                 'Set-Cookie': `jwt=${cookieJwt}; Path=/; Expires=${cookieExpiresStr}`,
                 'Content-Type': 'text/html',
-                'Refresh': '3; url=/index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
+                'Refresh': '0; url=/index.html', // <- https://en.wikipedia.org/wiki/URL_redirection#Refresh_Meta_tag_and_HTTP_refresh_header
               },
               body: `<p>Login succeeded! Redirecting to <a href="/index.html">Home</a>...</p>`
             };
