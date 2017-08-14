@@ -11,6 +11,7 @@ service: sheetmonkey-server
 
 plugins:
   - serverless-dynamodb-local
+  - serverless-apigwy-binary
 
 custom:
   dynamodb:
@@ -160,6 +161,11 @@ functions:
       - http:
           path: vendor/{url}
           method: get
+      - http:
+          path: fonts/{fonts+}
+          integration: lambda
+          method: get
+          contentHandling: CONVERT_TO_BINARY
       - http:
           path: bootstrap.min.js
           method: get

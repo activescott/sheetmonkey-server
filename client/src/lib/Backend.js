@@ -39,10 +39,9 @@ class BackendImpl {
     })
   }
 
-  updateUserPlugin (plugin, userID) {
-    let url = `api/users/${userID}/plugins`
-    plugin = Object.assign({}, plugin, {ownerID: userID})
-    return this.xhr.putJSON(url, {}, plugin).then(response => {
+  deleteUserPlugin (manifestUrl, userID) {
+    let url = `api/users/${userID}/plugins/${encodeURIComponent(manifestUrl)}`
+    return this.xhr.deleteJSON(url, {}).then(response => {
       console.log(`${url} response:`, response)
       return response
     })
@@ -98,6 +97,10 @@ class BackendMock {
 
   addUserPlugin (plugin) {
     return Promise.try(() => plugin)
+  }
+
+  deleteUserPlugin (manifestUrl, userID) {
+    return Promise.try(() => {})
   }
 }
 

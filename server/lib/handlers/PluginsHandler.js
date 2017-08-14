@@ -68,14 +68,18 @@ class PluginsHandler extends Handler {
   }
 
   put (event, context) {
+    /** NOTE: Now that a plugin is whittled down to nothing more than a single editable property 
+      (manifestURL) and the only property is also the key, edit/update/put isn't necessary but 
+      I'll leave this hear as a reference in case we add more properties to plugin later.
+    */
     return this.getRequestPrincipal(event, context).then(principalID => {
       const args = this.validateInput(createPluginArgsSchema, event)
       return this.db.updatePlugin(args, principalID).then(plugin => {
         return this.responseAsJson(plugin)
       }).catch(err => {
         // if user exists, just return null; if another error, rethrow
-        if (err.name && err.name === 'ConditionalCheckFailedException') {
-          return this.responseAsError(403, 'Forbidden')
+        if (('name' in err) && err.name === 'ConditionalCheckFailedException') {
+          return this.responseAsError(403, 'Forbidden: Only the owner can update their plugin.')
         }
         throw err
       })
@@ -87,9 +91,9 @@ class PluginsHandler extends Handler {
       let args = this.validateInput(getPluginArgsSchema, event)
       return this.db.getPlugin(args.manifestUrl).then(p => {
         if (p.ownerID !== principalID) {
-          return this.responseAsError(403, 'Forbidden, caller does not own the plugin')
+          return this.responseAsError(403, 'Forbidden: Only the owner can delete their plugin.')
         }
-        return this.db.deletePlugin(args.manifestUrl).then(() => {
+        return this.db.deletePlugin(args.manifestUrl, principalID).then(() => {
           return this.responseAsJson()
         })
       })

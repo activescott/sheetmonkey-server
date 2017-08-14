@@ -39,6 +39,14 @@ class Xhr {
     return Xhr.xhrPromise('GET', url, headers)
   }
 
+  deleteJSON (url, headers) {
+    headers = Object.assign({}, headers)
+    this.addAuthorizationHeader(headers)
+    headers['Content-Type'] = 'application/json'
+
+    return Xhr.xhrPromise('DELETE', url, headers)
+  }
+
   putJSON (url, headers, data) {
     headers = Object.assign({}, headers)
     this.addAuthorizationHeader(headers)

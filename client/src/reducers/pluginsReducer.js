@@ -9,11 +9,17 @@ reducerMap['ADD_PLUGIN'] = (action, state) => {
   plugins.push(action.plugin)
   return plugins
 }
-reducerMap['EDIT_PLUGIN'] = action => { // TODO: catch state and use plugins from there instead of passing it around.
-  let plugins = deepClone(action.plugins)
+reducerMap['EDIT_PLUGIN'] = (action, state) => {
+  let plugins = deepClone(state)
   let pluginIndexToEdit = action.pluginIndex
   let newPluginValue = action.plugin
   plugins[pluginIndexToEdit] = newPluginValue
+  return plugins
+}
+reducerMap['DELETE_PLUGIN'] = (action, state) => {
+  let plugins = deepClone(state)
+  let pluginIndexToEdit = action.pluginIndex
+  plugins.splice(pluginIndexToEdit, 1)
   return plugins
 }
 

@@ -87,6 +87,7 @@
 
 - [ ] Can content page paths be added to serverless.yml via a script (based on all files in a dir)? How about with an import?
 npm 
-- [ ] Break out the StaticFileHandler, JwtHandler, and necessary parts of vandium to provide a boilerplate/starter for a serverless web app backend.
-
-- [ ] Consider using https://github.com/laardee/serverless-authentication-boilerplate as a base layer for OAuth rather than the custom stuff here :/ Wish I would have found that before I wrote the OAuth stuff here.
+- [ ] Break out the StaticFileHandler. Add https://www.iana.org/assignments/media-types/media-types.xhtml. Make sure error response type of file is flexible (provide a file path to use as a template)
+- [ ] Break out LambdaAuthorizer.js. Allow error response to be specified as a templated file (or templated string?)
+- [ ] provide a boilerplate/starter for a serverless web app backend.
+  - [ ] Consider using https://github.com/laardee/serverless-authentication-boilerplate as a base layer for OAuth rather than the custom stuff here :/ Wish I would have found that before I wrote the OAuth stuff here.

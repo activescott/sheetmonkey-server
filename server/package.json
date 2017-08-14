@@ -18,7 +18,8 @@
     "bluebird": "^3.5.0",
     "jwt-simple": "^0.5.1",
     "mustache": "^2.3.0",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "serverless-apigwy-binary": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

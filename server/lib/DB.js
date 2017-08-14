@@ -198,14 +198,18 @@ class DB {
     })
   }
 
-  deletePlugin (manifestUrl) {
+  deletePlugin (manifestUrl, callerPrincipalID) {
     if (!manifestUrl || typeof manifestUrl !== 'string') {
       D.log('getPlugin: invalid manifestUrl')
       return Promise.resolve(null)
     }
     let params = {
       TableName: this.pluginsTableName,
-      Key: { manifestUrl: manifestUrl }
+      Key: { manifestUrl: manifestUrl },
+      ConditionExpression: 'attribute_exists(manifestUrl) AND ownerID = :callerPrincipalID',
+      ExpressionAttributeValues: {
+        ':callerPrincipalID': callerPrincipalID
+      }
     }
     return this.ddb.delete(params).catch(err => {
       // more detail to the error
@@ -215,7 +219,7 @@ class DB {
 
   deleteAllPlugins () {
     return this.listPlugins().then(plugins => {
-      let promises = plugins.map(p => this.deletePlugin(p.manifestUrl))
+      let promises = plugins.map(p => this.deletePlugin(p.manifestUrl, p.ownerID))
       return Promise.all(promises)
     })
   }

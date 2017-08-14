@@ -233,6 +233,7 @@ describe('PluginsHandler', function () {
         }
         // const handlerResponse = handler.delete(event, context)
         return invoker.invoke(`DELETE api/users/${userID}/plugins/http://blah.co/manifest.json`, event).then(response => {
+          console.log('response:', response)
           expect(response).to.have.property('statusCode', 403)
         })
       })
@@ -246,7 +247,6 @@ describe('PluginsHandler', function () {
           headers: buildAuthorizedHeaders()
         }
         return invoker.invoke(`DELETE api/users/${userID}/plugins/http://blah.co/manifest.json`, event).then(response => {
-          console.log('RRRRR:', response)
           return expect(response).to.have.property('statusCode', 200)
         })
       })

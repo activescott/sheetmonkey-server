@@ -2716,6 +2716,12 @@ semver@~5.0.1:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
 
+serverless-apigwy-binary@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/serverless-apigwy-binary/-/serverless-apigwy-binary-0.1.0.tgz#3a0ac4e4f0955c0c49f1f1f3c63244079a4824e8"
+  dependencies:
+    bluebird "^3.5.0"
+
 serverless-dynamodb-local@^0.2.22:
   version "0.2.22"
   resolved "https://registry.yarnpkg.com/serverless-dynamodb-local/-/serverless-dynamodb-local-0.2.22.tgz#05108bb22fc4e2931d139dc85388a61ad31d1118"

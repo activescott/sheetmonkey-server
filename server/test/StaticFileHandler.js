@@ -41,5 +41,26 @@ describe('StaticFileHandler', function () {
           return response
         })
     })
+    it('should work with non-lambdaproxy requests', function () {
+      let event = { 
+        path: {
+          fonts: 'glyphicons-halflings-regular.woff2' }
+      }
+      let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
+      return h.get(event, null)
+        .then(response => {
+          return expect(response.length).to.equal(24040)
+        })
+    })
+    it('should return text as text', function () {
+      let event = { path: 'README.md' }
+      let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
+      return h.get(event, null)
+        .then(response => {
+          console.log(response.body)
+          let expectedContent = 'This directory is empty and is populated with the distributable client libraries when the client project is built.'
+          return expect(response.body).to.equal(expectedContent)
+        })
+    })
   })
 })

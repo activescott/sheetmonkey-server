@@ -9,8 +9,11 @@ export default class Actions {
   static addPlugin (plugin) {
     return makeActionCreator('ADD_PLUGIN', 'plugin')(plugin)
   }
-  static editPlugin (plugins, pluginIndex, plugin) {
-    return makeActionCreator('EDIT_PLUGIN', 'plugins', 'pluginIndex', 'plugin')(plugins, pluginIndex, plugin)
+  static editPlugin (pluginIndex, plugin) {
+    return makeActionCreator('EDIT_PLUGIN', 'pluginIndex', 'plugin')(pluginIndex, plugin)
+  }
+  static deletePlugin (pluginIndex) {
+    return makeActionCreator('DELETE_PLUGIN', 'pluginIndex', 'plugin')(pluginIndex)
   }
 }
 
