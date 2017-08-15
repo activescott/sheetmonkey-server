@@ -12,9 +12,6 @@ const createPluginArgsSchema = {
   apiClientID: { type: 'string', required: false },
   apiClientSecret: { type: 'string', required: false }
 }
-const getPluginArgsSchema = {
-  manifestUrl: { type: 'string', required: true }
-}
 
 class PluginsHandler extends Handler {
   constructor (db) {
@@ -36,14 +33,9 @@ class PluginsHandler extends Handler {
 
   get (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      let args = this.validateInput(getPluginArgsSchema, event)
+      const args = event.pathParameters
       return this.db.getPlugin(args.manifestUrl).then(p => {
-        if (p.ownerID !== principalID) {
-          throw new Error('Delete failed. caller does not own the plugin')
-        }
-        return this.db.getPlugin(args.manifestUrl).then(p => {
-          return this.responseAsJson(p)
-        })
+        return this.responseAsJson(p)
       })
     })
   }
@@ -88,7 +80,8 @@ class PluginsHandler extends Handler {
 
   delete (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
-      let args = this.validateInput(getPluginArgsSchema, event)
+      const args = event.pathParameters
+      args.manifestUrl = decodeURIComponent(args.manifestUrl)
       return this.db.getPlugin(args.manifestUrl).then(p => {
         if (p.ownerID !== principalID) {
           return this.responseAsError(403, 'Forbidden: Only the owner can delete their plugin.')

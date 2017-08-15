@@ -217,9 +217,9 @@ describe('PluginsHandler', function () {
 
     it('should require auth', function () {
       let event = {
-        body: JSON.stringify({ manifestUrl: `https://blah.com/${userID}.json` })
       }
-      return invoker.invoke(`DELETE api/users/${userID}/plugins/http://blah.co/manifest.json`, event).then(response => {
+      let manifestUrl = encodeURIComponent('http://blah.co/manifest.json')
+      return invoker.invoke(`DELETE api/users/${userID}/plugins/${manifestUrl}`, event).then(response => {
         expect(response).to.have.property('statusCode', 401)
       })
     })
@@ -231,8 +231,8 @@ describe('PluginsHandler', function () {
           body: JSON.stringify(testPlugin),
           headers: buildAuthorizedHeaders(randomUserID()) // note deliberately different userID
         }
-        // const handlerResponse = handler.delete(event, context)
-        return invoker.invoke(`DELETE api/users/${userID}/plugins/http://blah.co/manifest.json`, event).then(response => {
+        let manifestUrl = encodeURIComponent(testPlugin.manifestUrl)
+        return invoker.invoke(`DELETE api/users/${userID}/plugins/${manifestUrl}`, event).then(response => {
           console.log('response:', response)
           expect(response).to.have.property('statusCode', 403)
         })
@@ -246,7 +246,8 @@ describe('PluginsHandler', function () {
           body: JSON.stringify(testPlugin),
           headers: buildAuthorizedHeaders()
         }
-        return invoker.invoke(`DELETE api/users/${userID}/plugins/http://blah.co/manifest.json`, event).then(response => {
+        let manifestUrl = encodeURIComponent(testPlugin.manifestUrl)
+        return invoker.invoke(`DELETE api/users/${userID}/plugins/${manifestUrl}`, event).then(response => {
           return expect(response).to.have.property('statusCode', 200)
         })
       })
