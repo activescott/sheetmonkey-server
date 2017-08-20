@@ -95,6 +95,8 @@
       }
       window.rootComponentTarget = this.queryRootComponentTarget()
 
+      this.navigateToGallery()
+
       // get this components state updated anytime store is updated:
       this.unsubscribeStore = store.subscribe(() => {
         let state = store.getState()

@@ -23,23 +23,71 @@ Tasks:
        <small>No plugins available</small>
       {{/if}}
       {{#each displayedPlugins as plugin}}
-        <div class="col-md-4">
-          <img src="{{plugin.icon}}" style="width:120px; height:120px" />
-          <h3 class="plugin-name">{{plugin.name}}</h3>
-          <h3 class="plugin-id"><small>{{plugin.id}}</small></h3>
-          <h3 class="plugin-subtitle"><small>{{plugin.subtitle}}</small></h3>
-          <p class="plugin-description">{{plugin.description}}</p>
-          {{#if plugin.installed}}
-            <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
-          {{else}}
-            <button type="button" class="btn btn-primary btn-xs">Installed</button>
-          {{/if}}
+        <div class="col-md-4 appcontainer">
+          <div class="appicon">
+            <img src="{{plugin.baseUrl + plugin.manifest.icon}}" style="width:120px; height:120px; text-align:center" />
+          </div>
+          <div class="appcontent">
+            <h3 class="plugin-name">{{plugin.manifest.name}}</h3>
+            <h3 class="plugin-subtitle"><small>{{plugin.manifest.subtitle}}</small></h3>
+            <p class="plugin-description">{{plugin.manifest.description}}</p>
+          </div>
+          <div class="appactions">
+            {{#if plugin.installed}}
+              <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
+            {{else}}
+              <button type="button" class="btn btn-primary btn-xs">Installed</button>
+            {{/if}}
+          </div>
         </div>
         {{/each}}
       </div>
     </div>
   </div>
-
+<style>
+  .appcontainer {
+    height: 300px;
+    overflow: hidden;
+    margin: 20px;
+  }
+  .appicon { 
+    float: left;
+    height: 300px;
+    width: 120px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    display: inline-block;
+    position: relative;
+  }
+    /* because css is insane https://stackoverflow.com/questions/7273338/how-to-vertically-align-an-image-inside-a-div */
+  .appicon > img {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+  .appcontent {
+    max-height: 270px; /* leave plenty of room for appactions */
+    padding: 5px;
+    overflow:hidden;
+    text-overflow: ellipsis;
+  }
+  .plugin-description {
+    height:100%;
+    text-overflow: ellipsis;
+  }
+  .appactions {
+    height: 20px;
+    padding: 5px;
+    text-align:center;
+  }
+</style>
 <script>
   /* global chrome */
   import Promise from 'bluebird'
