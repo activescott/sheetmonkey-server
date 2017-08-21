@@ -36,7 +36,7 @@ Tasks:
             {{#if plugin.installed }}
               <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
             {{else}}
-              <button type="button" class="btn btn-primary btn-xs">Install</button>
+              <button type="button" class="btn btn-primary btn-xs" on:click="installPlugin(plugin.manifestUrl)">Install</button>
             {{/if}}
           </div>
         </div>
@@ -116,7 +116,7 @@ Tasks:
         }
       },
       fetchPublicPlugins () {
-        return Promise.try(() => {
+        return new Promise((resolve, reject) => {
           let b = Backend.build()
           b.getPublicPlugins().then(plugins => {
             console.log('Gallery plugins:', plugins)
@@ -134,9 +134,12 @@ Tasks:
               console.log('Public loaded plugins returned from extension:', response)
               // for each extensionin the public gallery; if pugin is installed, set .installed = true
               if (response) {
+                for (let p of response) {
+                  p.installed = this.isInstalled(p)
+                }
                 this.set({publicPlugins: response})
               }
-              return response
+              return resolve(response)
             })
           })
         })
@@ -145,29 +148,42 @@ Tasks:
        * Fetches the list of installed plugins from the browser client.
        */
       fetchInstalledPlugins () {
-        return Promise.try(() => {
+        return new Promise((resolve, reject) => {
           const extension = this.getConnectedExtension()
           const cmd = {
             sheetmonkey: {
               cmd: 'getRegisteredPlugins'
             }
           }
-          extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+          return extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
             // apparently we are, so get the list of installed plugins
             console.log('Sheetmonkey extension found! Installed plugins returned from extension:', response)
             // for each extensionin the public gallery; if pugin is installed, set .installed = true
+            for (let p of response) {
+              p.installed = true
+            }
             if (response) {
               this.set({installedPlugins: response})
             }
-            return response
+            return resolve(response)
           })
         })
       },
-      isInstalled (plugin) {
-        let installedPlugins = this.get('installedPlugins')
-        if (installedPlugins) {
-          return installedPlugins.findIndex(p => p.manifestUrl.toLowerCase() === plugin.manifestUrl.toLowerCase()) >= 0
+      installPlugin (manifestUrl) {
+        console.log('installPlugin:', manifestUrl)
+        const extension = this.getConnectedExtension()
+        const cmd = {
+          sheetmonkey: {
+            cmd: 'installPlugin',
+            params: {
+              manifestUrl: manifestUrl
+            }
+          }
         }
+        extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+          console.log('installPlugin from extension:', response)
+          this.fetchInstalledPlugins().then(() => this.fetchPublicPlugins())
+        })
       },
       /**
        * Gets a connected chrome.runtime for the extension.
@@ -178,28 +194,28 @@ Tasks:
           console.error('not in chrome browser, assuming sheetmonkey not available in client.')
           return null
         }
-        console.log('Chrome is present. Checking for sheetmonkey extension...')
+        // console.log('Chrome is present. Checking for sheetmonkey extension...')
         chrome.runtime.connect(sheetmonkeyExtensionID)
         return chrome.runtime
+      },
+      isInstalled (plugin) {
+        let installedPlugins = this.get('installedPlugins')
+        if (installedPlugins) {
+          return installedPlugins.findIndex(p => p.manifestUrl.toLowerCase() === plugin.manifestUrl.toLowerCase()) >= 0
+        }
       }
     },
     oncreate () {
       this.observe('publicPlugins', plugins => {
-        for (let p of plugins) {
-          p.installed = this.isInstalled(p)
-        }
+        console.log('observed publicPlugins')
         this.refreshDisplayedPlugins()
       })
 
       this.observe('installedPlugins', plugins => {
-        for (let p of plugins) {
-          p.installed = this.isInstalled(p)
-        }
+        console.log('observed installedPlugins')
         this.refreshDisplayedPlugins()
       })
-
-      this.fetchInstalledPlugins()
-      this.fetchPublicPlugins()
+      this.fetchInstalledPlugins().then(() => this.fetchPublicPlugins())
     },
     data () {
       return {

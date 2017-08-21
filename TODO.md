@@ -44,8 +44,10 @@
       - subtitle # A concise, compelling summary of the plugin to appear below the plugin's name (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
       - icon # A url to an image that should be used for your plugin. Relative to the manifest. Make it square, 1024px × 1024px. For inspiration, see https://developer.apple.com/ios/human-interface-guidelines/graphics/app-icon/
       - description # An informative, engaging description that highlights the features and functionality of the plugin. For inspiration see https://developer.apple.com/app-store/product-page/
-    - [ ] display all plugins from sheetmonkey server.
-  
+    - [x] display all plugins from sheetmonkey server.
+    - [x] Allow installing a plugin in gallery.
+    - [ ] Allow uninstalling a plugin in gallery.
+
    - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
    
   - [ ] Provide plugins context to use rest api
