@@ -20,7 +20,7 @@ Tasks:
   <div class="container-fluid">
     <div class="row">
       {{#if displayedPlugins.length === 0}}
-       <small>No plugins available</small>
+       <small>No plugins available. Please make sure that you have installed the <a href="https://github.com/activescott/sheetmonkey">Sheetmonkey Chrome plugin</a> and return!</small>
       {{/if}}
       {{#each displayedPlugins as plugin}}
         <div class="col-md-4 appcontainer">
@@ -93,7 +93,6 @@ Tasks:
   import Promise from 'bluebird'
   import $ from 'jquery'
   import Backend from '../lib/Backend'
-  import SheetmonkeyUtil from 'sheetmonkey-util'
   const sheetmonkeyExtensionID = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
 
   export default {
@@ -172,7 +171,7 @@ Tasks:
       },
       /**
        * Gets a connected chrome.runtime for the extension.
-       */ 
+       */
       getConnectedExtension () {
         if (!window.chrome || !chrome.runtime) {
           // not even in chrome browser
