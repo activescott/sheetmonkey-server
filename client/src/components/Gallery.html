@@ -9,10 +9,10 @@ Tasks:
 <div>
   <!-- Nav tabs -->
   <ul id='gallery-tabs' class="nav nav-tabs">
-    <li role="presentation" class="active">
+    <li role="presentation" id="publictab" class="active" >
       <a href="#public" on:click="toggleDisplayedPlugins(event)">Public Plugins <span class="badge">{{publicPlugins.length}}</span></a>
     </li>
-    <li role="presentation">
+    <li role="presentation" id="installedtab" >
       <a href="#installed" on:click="toggleDisplayedPlugins(event)">Installed Plugins <span class="badge">{{installedPlugins.length}}</a>
     </li>
   </ul>
@@ -33,10 +33,10 @@ Tasks:
             <p class="plugin-description">{{plugin.manifest.description}}</p>
           </div>
           <div class="appactions">
-            {{#if plugin.installed}}
+            {{#if plugin.installed }}
               <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
             {{else}}
-              <button type="button" class="btn btn-primary btn-xs">Installed</button>
+              <button type="button" class="btn btn-primary btn-xs">Install</button>
             {{/if}}
           </div>
         </div>
@@ -73,7 +73,7 @@ Tasks:
     margin: auto;
   }
   .appcontent {
-    max-height: 270px; /* leave plenty of room for appactions */
+    height: 250px; /* leave plenty of room for appactions */
     padding: 5px;
     overflow:hidden;
     text-overflow: ellipsis;
@@ -92,42 +92,70 @@ Tasks:
   /* global chrome */
   import Promise from 'bluebird'
   import $ from 'jquery'
+  import Backend from '../lib/Backend'
+  import SheetmonkeyUtil from 'sheetmonkey-util'
+  const sheetmonkeyExtensionID = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
 
   export default {
     methods: {
       toggleDisplayedPlugins (event) {
         // i.e. when tab is clicked, toggle displayed plugins
         const target = $(event.target)
+        const li = target.parents('#gallery-tabs li')
         // deslect all tabs:
-        $('#gallery-tabs > li').removeClass('active')
+        $('#gallery-tabs li').removeClass('active')
         // select appropriate tab:
-        target.addClass('active')
-        if (target.attr('href') === '#public') {
+        li.addClass('active')
+        this.refreshDisplayedPlugins()
+      },
+      refreshDisplayedPlugins () {
+        let pubTab = $('#publictab')
+        if (pubTab.hasClass('active')) {
           this.set({displayedPlugins: this.get('publicPlugins')})
         } else {
           this.set({displayedPlugins: this.get('installedPlugins')})
         }
       },
-      /**
-       * Gets the list of installed plugins from the browser client.
-       */
-      getInstalledPlugins () {
+      fetchPublicPlugins () {
         return Promise.try(() => {
-          if (!window.chrome || !chrome.runtime) {
-            // not even in chrome browser
-            console.log('not in chrome browser, assuming sheetmonkey not available in client.')
-            return
-          }
-          const sheetmonkeyExtensionID = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
+          let b = Backend.build()
+          b.getPublicPlugins().then(plugins => {
+            console.log('Gallery plugins:', plugins)
+            const extension = this.getConnectedExtension()
+            const cmd = {
+              sheetmonkey: {
+                cmd: 'loadPluginsFromManifestUrls',
+                params: {
+                  manifestUrls: plugins.map(p => p.manifestUrl)
+                }
+              }
+            }
+            extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+              // apparently we are, so get the list of installed plugins
+              console.log('Public loaded plugins returned from extension:', response)
+              // for each extensionin the public gallery; if pugin is installed, set .installed = true
+              if (response) {
+                this.set({publicPlugins: response})
+              }
+              return response
+            })
+          })
+        })
+      },
+      /**
+       * Fetches the list of installed plugins from the browser client.
+       */
+      fetchInstalledPlugins () {
+        return Promise.try(() => {
+          const extension = this.getConnectedExtension()
           const cmd = {
             sheetmonkey: {
               cmd: 'getRegisteredPlugins'
             }
           }
-          chrome.runtime.connect(sheetmonkeyExtensionID)
-          chrome.runtime.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+          extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
             // apparently we are, so get the list of installed plugins
-            console.log('Chrome is present (not sure about extension yet)! Installed plugins returned from extension:', response)
+            console.log('Sheetmonkey extension found! Installed plugins returned from extension:', response)
             // for each extensionin the public gallery; if pugin is installed, set .installed = true
             if (response) {
               this.set({installedPlugins: response})
@@ -135,11 +163,44 @@ Tasks:
             return response
           })
         })
+      },
+      isInstalled (plugin) {
+        let installedPlugins = this.get('installedPlugins')
+        if (installedPlugins) {
+          return installedPlugins.findIndex(p => p.manifestUrl.toLowerCase() === plugin.manifestUrl.toLowerCase()) >= 0
+        }
+      },
+      /**
+       * Gets a connected chrome.runtime for the extension.
+       */ 
+      getConnectedExtension () {
+        if (!window.chrome || !chrome.runtime) {
+          // not even in chrome browser
+          console.error('not in chrome browser, assuming sheetmonkey not available in client.')
+          return null
+        }
+        console.log('Chrome is present. Checking for sheetmonkey extension...')
+        chrome.runtime.connect(sheetmonkeyExtensionID)
+        return chrome.runtime
       }
     },
     oncreate () {
-      console.log('initializing gallery. public plugins:', this.get('publicPlugins'), 'installedPlugins:', this.get('installedPlugins'))
-      return this.getInstalledPlugins()
+      this.observe('publicPlugins', plugins => {
+        for (let p of plugins) {
+          p.installed = this.isInstalled(p)
+        }
+        this.refreshDisplayedPlugins()
+      })
+
+      this.observe('installedPlugins', plugins => {
+        for (let p of plugins) {
+          p.installed = this.isInstalled(p)
+        }
+        this.refreshDisplayedPlugins()
+      })
+
+      this.fetchInstalledPlugins()
+      this.fetchPublicPlugins()
     },
     data () {
       return {

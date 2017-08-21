@@ -55,6 +55,14 @@ class BackendImpl {
       return response
     })
   }
+
+  getPublicPlugins () {
+    let url = `https://beta.sheetmonkey.com/api/plugins`
+    return this.xhr.getJSON(url).then(response => {
+      console.log(`${url} response:`, response)
+      return response
+    })
+  }
 }
 
 class BackendMock {
@@ -101,6 +109,13 @@ class BackendMock {
 
   deleteUserPlugin (manifestUrl, userID) {
     return Promise.try(() => {})
+  }
+
+  getPublicPlugins () {
+    return Promise.try(() => [
+      { manifestUrl: `http://localhost:8100/smartsheetforjira/ssfjmanifest.json` },
+      { manifestUrl: `http://localhost:8100/smartsheetforsalesforce/ssfsfmanifest.json` }
+    ])
   }
 }
 

@@ -69,20 +69,8 @@ module.exports.staticfile = (event, context, callback) => {
 };
 
 module.exports.defaultredirect = (event, context, callback) => {
-  const redirect = false
-  if (redirect) {
-    const response = {
-      statusCode: 302,
-      headers: {
-        "Location": 'index.html',
-      },
-      body: ''
-    }
-    callback(null, response)
-  } else {
-    event.path = '/index.html'
-    return module.exports.staticfile(event, context, callback)
-  }
+  event.path = '/index.html'
+  return module.exports.staticfile(event, context, callback)
 }
 
 module.exports.handleOAuthRedirect = (event, context, callback) => {
@@ -101,7 +89,7 @@ module.exports.plugins_post = authorizer.protectHandler((event, context, callbac
   return pluginsHandler.post(event, context)
 })
 
-module.exports.plugins_listPublic = authorizer.protectHandler((event, context, callback) => {
+module.exports.plugins_listPublic = authorizer.publicHandler((event, context, callback) => {
   const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.listPublic(event, context)
 })
@@ -111,9 +99,14 @@ module.exports.plugins_listPrivate = authorizer.protectHandler((event, context, 
   return pluginsHandler.listPrivate(event, context)
 })
 
-module.exports.plugins_get = authorizer.protectHandler((event, context, callback) => {
+module.exports.plugins_getPrivate = authorizer.protectHandler((event, context, callback) => {
   const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
-  return pluginsHandler.get(event, context)
+  return pluginsHandler.getPrivate(event, context)
+})
+
+module.exports.plugins_getPublic = authorizer.publicHandler((event, context, callback) => {
+  const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
+  return pluginsHandler.getPublic(event, context)
 })
 
 module.exports.plugins_put = authorizer.protectHandler((event, context, callback) => {
@@ -125,5 +118,3 @@ module.exports.plugins_delete = authorizer.protectHandler((event, context, callb
   const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.delete(event, context)
 })
-
-module.exports.plugins_get

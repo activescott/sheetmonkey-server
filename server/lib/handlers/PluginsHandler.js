@@ -31,13 +31,24 @@ class PluginsHandler extends Handler {
     })
   }
 
-  get (event, context) {
+  getPrivate (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
       const args = event.pathParameters
+      args.manifestUrl = decodeURIComponent(args.manifestUrl)
       return this.db.getPlugin(args.manifestUrl).then(p => {
-        return this.responseAsJson(p)
+        if (p) return this.responseAsJson(p)
+        else return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
       })
     })
+  }
+
+  getPublic (event, context) {
+    const args = event.pathParameters
+    args.manifestUrl = decodeURIComponent(args.manifestUrl)   
+    return this.db.getPlugin(args.manifestUrl).then(p => {
+      if (p) return this.responseAsJson(p)
+      else return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
+      })
   }
 
   listPrivate (event, context) {
@@ -52,7 +63,6 @@ class PluginsHandler extends Handler {
 
   listPublic (event, context) {
     // NOTE: ONLY PUBLIC information for a plugin - (no auth details)
-    console.log('plugins.listPublic')
     return this.db.listPlugins().then(plugins => {
       const payload = plugins.map(p => Object.assign({}, { manifestUrl: p.manifestUrl }))
       return this.responseAsJson(payload)
@@ -71,7 +81,7 @@ class PluginsHandler extends Handler {
       }).catch(err => {
         // if user exists, just return null; if another error, rethrow
         if (('name' in err) && err.name === 'ConditionalCheckFailedException') {
-          return this.responseAsError(403, 'Forbidden: Only the owner can update their plugin.')
+          return this.responseAsError('Forbidden: Only the owner can update their plugin.', 403)
         }
         throw err
       })
@@ -84,7 +94,7 @@ class PluginsHandler extends Handler {
       args.manifestUrl = decodeURIComponent(args.manifestUrl)
       return this.db.getPlugin(args.manifestUrl).then(p => {
         if (p.ownerID !== principalID) {
-          return this.responseAsError(403, 'Forbidden: Only the owner can delete their plugin.')
+          return this.responseAsError('Forbidden: Only the owner can delete their plugin.', 403)
         }
         return this.db.deletePlugin(args.manifestUrl, principalID).then(() => {
           return this.responseAsJson()

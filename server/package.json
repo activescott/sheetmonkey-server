@@ -11,7 +11,7 @@
     "test": "clear; ./node_modules/.bin/_mocha",
     "pretest": "./dev/start-dynamodb.sh",
     "deploy": "./deploy.sh",
-    "watch": "clear; ./node_modules/.bin/_mocha -w"
+    "watch": "clear; ./node_modules/.bin/_mocha --watch --watch-extensions js,yml,json"
   },
   "dependencies": {
     "aws-sdk": "^2.77.0",

@@ -11,10 +11,10 @@ class Handler {
      * Returns the specified object as a JSON response properly formatted for lambda.
      * @param {*any} jsonBody
      */
-  responseAsJson (jsonBody) {
+  responseAsJson (jsonBody, statusCode = 200) {
     jsonBody = jsonBody || '{}'
     let response = {
-      statusCode: 200,
+      statusCode: statusCode,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -23,7 +23,7 @@ class Handler {
     return response
   }
 
-  responseAsError (statusCode, message) {
+  responseAsError (message, statusCode) {
     let response = {
       statusCode: statusCode,
       headers: {

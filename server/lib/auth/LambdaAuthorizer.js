@@ -48,24 +48,40 @@ class LambdaAuthorizer {
       }
 
       if (isAuthenticated) {
-        let result = postAuthorizationHandler(event, context, callback)
-        // D.log('response from postAuthorizationHandler:', result)
-        const isPromise = obj => obj && 'then' in obj // <- https://stackoverflow.com/a/27746324/51061
-        if (isPromise(result)) {
-          return result
-            .then(handlerResponse => callback(null, handlerResponse))
-            .catch(handlerError => callback(handlerError, null))
-        } else {
-          // not a promise, so handler expected to invoke callback
-          return result
-        }
+        return this._invokeHandlerAnadMapResponse(postAuthorizationHandler, event, context, callback)
       } else {
         return this._writeError(`This resource requires authentication. Additional information: ${authError}`, callback)
       }
     }
   }
+
   /**
-   * Ensure request is authorized or throws.
+   * Calls the handler directly without requiring authentication.
+   * It does allow the handler to returna promise that will be mapped to the appropriate callback.
+   * @param {*function} postAuthorizationHandler A AWS Lambda-style handler that will be called.
+   */
+  publicHandler (postAuthorizationHandler) {
+    return (event, context, callback) => {
+      return this._invokeHandlerAnadMapResponse(postAuthorizationHandler, event, context, callback)
+    }
+  }
+
+  _invokeHandlerAnadMapResponse (postAuthorizationHandler, event, context, callback) {
+    let result = postAuthorizationHandler(event, context, callback)
+    // D.log('response from postAuthorizationHandler:', result)
+    const isPromise = obj => obj && 'then' in obj // <- https://stackoverflow.com/a/27746324/51061
+    if (isPromise(result)) {
+      return result
+        .then(handlerResponse => callback(null, handlerResponse))
+        .catch(handlerError => callback(handlerError, null))
+    } else {
+      // not a promise, so handler expected to invoke callback
+      return result
+    }
+  }
+  
+  /**
+   * Return true if request is authorized.
    */
   _ensureAuthentication (event, context, callback) {
     const getToken = () => {
@@ -101,6 +117,7 @@ class LambdaAuthorizer {
   }
 
   _writeError (errMsg, callback) {
+    //TODO: Should optionally allow to use a templated "error" html page for response via staticfilehandler too. See OAuthClientHandler
     const response = {
       statusCode: 401,
       headers: {

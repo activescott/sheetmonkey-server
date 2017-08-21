@@ -98,7 +98,7 @@ describe('PluginsHandler', function () {
     })
   })
 
-  describe('list', function () {
+  describe('list private', function () {
     // GET api/plugins                <-- public
     // GET api/users/{userID}/plugins <-- private
     it('should require auth', function () {
@@ -130,6 +130,17 @@ describe('PluginsHandler', function () {
         })
       })
     })
+  })
+
+  describe('list public', function () {
+    it('should NOT require auth', function () {
+      let event = {
+        body: JSON.stringify({})
+      }
+      return invoker.invoke(`get api/plugins`, event).then(response => {
+        return expect(response).to.have.property('statusCode', 200)
+      })
+    })
 
     it('should list ALL plugins with public info', function () {
       const testPlugin = { manifestUrl: `https://blah.com/aaa.json`, ownerID: randomUserID() }
@@ -154,16 +165,7 @@ describe('PluginsHandler', function () {
 
   })
 
-  describe('read', function () {
-
-    it('should require auth', function () {
-      let event = {
-        body: JSON.stringify({id: '123456', email: 'a@b.com'})
-      }
-      return invoker.invoke(`get api/plugins`, event).then(response => {
-        expect(response).to.have.property('statusCode', 401)
-      })
-    })
+  describe('read public', function () {
 
     it('should return the specified plugin', function () {
       const testUserID = randomUserID()
@@ -171,16 +173,50 @@ describe('PluginsHandler', function () {
 
       return db.addPlugin(testPlugin).then(() => {
         const event = {
-          body: JSON.stringify(testPlugin),
-          headers: buildAuthorizedHeaders()
         }
 
-        return invoker.invoke(`GET api/plugins/${testPlugin.manifestUrl}`, event).then(response => {
+        return invoker.invoke(`GET api/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          console.log('response.body:', response.body)
           return expect(response.body).to.deep.include({manifestUrl: testPlugin.manifestUrl})
         })
       })
     })
 
+    it('should return 404 if not found', function () {
+      const event = { }
+      return invoker.invoke(`GET api/plugins/http___nonsense`, event).then(response => {
+        expect(response).to.have.property('statusCode', 404)
+      })
+    })
+
+  })
+
+  describe('read private', function () {
+
+    it('should return the specified plugin', function () {
+      const testUserID = randomUserID()
+      const testPlugin = { manifestUrl: `https://blah.com/${testUserID}.json`, ownerID: testUserID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          headers: buildAuthorizedHeaders()
+        }
+
+        return invoker.invoke(`GET api/users/${userID}/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          return expect(response.body).to.deep.include({manifestUrl: testPlugin.manifestUrl})
+        })
+      })
+    })
+
+    it('should return 404 if not found', function () {
+      const event = {
+        headers: buildAuthorizedHeaders()
+      }
+      return invoker.invoke(`GET api/users/${userID}/plugins/http___nonsense`, event).then(response => {
+        expect(response).to.have.property('statusCode', 404)
+      })
+    })
+    
   })
 
   describe('update', function () {
@@ -196,7 +232,6 @@ describe('PluginsHandler', function () {
     })
 
     it('should not let caller update unless he is the owner', function () {
-
       const testPlugin = { manifestUrl: `https://blah.com/${randomUserID()}.json`, ownerID: randomUserID() }
 
       return db.addPlugin(testPlugin).then(() => {
@@ -233,7 +268,6 @@ describe('PluginsHandler', function () {
         }
         let manifestUrl = encodeURIComponent(testPlugin.manifestUrl)
         return invoker.invoke(`DELETE api/users/${userID}/plugins/${manifestUrl}`, event).then(response => {
-          console.log('response:', response)
           expect(response).to.have.property('statusCode', 403)
         })
       })

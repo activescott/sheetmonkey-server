@@ -120,6 +120,14 @@ functions:
           path: api/users/me
           method: get
 
+  plugins_getPrivate:
+    handler: handler.plugins_getPrivate
+    events:
+      - http: GET api/users/{userID}/plugins/{manifestUrl}
+  plugins_getPublic:
+    handler: handler.plugins_getPublic
+    events:
+      - http: GET api/plugins/{manifestUrl}
   plugins_listPublic:
     handler: handler.plugins_listPublic
     events:
@@ -132,10 +140,6 @@ functions:
     handler: handler.plugins_listPrivate
     events:
       - http: GET api/users/{userID}/plugins
-  plugins_get:
-    handler: handler.plugins_get
-    events:
-      - http: GET api/users/{userID}/plugins/{manifestUrl}
   plugins_put:
     handler: handler.plugins_put
     events:

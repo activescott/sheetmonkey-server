@@ -4,10 +4,10 @@
   - Routes:
     - /api/ - API 
     - /     - content
-- [ ] Setup client app:
+- [x] Setup client app:
   - [+] [svelt](https://svelte.technology/guide) + 
   - [+] roundtrip jwt in a test call
-  - [ ] [redux](http://redux.js.org/docs/introduction/CoreConcepts.html)
+  - [x] [redux](http://redux.js.org/docs/introduction/CoreConcepts.html)
 - [x] Setup developer login via SS
   - [x] store developer tokens & user id in DynamoDB
   - [x] fix: add user is creating a new user, not updating existing (createdAt==updatedAt!)
@@ -35,32 +35,48 @@
     - [x] Edit some values for a plugin
     - [x] Validate edit/add plugin manifest url is a valid url
       - [ ] Validate edit/add plugin manifest content
-    - [ ] Delete plugin
+    - [x] Delete plugin
 
   - [ ] Display gallery in extension+server
-    - [ ] manifest changes 
+    - [x] manifest changes 
       - remove id (use the url, escaped if necessary)
       - name # The name of the plugin that will be displayed in the extension's Plugins page (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
       - subtitle # A concise, compelling summary of the plugin to appear below the plugin's name (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
-      - icon # A url to an image that should be used for your plugin. Make it square. For inspiration, see https://developer.apple.com/ios/human-interface-guidelines/graphics/app-icon/
+      - icon # A url to an image that should be used for your plugin. Relative to the manifest. Make it square, 1024px × 1024px. For inspiration, see https://developer.apple.com/ios/human-interface-guidelines/graphics/app-icon/
       - description # An informative, engaging description that highlights the features and functionality of the plugin. For inspiration see https://developer.apple.com/app-store/product-page/
-    - [ ] Preview plugin on server add/edit pages too
+    - [ ] display all plugins from sheetmonkey server.
+  
+   - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
+   
+  - [ ] Provide plugins context to use rest api
+    - [ ] container type & id on all events
+    - [ ] row id (on row or cell events)
+    - [ ] column id or name (on row or cell events)
 
+  - [ ] add keyboard shortcut commands (pass in container details)
+  - [ ] plugin: refresh sheet (sheetmonkey can provide such a service to use)
+  
   - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
     - [ ] catch token on backend and send to extension
     - [ ] route token from extension to plugin
 
+  - [ ] Enable redirect flow to extension for clients.
+    - [ ] redirect endpoint.
+    - [ ] fail if unknown client id
+    - [ ] get code=>tokens, store tokens, redirect token to extension.
+
 - [ ] Give sheetmonkey server some style:
-  - Icon: http://game-icons.net/lorc/originals/monkey.html
-  - Color Pallet: 
+  - [ ] Icon: http://game-icons.net/lorc/originals/monkey.html
+  - [ ]  Color Pallet:
       - http://paletton.com/#uid=53z0B0kygSv00++2pQU++Oi++Gn
+  - [ ] favicon
+  
+- [ ] support reviews for plugins (requires login, each user can only review once)
+  - [ ] 1-5 stars
+  - [ ] text
 
 - [ ] Secure client secret detail so it isn't exposed in cloudformation and console. Like this: http://forum.serverless.com/t/storing-database-credentials-securely/1370/9?u=activescott
 
-- [ ] Enable redirect flow to extension for clients.
-  - [ ] redirect endpoint.
-  - [ ] fail if unknown client id
-  - [ ] get code=>tokens, store tokens, redirect token to extension.
 
 - [ ] Refresh token automatically in SmartsheetApi.
   - [ ] Why?
