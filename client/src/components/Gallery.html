@@ -28,15 +28,15 @@ Tasks:
             <img src="{{plugin.baseUrl + plugin.manifest.icon}}" style="width:120px; height:120px; text-align:center" />
           </div>
           <div class="appcontent">
-            <h3 class="plugin-name">{{plugin.manifest.name}}</h3>
+            <h3 class="plugin-name" title="{{plugin.manifestUrl}}">{{plugin.manifest.name}}</h3>
             <h3 class="plugin-subtitle"><small>{{plugin.manifest.subtitle}}</small></h3>
             <p class="plugin-description">{{plugin.manifest.description}}</p>
           </div>
           <div class="appactions">
             {{#if plugin.installed }}
-              <button type="button" class="btn btn-success btn-xs" disabled>Installed</button>
+              <button type="button" class="btn btn-danger btn-xs" on:click="pluginInstaller('uninstallPlugin', plugin.manifestUrl)">Uninstall</button>
             {{else}}
-              <button type="button" class="btn btn-primary btn-xs" on:click="installPlugin(plugin.manifestUrl)">Install</button>
+              <button type="button" class="btn btn-primary btn-xs" on:click="pluginInstaller('installPlugin', plugin.manifestUrl)">Install</button>
             {{/if}}
           </div>
         </div>
@@ -169,19 +169,23 @@ Tasks:
           })
         })
       },
-      installPlugin (manifestUrl) {
-        console.log('installPlugin:', manifestUrl)
+      pluginInstaller (actionName, manifestUrl) {
+        const expectedActions = ['installPlugin', 'uninstallPlugin']
+        if (expectedActions.indexOf(actionName) === -1) {
+          console.error('unexpected action for installPluginHelper:', actionName)
+          return
+        }
         const extension = this.getConnectedExtension()
         const cmd = {
           sheetmonkey: {
-            cmd: 'installPlugin',
+            cmd: actionName,
             params: {
               manifestUrl: manifestUrl
             }
           }
         }
         extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-          console.log('installPlugin from extension:', response)
+          console.log(`${actionName} extension response:`, response)
           this.fetchInstalledPlugins().then(() => this.fetchPublicPlugins())
         })
       },

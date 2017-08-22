@@ -46,9 +46,13 @@
       - description # An informative, engaging description that highlights the features and functionality of the plugin. For inspiration see https://developer.apple.com/app-store/product-page/
     - [x] display all plugins from sheetmonkey server.
     - [x] Allow installing a plugin in gallery.
-    - [ ] Allow uninstalling a plugin in gallery.
+    - [x] Allow uninstalling a plugin in gallery.
 
-   - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
+  - [ ] get rid of the gallery link and make the main sheetmonkey link just load the gallery
+  - [ ] add a loading spinner to gallery (public plugins are slow) 
+  - [ ] add a loading spinner to "My Plugins" page
+  
+  - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
    
   - [ ] Provide plugins context to use rest api
     - [ ] container type & id on all events
