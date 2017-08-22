@@ -92,27 +92,27 @@ class BackendMock {
   }
 
   getUserPlugins (userID) {
-    return Promise.try(() => [
+    return Promise.delay(75).then(() => [
       { manifestUrl: `https://m${userID}.com/manifest1.json` },
       { manifestUrl: `https://m${userID}.com/manifest2.json` }
     ])
   }
 
   updateUserPlugin (plugin, userID) {
-    return Promise.try(() => {
+    return Promise.delay(75).then(() => {
     })
   }
 
   addUserPlugin (plugin) {
-    return Promise.try(() => plugin)
+    return Promise.delay(75).then(() => plugin)
   }
 
   deleteUserPlugin (manifestUrl, userID) {
-    return Promise.try(() => {})
+    return Promise.delay(75).then(() => {})
   }
 
   getPublicPlugins () {
-    return Promise.try(() => [
+    return Promise.delay(75).then(() => [
       { manifestUrl: `http://localhost:8100/smartsheetforjira/ssfjmanifest.json` },
       { manifestUrl: `http://localhost:8100/smartsheetforsalesforce/ssfsfmanifest.json` }
     ])

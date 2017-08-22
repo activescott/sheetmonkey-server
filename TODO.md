@@ -48,9 +48,9 @@
     - [x] Allow installing a plugin in gallery.
     - [x] Allow uninstalling a plugin in gallery.
 
-  - [ ] get rid of the gallery link and make the main sheetmonkey link just load the gallery
-  - [ ] add a loading spinner to gallery (public plugins are slow) 
-  - [ ] add a loading spinner to "My Plugins" page
+  - [x] get rid of the gallery link and make the main sheetmonkey link just load the gallery
+  - [x] add a loading spinner to gallery (public plugins are slow) 
+  - [x] add a loading spinner to "My Plugins" page
   
   - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
    
@@ -70,6 +70,9 @@
     - [ ] redirect endpoint.
     - [ ] fail if unknown client id
     - [ ] get code=>tokens, store tokens, redirect token to extension.
+
+- [ ] Don't allow adding plugins with the same name (from manifest) to sheetmonkey-server (security/phishing)
+- [ ] Do more validation of manifest when adding plugins (what?) to sheetmonkey-server + preview. Maybe preview is enough?
 
 - [ ] Give sheetmonkey server some style:
   - [ ] Icon: http://game-icons.net/lorc/originals/monkey.html

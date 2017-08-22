@@ -8,13 +8,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#" on:click="brandButtonClick(event)">SheetMonkey Server</a>
+      <a class="navbar-brand" href="#" on:click="navigateToGallery(event)">SheetMonkey Server</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <li><a href="#gallery" on:click="navigateToGallery(event)">Gallery</a></li>
         <li><a href="#apitest" on:click="apiTestButtonClick(event)">API Test</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -67,10 +66,6 @@
           target: this.getTarget()
         })
         window.setRootComponent(comp)
-      },
-
-      brandButtonClick (event) {
-        window.setRootComponent(null)
       },
 
       dispatch (action) {

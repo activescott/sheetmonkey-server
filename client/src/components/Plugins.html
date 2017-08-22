@@ -34,6 +34,7 @@
   import Actions from '../actions'
   import Backend from '../lib/Backend'
   import PluginEditDialog from './PluginEditDialog.html'
+  import Spinner from './Spinner.html'
 
   export default {
     methods: {
@@ -43,35 +44,40 @@
         if (!state.user || !state.user.id) {
           throw new Error('User must be logged in to list plugins.')
         }
+        const spinner = new Spinner({ target: $('body').get(0) })
         this.backend.getUserPlugins(state.user.id).then(response => {
           const plugins = response
           const action = Actions.setPlugins(plugins)
           this.get('store').dispatch(action)
-        })
+        }).finally(() => { if (spinner) spinner.destroy() })
       },
       deletePlugin (pluginIndex, pluginValue) {
         // show an edit dialog:
         if (window.confirm('Are you sure you want to delete this plugin (press OK to confirm)?')) {
           // first update server...
           let userID = this.get('user').id
+          const spinner = new Spinner({ target: $('body').get(0) })
           this.backend.deleteUserPlugin(pluginValue.manifestUrl, userID).then(response => {
             // now update the local model
             const action = Actions.deletePlugin(pluginIndex)
             this.get('store').dispatch(action)
           }).catch(e => {
             console.error('Error from backend deleting plugin:', e)
-          })
+          }).finally(() => { if (spinner) spinner.destroy() })
         }
       },
       addPlugin () {
-        let dlg = new PluginEditDialog({target: $('body').get(0)})
+        let dlg = new PluginEditDialog({ target: $('body').get(0) })
         return dlg.prompt({}, 'Enter the plugin manifest URL below:').then(editedPlugin => {
           // save the plugin to the server
           let userID = this.get('user').id
+          const spinner = new Spinner({ target: $('body').get(0) })
           this.backend.addUserPlugin(editedPlugin, userID).then(response => {
             // add the plugin to the local model
             const action = Actions.addPlugin(editedPlugin)
             this.get('store').dispatch(action)
+          }).finally(() => {
+            if (spinner) spinner.destroy()
           })
           return null
         }).catch(e => {

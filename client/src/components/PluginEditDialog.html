@@ -44,8 +44,9 @@ export default {
             console.log('submit:', e)
             plugin = plugin ? this.deepClone(plugin) : { manifestUrl: '' }
             plugin.manifestUrl = inputManifestUrl.val()
-            resolve(plugin)
+            dialog.addClass('hidden')
             this.close()
+            resolve(plugin)
           })
           cancelButton.on('click', e => {
             this.close()
