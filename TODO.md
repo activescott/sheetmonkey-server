@@ -21,7 +21,7 @@
       - [x] Auth via cookie+Authorization header. Client Requests can extract token from cookie and add it as an Auth header in API. 
 
 
-- [ ] Enable developer to register a plugin with optional API Client ID and Secret
+- [x] Enable developer to register a plugin with optional API Client ID and Secret
   - [x] redux now?
   - Backend:
     - [x] Create
@@ -34,7 +34,6 @@
     - [x] View/list plugins in a table
     - [x] Edit some values for a plugin
     - [x] Validate edit/add plugin manifest url is a valid url
-      - [ ] Validate edit/add plugin manifest content
     - [x] Delete plugin
 
   - [ ] Display gallery in extension+server
@@ -52,25 +51,27 @@
   - [x] add a loading spinner to gallery (public plugins are slow) 
   - [x] add a loading spinner to "My Plugins" page
   
-  - [ ] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
+  - [x] fix the slow addition of menu items in extension with DomUtil.lazyQuerySelector
    
-  - [ ] Provide plugins context to use rest api
-    - [ ] container type & id on all events
-    - [ ] row id (on row or cell events)
-    - [ ] column id or name (on row or cell events)
+  - [x] Provide plugins context to use w/ rest api
+    - [x] container type & id on all events/upon request
+      - confirm it works with a example plugin
+    - [x] row id (on row or cell events)
+    - [x] column id or name (on row or cell events)
+  
+  - [ ] Allow plugins to get SS REST API access w/ tokens without any backend.
+    - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
+    - [ ] catch token on backend and send to extension via https://developer.chrome.com/extensions/app_identity#non
+      - i.e. essentially SS redirects useragent to sheetmonkey.com, which uses secret to get token, and redirects user (with token in URL) to https://<extension-id>.chromiumapp.org/<anything-here>
+    - [ ] route token from extension to plugin
+      - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
+      - How does the plugin init the auth flow? SheetMonkeyHost.getAuthToken?
+      - Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care? what if they
 
-  - [ ] add keyboard shortcut commands (pass in container details)
+  - [x] add contextmenu commands
+  - [ ] add keyboard shortcut commands (pass in selection details (container, row, col))
   - [ ] plugin: refresh sheet (sheetmonkey can provide such a service to use)
   
-  - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
-    - [ ] catch token on backend and send to extension
-    - [ ] route token from extension to plugin
-
-  - [ ] Enable redirect flow to extension for clients.
-    - [ ] redirect endpoint.
-    - [ ] fail if unknown client id
-    - [ ] get code=>tokens, store tokens, redirect token to extension.
-
 - [ ] Don't allow adding plugins with the same name (from manifest) to sheetmonkey-server (security/phishing)
 - [ ] Do more validation of manifest when adding plugins (what?) to sheetmonkey-server + preview. Maybe preview is enough?
 

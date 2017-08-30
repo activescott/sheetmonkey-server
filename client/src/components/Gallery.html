@@ -20,7 +20,7 @@ Tasks:
   <div class="container-fluid">
     <div class="row">
       {{#if displayedPlugins.length === 0}}
-       <small>No plugins available. Please make sure that you have installed the <a href="https://github.com/activescott/sheetmonkey">Sheetmonkey Chrome plugin</a> and return!</small>
+       <small>No plugins available. Please make sure that you have installed the <a href="https://chrome.google.com/webstore/detail/gdnefhegodkfgopmjacoenelkfkbkkdg">Sheetmonkey Chrome plugin</a> installed and return!</small>
       {{/if}}
       {{#each displayedPlugins as plugin}}
         <div class="col-md-4 appcontainer">
@@ -94,7 +94,7 @@ Tasks:
   import $ from 'jquery'
   import Backend from '../lib/Backend'
   import Spinner from './Spinner.html'
-  const sheetmonkeyExtensionID = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
+  const sheetmonkeyExtensionID = 'gdnefhegodkfgopmjacoenelkfkbkkdg'
 
   export default {
     methods: {
@@ -132,8 +132,8 @@ Tasks:
               }
             }
             extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-              // apparently we are, so get the list of installed plugins
-              console.log('Public loaded plugins returned from extension:', response)
+              // we're at least in chrome, but it seems if we don't find the extension response is undefined.
+              console.log('Chrome extension response (public):', response)
               // for each extensionin the public gallery; if pugin is installed, set .installed = true
               if (response) {
                 for (let p of response) {
@@ -159,13 +159,13 @@ Tasks:
             }
           }
           return extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-            // apparently we are, so get the list of installed plugins
-            console.log('Sheetmonkey extension found! Installed plugins returned from extension:', response)
-            // for each extensionin the public gallery; if pugin is installed, set .installed = true
-            for (let p of response) {
-              p.installed = true
-            }
+            // we're at least in chrome, but it seems if we don't find the extension response is undefined.
+            console.log('Chrome extension response (installed):', response)
             if (response) {
+              // for each extensionin the public gallery; if pugin is installed, set .installed = true
+              for (let p of response) {
+                p.installed = true
+              }
               this.set({installedPlugins: response})
             }
             return resolve(response)
