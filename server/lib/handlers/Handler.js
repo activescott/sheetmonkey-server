@@ -50,7 +50,7 @@ class Handler {
   }
 
   validateInput (expectation, event) {
-    D.log('validateInput event:', event)
+    // D.log('validateInput event:', event)
     const body = JSON.parse(event.body)
     return validateInput(expectation, body)
   }

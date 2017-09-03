@@ -13,6 +13,9 @@
         <thead>
         <tr>
           <th>Manifest URL</th>
+          <th>Smartsheet API Client ID</th>
+          <th>Smartsheet API Client Secret</th>
+          <th>Smartsheet API Redirect URL <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Enter this as the 'App redirect URL' in your Smartsheet developer tools." data-toggle="tooltip"></span></th>
           <th> </th>
         </tr>
         </thead>
@@ -20,6 +23,9 @@
           {{#each plugins as plugin, idx}}
           <tr>
             <td>{{plugin.manifestUrl}}</td>
+            <td>{{plugin.apiClientID || ''}}</td>
+            <td>{{plugin.apiClientSecret || ''}}</td>
+            <td>{{plugin.redirectUrl || ''}}</td>
             <td><a href="#" on:click="deletePlugin(idx, plugin)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
           </tr>
           {{/each}}
@@ -37,6 +43,11 @@
   import Spinner from './Spinner.html'
 
   export default {
+    helpers: {
+      genRedirectUrl (plugin) {
+        return 'https://beta.sheetmonkey.com/'
+      }
+    },
     methods: {
       getUserPlugins () {
         let store = this.get('store')
@@ -103,8 +114,12 @@
         this.set(state) // this will not overwrite the existing store property in the local state.
       })
       this.getUserPlugins()
+      // init the bootstrap tooltip plugin
+      $(function () {
+        console.log('initializing toolstipos on', $('[data-toggle="tooltip"]').get(0))
+        $('[data-toggle="tooltip"]').tooltip()
+      })
     },
-
     ondestroy () {
       if (this.unsubscribeStore) {
         this.unsubscribeStore()

@@ -2,13 +2,17 @@
   <div class="dialog-modal panel panel-default" role="document">
     <div class="panel-heading">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title">Dialog title</h4>
+      <h4 class="modal-title">Edit Plugin</h4>
     </div>
     <form>
       <div class="dialog-body form-group">
         <p class="message help-block">dialog message</p>
         <label for="inputManifestUrl">Manifest URL</label>
         <input type="url" id="inputManifestUrl" class="form-control" pattern="https://.+" placeholder="https://yourdomain.com/yourmanifest.json" required>
+        <label for="apiClientID">Smartsheet API Client ID <small>(optional)</small></label>
+        <input type="text" id="apiClientID" class="form-control">
+        <label for="apiClientSecret">Smartsheet API Client Secret <small>(optional)</small></label>
+        <input type="text" id="apiClientSecret" class="form-control">
       </div>
       <div class="dialog-footer panel-footer">
         <!-- <button class="save btn btn-primary">Save</button> -->
@@ -31,10 +35,12 @@ export default {
       return domLoaded.then(() => {
         let dialog = $('#dialog')
         let inputManifestUrl = $('#inputManifestUrl')
+        let apiClientID = $('#apiClientID')
+        let apiClientSecret = $('#apiClientSecret')
         let cancelButton = $('button.cancel')
         let form = $('#dialog form')
         inputManifestUrl.on('input', this.validate.bind(this))
-        inputManifestUrl.on('valid')
+        // inputManifestUrl.on('valid')
         $('.message').text(message)
         if (plugin) inputManifestUrl.val(plugin.manifestUrl)
         dialog.removeClass('hidden')
@@ -44,6 +50,8 @@ export default {
             console.log('submit:', e)
             plugin = plugin ? this.deepClone(plugin) : { manifestUrl: '' }
             plugin.manifestUrl = inputManifestUrl.val()
+            plugin.apiClientID = apiClientID.val()
+            plugin.apiClientSecret = apiClientSecret.val()
             dialog.addClass('hidden')
             this.close()
             resolve(plugin)
@@ -60,15 +68,13 @@ export default {
     },
     validate () {
       const inputManifestUrl = $('#inputManifestUrl')
-      console.log('validate')
       const u = urlmod.parse(inputManifestUrl.val())
-      console.log('parsed url:', u)
       let msg = ''
       if (u.protocol !== 'https:') {
         msg += 'The protocol must be https.\n'
       }
       if (!u.host) {
-        msg += 'A host must be specified.'
+        msg += 'A host must be specified.\n'
       }
       inputManifestUrl.get(0).setCustomValidity(msg)
       return msg === ''

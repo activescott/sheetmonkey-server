@@ -60,13 +60,17 @@
     - [x] column id or name (on row or cell events)
   
   - [ ] Allow plugins to get SS REST API access w/ tokens without any backend.
-    - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow. 
+    - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow.
+    - [ ] Start flow w/ [launchWebAuthFlow](https://developer.chrome.com/extensions/identity#method-launchWebAuthFlow)
     - [ ] catch token on backend and send to extension via https://developer.chrome.com/extensions/app_identity#non
       - i.e. essentially SS redirects useragent to sheetmonkey.com, which uses secret to get token, and redirects user (with token in URL) to https://<extension-id>.chromiumapp.org/<anything-here>
     - [ ] route token from extension to plugin
       - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
       - How does the plugin init the auth flow? SheetMonkeyHost.getAuthToken?
       - Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care? what if they
+      - NOTES:
+        - Tool: chrome://identity-internals/
+        - Great article: https://walty8.com/simple-gmail-notes-chrome-extension/
 
   - [x] add contextmenu commands
   - [ ] add keyboard shortcut commands (pass in selection details (container, row, col))

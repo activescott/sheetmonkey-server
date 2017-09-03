@@ -104,6 +104,7 @@ class BackendMock {
   }
 
   addUserPlugin (plugin) {
+    console.log('addUserPlugin (', plugin, ')')
     return Promise.delay(75).then(() => plugin)
   }
 

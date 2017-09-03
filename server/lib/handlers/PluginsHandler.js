@@ -26,6 +26,7 @@ class PluginsHandler extends Handler {
       // establish the ownerID based on the authenticated caller:
       args = Object.assign(args, { ownerID: principalID })
       return this.db.addPlugin(args).then(plugin => {
+        plugin = PluginsHandler.addRedirectUrlToPlugin(plugin)
         return this.responseAsJson(plugin)
       })
     })
@@ -36,29 +37,42 @@ class PluginsHandler extends Handler {
       const args = event.pathParameters
       args.manifestUrl = decodeURIComponent(args.manifestUrl)
       return this.db.getPlugin(args.manifestUrl).then(p => {
-        if (p) return this.responseAsJson(p)
-        else return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
+        if (p) {
+          p = PluginsHandler.addRedirectUrlToPlugin(p)
+          return this.responseAsJson(p)
+        } else {
+          return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
+        }
       })
     })
   }
 
   getPublic (event, context) {
     const args = event.pathParameters
-    args.manifestUrl = decodeURIComponent(args.manifestUrl)   
+    args.manifestUrl = decodeURIComponent(args.manifestUrl)
     return this.db.getPlugin(args.manifestUrl).then(p => {
       if (p) return this.responseAsJson(p)
       else return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
-      })
+    })
   }
 
   listPrivate (event, context) {
     return this.getRequestPrincipal(event, context).then(principalID => {
       // NOTE: Only owner's plugins, but all information
       return this.db.listPlugins().then(plugins => {
-        const payload = plugins.filter(p => p.ownerID === principalID)
-        return this.responseAsJson(payload)
+        plugins = plugins.filter(p => p.ownerID === principalID)
+        plugins = plugins.map(PluginsHandler.addRedirectUrlToPlugin)
+        return this.responseAsJson(plugins)
       })
     })
+  }
+
+  static addRedirectUrlToPlugin (plugin) {
+    if ('apiClientID' in plugin && 'apiClientSecret' in plugin) {
+      const pluginID = encodeURIComponent(plugin.manifestUrl)
+      plugin.redirectUrl = `/api/pluginauthcallback/${pluginID}`
+    }
+    return plugin
   }
 
   listPublic (event, context) {
@@ -70,8 +84,8 @@ class PluginsHandler extends Handler {
   }
 
   put (event, context) {
-    /** NOTE: Now that a plugin is whittled down to nothing more than a single editable property 
-      (manifestURL) and the only property is also the key, edit/update/put isn't necessary but 
+    /** NOTE: Now that a plugin is whittled down to nothing more than a single editable property
+      (manifestURL) and the only property is also the key, edit/update/put isn't necessary but
       I'll leave this hear as a reference in case we add more properties to plugin later.
     */
     return this.getRequestPrincipal(event, context).then(principalID => {

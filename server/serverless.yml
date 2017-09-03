@@ -149,6 +149,11 @@ functions:
     events:
       - http: DELETE api/users/{userID}/plugins/{manifestUrl}
 
+  pluginauthflow:
+    handler: handler.pluginauthflow
+    events:
+      - http: GET api/pluginauthflow
+
   defaultredir:
     handler: handler.defaultredirect
     events:

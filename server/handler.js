@@ -12,6 +12,7 @@ const crt = fs.readFileSync(path.join(__dirname, '/data/private/test-key.crt')).
 const LambdaAuthorizer = require('./lib/auth/LambdaAuthorizer')
 const UsersHandler = require('./lib/handlers/UsersHandler')
 const PluginsHandler = require('./lib/handlers/PluginsHandler')
+const PluginAuthHandler = require('./lib/handlers/PluginAuthHandler')
 
 const authorizer = new LambdaAuthorizer(crt)
 const api = new SmartsheetApi()
@@ -66,7 +67,7 @@ module.exports.staticfile = (event, context, callback) => {
   return new StaticFileHandler(clientFilesPath).get(event, context)
     .then(response => callback(null, response))
     .catch(err => callback(err))
-};
+}
 
 module.exports.defaultredirect = (event, context, callback) => {
   event.path = '/index.html'
@@ -117,4 +118,9 @@ module.exports.plugins_put = authorizer.protectHandler((event, context, callback
 module.exports.plugins_delete = authorizer.protectHandler((event, context, callback) => {
   const pluginsHandler = new PluginsHandler(db, process.env.DDB_PLUGINS_TABLE)
   return pluginsHandler.delete(event, context)
+})
+
+module.exports.pluginauthflow = authorizer.publicHandler((event, context, callback) => {
+  const pluginAuthHandler = new PluginAuthHandler()
+  return pluginAuthHandler.get(event, context)
 })

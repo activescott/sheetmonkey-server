@@ -4,9 +4,6 @@
 require('./support/setup.js')
 const expect = require('chai').expect
 
-const PluginsHandler = require('../lib/handlers/PluginsHandler.js')
-const DBMock = require('./mocks/DBMock')
-const TokenTool = require('./support/TokenTool')
 const randomUserID = require('./support/tools').randomUserID
 const ServerlessInvoker = require('serverless-http-invoker')
 const JwtHandler = require('../lib/handlers/JwtHandler')
@@ -15,8 +12,6 @@ const DB = require('../lib/DB')
 
 describe('PluginsHandler', function () {
   var db
-  var handler
-  var emptyContext = {}
   var userID
   var invoker = new ServerlessInvoker()
 
@@ -27,7 +22,6 @@ describe('PluginsHandler', function () {
   beforeEach(function () {
     // runs before each test in this block
     return db.deleteAllPlugins().then(() => {
-      handler = new PluginsHandler(db)
       userID = randomUserID()
     })
   })
@@ -50,6 +44,15 @@ describe('PluginsHandler', function () {
       return response.then(r => {
         expect(r).to.have.property('statusCode', 200)
         return expect(r.body).to.have.property('ownerID', userID)
+      })
+    })
+
+    it('should require auth', function () {
+      let event = {
+        body: JSON.stringify({id: '123456', email: 'a@b.com'})
+      }
+      return invoker.invoke(`POST api/users/{userID}/plugins`, event).then(response => {
+        return expect(response).to.have.property('statusCode', 401)
       })
     })
 
@@ -88,14 +91,56 @@ describe('PluginsHandler', function () {
       return Promise.all(results)
     })
 
-    it('should require auth', function () {
+    it('should save optional args (clientid, secret)', function () {
+      const testCases = [
+        {
+          body: JSON.stringify({
+            manifestUrl: `https://${userID}.com/manifest.json`,
+            ownerID: userID,
+            apiClientID: `clientid${randomUserID()}`,
+            apiClientSecret: `secret${randomUserID()}`
+          }),
+          headers: buildAuthorizedHeaders(userID)
+        }
+      ]
+
+      const results = testCases.map(event => {
+        const testCase = JSON.parse(event.body)
+        return invoker.invoke(`POST api/users/${userID}/plugins`, event).then(handlerResponse => {
+          const responseBody = handlerResponse.body
+          expect(responseBody).to.have.property('apiClientID', testCase.apiClientID)
+          return expect(responseBody).to.have.property('apiClientSecret', testCase.apiClientSecret)
+        })
+      })
+      return Promise.all(results)
+    })
+
+    it('should have redirectUrl when apiClient props provided', function () {
       let event = {
-        body: JSON.stringify({id: '123456', email: 'a@b.com'})
+        body: JSON.stringify({ manifestUrl: `https://${userID}.com/manifest.json`, ownerID: randomUserID(), apiClientID: 'abc', apiClientSecret: 'xyz' }),
+        headers: buildAuthorizedHeaders(userID)
       }
-      return invoker.invoke(`POST api/users/{userID}/plugins`, event).then(response => {
-        return expect(response).to.have.property('statusCode', 401)
+
+      let response = invoker.invoke(`POST api/users/${userID}/plugins`, event)
+      return response.then(r => {
+        expect(r).to.have.property('statusCode', 200)
+        return expect(r.body).to.have.property('redirectUrl')
       })
     })
+
+    it('should not have redirectUrl when apiClient props not provided', function () {
+      let event = {
+        body: JSON.stringify({ manifestUrl: `https://${userID}.com/manifest.json`, ownerID: randomUserID() }),
+        headers: buildAuthorizedHeaders(userID)
+      }
+
+      let response = invoker.invoke(`POST api/users/${userID}/plugins`, event)
+      return response.then(r => {
+        expect(r).to.have.property('statusCode', 200)
+        return expect(r.body).to.not.have.property('redirectUrl')
+      })
+    })
+
   })
 
   describe('list private', function () {
@@ -110,26 +155,58 @@ describe('PluginsHandler', function () {
       })
     })
 
-    it('should list users plugins with private info', function () {
-      const testPlugin = { manifestUrl: `https://blah.com/${userID + 1}.json`, ownerID: userID }
-      const testPlugin2 = { manifestUrl: `https://blah.com/${userID + 2}.json`, ownerID: userID }
+    it('should list plugins with private info', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
 
       return db.addPlugin(testPlugin).then(() => {
-        return db.addPlugin(testPlugin2)
-      }).then(() => {
         const event = {
           body: {},
           headers: buildAuthorizedHeaders()
         }
         return invoker.invoke(`get api/users/${userID}/plugins`, event).then(response => {
-          let plugins = response.body
-          console.log('plugins:', plugins)
-          expect(plugins).to.have.lengthOf(2)
-          expect(plugins).to.deep.include(testPlugin)
-          expect(plugins).to.deep.include(testPlugin2)
+          const plugins = response.body
+          expect(plugins).to.have.lengthOf(1)
+          const p = plugins[0]
+          expect(p).to.have.property('apiClientID')
+          expect(p).to.have.property('apiClientSecret')
         })
       })
     })
+
+    it('should include redirectUrl when cliendID and clientSecret present', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: {},
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`get api/users/${userID}/plugins`, event).then(response => {
+          const plugins = response.body
+          expect(plugins).to.have.lengthOf(1)
+          const p = plugins[0]
+          expect(p).to.have.property('redirectUrl')
+        })
+      })
+    })
+
+    it('should NOT include redirectUrl when cliendID and clientSecret not present', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: {},
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`get api/users/${userID}/plugins`, event).then(response => {
+          const plugins = response.body
+          expect(plugins).to.have.lengthOf(1)
+          const p = plugins[0]
+          expect(p).to.not.have.property('redirectUrl')
+        })
+      })
+    })
+
   })
 
   describe('list public', function () {
@@ -142,7 +219,7 @@ describe('PluginsHandler', function () {
       })
     })
 
-    it('should list ALL plugins with public info', function () {
+    it('should list plugins from all users', function () {
       const testPlugin = { manifestUrl: `https://blah.com/aaa.json`, ownerID: randomUserID() }
       const testPlugin2 = { manifestUrl: `https://blah.com/bbb.json`, ownerID: randomUserID() }
 
@@ -163,6 +240,26 @@ describe('PluginsHandler', function () {
       })
     })
 
+    it('should not provide private properties', function () {
+      const testPlugin = {
+        manifestUrl: `https://blah.com/aaa.json`,
+        ownerID: randomUserID(),
+        apiClientID: 'fdsjhklfas',
+        apiClientSecret: 'fdsjhklfas'
+      }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: {},
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`get api/plugins`, event).then(response => {
+          let p = response.body[0]
+          expect(p).to.not.have.property('apiClientID')
+          expect(p).to.not.have.property('apiClientSecret')
+        })
+      })
+    })
+
   })
 
   describe('read public', function () {
@@ -176,7 +273,6 @@ describe('PluginsHandler', function () {
         }
 
         return invoker.invoke(`GET api/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
-          console.log('response.body:', response.body)
           return expect(response.body).to.deep.include({manifestUrl: testPlugin.manifestUrl})
         })
       })
@@ -216,7 +312,47 @@ describe('PluginsHandler', function () {
         expect(response).to.have.property('statusCode', 404)
       })
     })
-    
+
+    it('should include private properties', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'abc', apiClientSecret: 'def' }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`GET api/users/${userID}/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          const p = response.body
+          expect(p).to.have.property('apiClientID')
+          return expect(p).to.have.property('apiClientSecret')
+        })
+      })
+    })
+
+    it('should include redirectURL if apiClient props provided', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'abc', apiClientSecret: 'def' }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`GET api/users/${userID}/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          const p = response.body
+          return expect(p).to.have.property('redirectUrl')
+        })
+      })
+    })
+
+    it('should not include redirectURL if apiClient props not provided', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`GET api/users/${userID}/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          const p = response.body
+          return expect(p).to.not.have.property('redirectUrl')
+        })
+      })
+    })
+
   })
 
   describe('update', function () {
