@@ -36,7 +36,7 @@
     - [x] Validate edit/add plugin manifest url is a valid url
     - [x] Delete plugin
 
-  - [ ] Display gallery in extension+server
+  - [x] Display gallery in extension+server
     - [x] manifest changes 
       - remove id (use the url, escaped if necessary)
       - name # The name of the plugin that will be displayed in the extension's Plugins page (max 30 characters). For inspiration see https://developer.apple.com/app-store/product-page/
@@ -60,7 +60,7 @@
     - [x] column id or name (on row or cell events)
   
   - [ ] Allow plugins to get SS REST API access w/ tokens without any backend.
-    - [ ] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow.
+    - [x] Provide a unique redirect URL (once client id/secret provided) to dev to register for redirect flow.
     - [ ] Start flow w/ [launchWebAuthFlow](https://developer.chrome.com/extensions/identity#method-launchWebAuthFlow)
     - [ ] catch token on backend and send to extension via https://developer.chrome.com/extensions/app_identity#non
       - i.e. essentially SS redirects useragent to sheetmonkey.com, which uses secret to get token, and redirects user (with token in URL) to https://<extension-id>.chromiumapp.org/<anything-here>

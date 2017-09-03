@@ -94,7 +94,9 @@ Tasks:
   import $ from 'jquery'
   import Backend from '../lib/Backend'
   import Spinner from './Spinner.html'
-  const sheetmonkeyExtensionID = 'gdnefhegodkfgopmjacoenelkfkbkkdg'
+  const sheetmonkeyExtensionIDDev = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
+  const sheetmonkeyExtensionIDProd = 'gdnefhegodkfgopmjacoenelkfkbkkdg'
+  let sheetmonkeyExtensionID = ''
 
   export default {
     methods: {
@@ -122,27 +124,28 @@ Tasks:
           let b = Backend.build()
           b.getPublicPlugins().then(plugins => {
             console.log('Gallery plugins:', plugins)
-            const extension = this.getConnectedExtension()
-            const cmd = {
-              sheetmonkey: {
-                cmd: 'loadPluginsFromManifestUrls',
-                params: {
-                  manifestUrls: plugins.map(p => p.manifestUrl)
+            return this.getConnectedExtension().then(extension => {
+              const cmd = {
+                sheetmonkey: {
+                  cmd: 'loadPluginsFromManifestUrls',
+                  params: {
+                    manifestUrls: plugins.map(p => p.manifestUrl)
+                  }
                 }
               }
-            }
-            extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-              // we're at least in chrome, but it seems if we don't find the extension response is undefined.
-              console.log('Chrome extension response (public):', response)
-              // for each extensionin the public gallery; if pugin is installed, set .installed = true
-              if (response) {
-                for (let p of response) {
-                  p.installed = this.isInstalled(p)
+              extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+                // we're at least in chrome, but it seems if we don't find the extension response is undefined.
+                console.log('Chrome extension response (public):', response)
+                // for each extensionin the public gallery; if pugin is installed, set .installed = true
+                if (response) {
+                  for (let p of response) {
+                    p.installed = this.isInstalled(p)
+                  }
+                  this.set({publicPlugins: response})
                 }
-                this.set({publicPlugins: response})
-              }
-              return resolve(response)
-            })
+                return resolve(response)
+              })
+            }).catch(reject)
           })
         }).finally(() => { if (spinner) spinner.destroy() })
       },
@@ -152,24 +155,25 @@ Tasks:
       fetchInstalledPlugins () {
         const spinner = new Spinner({ target: $('body').get(0) })
         return new Promise((resolve, reject) => {
-          const extension = this.getConnectedExtension()
-          const cmd = {
-            sheetmonkey: {
-              cmd: 'getRegisteredPlugins'
-            }
-          }
-          return extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-            // we're at least in chrome, but it seems if we don't find the extension response is undefined.
-            console.log('Chrome extension response (installed):', response)
-            if (response) {
-              // for each extensionin the public gallery; if pugin is installed, set .installed = true
-              for (let p of response) {
-                p.installed = true
+          return this.getConnectedExtension().then(extension => {
+            const cmd = {
+              sheetmonkey: {
+                cmd: 'getRegisteredPlugins'
               }
-              this.set({installedPlugins: response})
             }
-            return resolve(response)
-          })
+            return extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+              // we're at least in chrome, but it seems if we don't find the extension response is undefined.
+              console.log('Chrome extension response:', response)
+              if (response) {
+                // for each extensionin the public gallery; if pugin is installed, set .installed = true
+                for (let p of response) {
+                  p.installed = true
+                }
+                this.set({installedPlugins: response})
+              }
+              return resolve(response)
+            })
+          }).catch(reject)
         }).finally(() => { if (spinner) spinner.destroy() })
       },
       pluginInstaller (actionName, manifestUrl) {
@@ -178,32 +182,52 @@ Tasks:
           console.error('unexpected action for installPluginHelper:', actionName)
           return
         }
-        const extension = this.getConnectedExtension()
-        const cmd = {
-          sheetmonkey: {
-            cmd: actionName,
-            params: {
-              manifestUrl: manifestUrl
+        return this.getConnectedExtension().then(extension => {
+          const cmd = {
+            sheetmonkey: {
+              cmd: actionName,
+              params: {
+                manifestUrl: manifestUrl
+              }
             }
           }
-        }
-        extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
-          console.log(`${actionName} extension response:`, response)
-          this.fetchInstalledPlugins().then(() => this.fetchPublicPlugins())
-        })
+          extension.sendMessage(sheetmonkeyExtensionID, cmd, response => {
+            console.log(`${actionName} extension response:`, response)
+            this.fetchInstalledPlugins().then(() => this.fetchPublicPlugins())
+          })
+        }).catch(err => console.error(err))
       },
       /**
        * Gets a connected chrome.runtime for the extension.
        */
       getConnectedExtension () {
-        if (!window.chrome || !chrome.runtime) {
-          // not even in chrome browser
-          console.error('not in chrome browser, assuming sheetmonkey not available in client.')
-          return null
-        }
-        // console.log('Chrome is present. Checking for sheetmonkey extension...')
-        chrome.runtime.connect(sheetmonkeyExtensionID)
-        return chrome.runtime
+        return new Promise((resolve, reject) => {
+          if (!window.chrome || !chrome.runtime) {
+            reject(new Error('not in chrome browser, assuming sheetmonkey not available in client.'))
+          }
+          
+          // first try to see if dev extension is installed:
+          chrome.runtime.connect(sheetmonkeyExtensionIDDev)
+          const cmd = { sheetmonkey: { cmd: 'getRegisteredPlugins' } }
+          chrome.runtime.sendMessage(sheetmonkeyExtensionIDDev, cmd, response => {
+            if (response) {
+              console.log('Using sheetmonkey DEV extension')
+              sheetmonkeyExtensionID = sheetmonkeyExtensionIDDev
+              resolve(chrome.runtime)
+            } else {
+              chrome.runtime.connect(sheetmonkeyExtensionIDDev)
+              chrome.runtime.sendMessage(sheetmonkeyExtensionIDProd, cmd, response => {
+                if (response) {
+                  console.log('Using sheetmonkey PROD extension')
+                  sheetmonkeyExtensionID = sheetmonkeyExtensionIDProd
+                  resolve(chrome.runtime)
+                } else {
+                  reject(new Error('could not connect to dev or prod extension'))
+                }
+              })
+            }
+          })
+        })
       },
       isInstalled (plugin) {
         let installedPlugins = this.get('installedPlugins')
