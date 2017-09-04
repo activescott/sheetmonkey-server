@@ -43,6 +43,26 @@ class JwtHandler extends Handler {
     if (userID) {
       payload.prn = userID// prn == principal - https://openid.net/specs/draft-jones-json-web-token-07.html#anchor4
     }
+    const token = JwtHandler.encodeToken(payload)
+    return token
+  }
+
+  /**
+   * Issues a signed token with the specified payload.
+   * @param {*Object} payload Object where keys are propper JWT claim names and values are values for the claims.
+   */
+  static encodeToken (payload) {
+    const nowSeconds = Date.now() / 1000
+    if (!('nbf' in payload)) {
+      payload.nbf = nowSeconds
+    }
+    if (!('iat' in payload)) {
+      payload.iat = nowSeconds
+    }
+    if (!('exp' in payload)) {
+      const expiresInSeconds = 60 * 60
+      payload.exp = nowSeconds + expiresInSeconds
+    }
     const token = jwt.encode(payload, JwtHandler.pem, JwtHandler.alg)
     return token
   }

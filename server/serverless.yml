@@ -152,7 +152,7 @@ functions:
   pluginauthflow:
     handler: handler.pluginauthflow
     events:
-      - http: GET api/pluginauthflow
+      - http: GET api/pluginauthcallback/{manifestUrl}
 
   defaultredir:
     handler: handler.defaultredirect

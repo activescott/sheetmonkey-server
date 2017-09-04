@@ -23,10 +23,11 @@ describe('StaticFileHandler', function () {
     it('should return index.html', function () {
       let event = { path: 'index.html' }
       let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
-      let response = h.get(event, null)
-      expect(response).to.eventually.have.property('statusCode', 200)
-      expect(response).to.eventually.have.property('body').to.match(/^<!DOCTYPE html>/)
-      return response
+      return h.get(event, null).then(response => {
+        expect(response).to.have.property('statusCode', 200)
+        expect(response).to.have.property('body').to.match(/^<!DOCTYPE html>/)
+        return response
+      })
     })
 
     it('should return a mime/type of application/octet-stream for .map files', function () {
@@ -34,7 +35,6 @@ describe('StaticFileHandler', function () {
       let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
       return h.get(event, null)
         .then(response => {
-          console.log('response.headers', response.headers)
           expect(response).to.have.property('headers')
           expect(response.headers).to.have.property('Content-Type')
           expect(response.headers['Content-Type']).to.equal('application/octet-stream')
@@ -57,7 +57,6 @@ describe('StaticFileHandler', function () {
       let h = new StaticFileHandler(path.join(__dirname, '../data/public/'))
       return h.get(event, null)
         .then(response => {
-          console.log(response.body)
           let expectedContent = 'This directory is empty and is populated with the distributable client libraries when the client project is built.'
           return expect(response.body).to.equal(expectedContent)
         })

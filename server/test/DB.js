@@ -92,7 +92,6 @@ describe('DB', function () {
             expect(updatedUser).to.not.be.null
             // now make sure that the update didn't overwrite /all/ existing attributes:
             return db.getUser(testUser.id).then(found => {
-              console.log('found:', found)
               expect(found).to.have.property('createdAt', newUser.createdAt)
               expect(found).to.have.property('expires_at', testUser.expires_at)
             })

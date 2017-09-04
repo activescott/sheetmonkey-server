@@ -26,7 +26,6 @@ describe('JwtHandler', function() {
       const now = Date.now() / 1000;
       const t = JwtHandler.newToken(null, 100);
       const decoded = JwtHandler.decodeToken(t);
-      console.log('decoded:', decoded);
       expect(decoded).to.have.property('exp');
       
       console.log('now:', now);

@@ -58,7 +58,7 @@ class StaticFileHandler extends Handler {
    */
   constructor (clientFilesPath) {
     super()
-    if (clientFilesPath == null || clientFilesPath.length == 0) {
+    if (clientFilesPath == null || clientFilesPath.length === 0) {
       throw new Error('clientFilesPath must be specified')
     }
     this.clientFilesPath = clientFilesPath
@@ -77,15 +77,17 @@ class StaticFileHandler extends Handler {
     }
     return mimeType
   }
-  static isBinaryType(mimeType) {
+
+  static isBinaryType (mimeType) {
     return binaryTypes.indexOf(mimeType) >= 0
   }
+
   get (event, context, callback) {
     return Promise.try(() => {
       if (!event) {
         throw new Error('event object not specified.')
       }
-      if (!path in event) {
+      if (!('path' in event)) {
         throw new Error('No path.')
       }
       if (!event.path) {
@@ -94,14 +96,12 @@ class StaticFileHandler extends Handler {
 
       let requestPath = event.path
       if (typeof requestPath === 'object') {
-        console.log('requestPath is object:', requestPath)
         /** in this case this path should be mapped like so in serverless.yml:
          * - http:
                path: fonts/{fonts+}
                integration: lambda
                method: get
                contentHandling: CONVERT_TO_BINARY
-         * 
          * integration: lambda means not proxy.
          * The {fonts+} in the path indicates the base path and tells APIG to pass along the whole path
          */
@@ -114,7 +114,7 @@ class StaticFileHandler extends Handler {
       } else {
         assert(typeof requestPath === 'string', 'expected path to be string')
       }
-      
+
       // NOTE: We're not enforcing/validate a prefix path for content on the public endpoint here. Instead the serverless.yml is entirely responsible for only routing requests here that should be valid content.
       /*
       const prefix = '/client';
@@ -126,7 +126,7 @@ class StaticFileHandler extends Handler {
       let postfix = requestPath.substring(prefix.length)
       let basePath = this.clientFilesPath
       let filePath = path.join(basePath, postfix)
-      return StaticFileHandler.readFileAsResponse(filePath, {}, event, context).then(response => {
+      return StaticFileHandler.readFileAsResponse(filePath, {}).then(response => {
         return response
       }).catch(err => {
         throw new Error(`Unable to read client file '${postfix}'. Error: ${err}`)
@@ -137,7 +137,7 @@ class StaticFileHandler extends Handler {
   /**
    * Loads the specified file's content and returns a response that can be called back to lambda for sending the file as the http response.
    */
-  static readFileAsResponse (filePath, viewData) {
+  static readFileAsResponse (filePath, viewData, statusCode = 200) {
     return fs.readFileAsync(filePath).then(stream => {
       let mimeType = StaticFileHandler.getMimeType(filePath)
       if (!mimeType) {
@@ -156,7 +156,7 @@ class StaticFileHandler extends Handler {
           body = Mustache.render(body, viewData)
         }
         let response = {
-          statusCode: 200,
+          statusCode: statusCode,
           headers: {
             'Content-Type': mimeType
           },
@@ -164,6 +164,23 @@ class StaticFileHandler extends Handler {
         }
         return response
       }
+    })
+  }
+
+  /**
+   * Returns a Promise with a response that is an HTML page with the specified error text on it.
+   * @param {*string} errorText The error to add to the page.
+   */
+  static responseAsError (errorText, statusCode = 400) {
+    return Promise.try(() => {
+      const clientFilesPath = path.join(__dirname, '../../data/public/')
+      let filePath = path.join(clientFilesPath, 'error.html')
+      const viewData = {
+        errorText: errorText
+      }
+      return StaticFileHandler.readFileAsResponse(filePath, viewData, statusCode)
+    }).catch(err => {
+      throw err
     })
   }
 }

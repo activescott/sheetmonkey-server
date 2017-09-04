@@ -79,11 +79,9 @@ describe('OAuthClientHandler', function() {
       };
 
       return handler.handleOAuthRedirect(event, null).then(response => {
-        console.log('\nresponse 1:', response)
         expect(response.body).to.match(/Login succeeded/);
         // now add the same user again (since the mock API will return the same user again):
         return handler.handleOAuthRedirect(event, null).then(response => { 
-          console.log('\nresponse 2:', response)
           expect(response.body).to.match(/Login succeeded/);
         });
       });

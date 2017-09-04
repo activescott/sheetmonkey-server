@@ -1,4 +1,4 @@
-  /* eslint-env mocha */
+/* eslint-env mocha */
 /* eslint-disable padded-blocks */
 'use strict'
 require('./support/setup.js')
