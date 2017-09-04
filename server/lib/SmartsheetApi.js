@@ -17,15 +17,19 @@ class SmartsheetApi {
   constructor (tokens, clientID, clientSecret) {
     // Caller may not provide tokens (as he'll get them via this.refreshTokens later, so we'll start with some expired tokens to keep the rest of the code happy)
     this._tokens = tokens || SmartsheetApi.createExpiredTokens()
-    this._clientID = clientID
-    this._clientSecret = clientSecret
     if (!clientID) {
       assert('SS_CLIENT_ID' in process.env, 'missing environment variable: SS_CLIENT_ID')
       this._clientID = process.env.SS_CLIENT_ID
+    } else {
+      assert(clientSecret, 'clientID was provided by not secret.')
+      this._clientID = clientID
     }
     if (!clientSecret) {
       assert('SS_CLIENT_SECRET' in process.env, 'missing environment variable: SS_CLIENT_SECRET')
       this._clientSecret = process.env.SS_CLIENT_SECRET
+    } else {
+      assert(clientID, 'clientSecret was provided but not secret.')
+      this._clientSecret = clientSecret
     }
   }
 
@@ -55,12 +59,12 @@ class SmartsheetApi {
     assert(this._clientID, 'Client ID not provided')
     assert(this._clientSecret, 'Client Secret not provided')
     assert(code || refreshToken, 'Expected code or refresh token')
-    const hashInput = `${process.env.SS_CLIENT_SECRET}|${code || refreshToken}`
+    const hashInput = `${this._clientSecret}|${code || refreshToken}`
     const hasher = crypto.createHash('sha256')
     hasher.update(hashInput)
     const hash = hasher.digest('hex')
     const formData = {
-      'client_id': process.env.SS_CLIENT_ID,
+      'client_id': this._clientID,
       'hash': hash
     }
     if (code) {
@@ -75,8 +79,10 @@ class SmartsheetApi {
       url: BASE_URL + '/token',
       form: formData // <- Note that request.post will translate `form` to application/x-www-form-urlencoded data
     }
+    D.log('refreshToken request:', options)
     return SmartsheetApi._httpRequestImpl(options)
       .then(httpResponse => {
+        D.log('refreshToken httpResponse:', httpResponse)
         if (httpResponse.statusCode !== 200) {
           throw new Error(`Smartsheet returned an error. Status code: ${httpResponse.statusCode}. Status message: ${httpResponse.statusMessage}. Body:${httpResponse.body}`)
         }
@@ -87,7 +93,7 @@ class SmartsheetApi {
         })
         // Note Smartsheet's API returns expires_in which is in seconds. We convert to a Date here:
         response.expires_at = String(Date.now() + body.expires_in * 1000)
-        //D.log('transformed token response:', response)
+        // D.log('transformed token response:', response)
         this._tokens = response
         return response
       })

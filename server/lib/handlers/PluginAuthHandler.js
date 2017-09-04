@@ -8,6 +8,7 @@ const Constants = require('../Constants')
 const SmartsheetApi = require('../SmartsheetApi')
 const JwtHandler = require('./JwtHandler')
 const StaticFileHandler = require('./StaticFileHandler')
+const assert = require('assert')
 
 const path = require('path')
 const D = new Diag(path.parse(__filename).name)
@@ -22,6 +23,8 @@ class PluginAuthHandler extends Handler {
     return Promise.try(() => {
       const qs = event.queryStringParameters
       const pp = event.pathParameters
+      // D.log('qs:', qs)
+      // D.log('pp:', pp)
 
       // Which plugin is this for?
       if (!('manifestUrl' in pp)) {
@@ -79,7 +82,8 @@ class PluginAuthHandler extends Handler {
   }
   exchangeCodeForToken (plugin, code) {
     // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
-    const smartsheetApi = new SmartsheetApi(null, plugin.apiClientID, plugin.apiCLientSecret)
+    assert(plugin.apiClientID && plugin.apiClientSecret, 'plugin doesn\'t have apiClientID or secret!')
+    const smartsheetApi = new SmartsheetApi(null, plugin.apiClientID, plugin.apiClientSecret)
     return smartsheetApi.refreshToken(code, null).then(tokens => {
       return smartsheetApi.me().then(ssUser => {
         // save access token, expire time, and refresh token to DB:

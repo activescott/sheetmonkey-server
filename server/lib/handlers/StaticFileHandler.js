@@ -173,6 +173,7 @@ class StaticFileHandler extends Handler {
    */
   static responseAsError (errorText, statusCode = 400) {
     return Promise.try(() => {
+      D.log('responseAsError:', errorText)
       const clientFilesPath = path.join(__dirname, '../../data/public/')
       let filePath = path.join(clientFilesPath, 'error.html')
       const viewData = {
