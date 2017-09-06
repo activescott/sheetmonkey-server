@@ -78,6 +78,8 @@
   - [ ] Add plugin for Cell as JSON
   - [ ] Add plugin for Col JSON
   - [ ] Add plugin for Row JSON
+  
+  - [ ] Encrypt DDB!
 
   - [x] add contextmenu commands
   - [ ] add keyboard shortcut commands (pass in selection details (container, row, col))

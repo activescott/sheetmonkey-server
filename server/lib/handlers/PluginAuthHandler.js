@@ -11,7 +11,7 @@ const StaticFileHandler = require('./StaticFileHandler')
 const assert = require('assert')
 
 const path = require('path')
-const D = new Diag(path.parse(__filename).name)
+const D = new Diag(path.parse(__filename).name) // eslint-disable-line no-unused-vars
 
 class PluginAuthHandler extends Handler {
   constructor () {
@@ -56,12 +56,16 @@ class PluginAuthHandler extends Handler {
         // Exchange code for token
         return this.exchangeCodeForToken(plugin, qs.code).then(tokenInfo => {
           // Put token details in a JWT
+          const expiresAtSeconds = new Date(Number.parseInt(tokenInfo.expires_at)).valueOf() / 1000
           const payload = {
             access_token: tokenInfo.access_token,
             // refresh_token: tokenInfo.refresh_token,
             expires_at: tokenInfo.expires_at,
             prn: tokenInfo.id,
-            prneml: tokenInfo.email
+            prneml: tokenInfo.email,
+            aud: pp.manifestUrl,
+            iss: 'sheetmonkey-server',
+            exp: expiresAtSeconds
           }
           const jwt = JwtHandler.encodeToken(payload)
           const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?tokenInfo=${encodeURIComponent(jwt)}`
