@@ -64,12 +64,15 @@
     - [x] Start flow w/ [launchWebAuthFlow](https://developer.chrome.com/extensions/identity#method-launchWebAuthFlow)
     - [x] catch token on backend and send to extension via https://developer.chrome.com/extensions/app_identity#non
       - i.e. essentially SS redirects useragent to sheetmonkey.com, which uses secret to get token, and redirects user (with token in URL) to https://<extension-id>.chromiumapp.org/<anything-here>
-    - [ ] save token on behalf of plugin (so when plugin wants an API call, extension will do it (to avoid cors))
+    - [x] save token on behalf of plugin (so when plugin wants an API call, extension will do it (to avoid cors))
       - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
-      - Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care?
-      - NOTES:
-        - Tool: chrome://identity-internals/
-        - Great article: https://walty8.com/simple-gmail-notes-chrome-extension/
+      - [x] Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care?
+    - [ ] Adjust PluginAuthHandler to not return API Access Token and instead:
+      - Save SS API Access Token to DB using pluginID+userID as key. Issue a JWT instaed with pluginID, userID, and exp as claims (JWT later used as Authorization header in proxy call)
+      - Have plugins register a whitelist of method+URL (relative), Examples:
+        POST /folders/{folderId}/copy
+        GET /sheets/{sheetId}/rows/{rowId}/columns/{columnId}/history
+      - Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apicall+}
 
   - [ ] Fix redirect URL after adding plugin not appearing on My Plugins page
   - [ ] Fix redirect URL to be qualified path and not relative path on My Plugins page
