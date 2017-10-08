@@ -32,6 +32,7 @@ provider:
     SS_CLIENT_SECRET: ${file(data/private/ss-oauth.json):secret}
     DDB_USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
     DDB_PLUGINS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-plugins
+    DDB_API_TOKENS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-apiTokens
 
   iamRoleStatements:
     - Effect: Allow
@@ -52,6 +53,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DDB_PLUGINS_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DDB_API_TOKENS_TABLE}"
 
 resources:
   Resources:
@@ -80,7 +90,24 @@ resources:
             KeyType: HASH          
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1          
+          WriteCapacityUnits: 1
+    apiTokensTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DDB_API_TOKENS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: manifestUrl
+            AttributeType: S
+          - AttributeName: userID
+            AttributeType: N
+        KeySchema:
+          - AttributeName: userID
+            KeyType: HASH
+          - AttributeName: manifestUrl
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 functions:
   echo:
@@ -92,6 +119,9 @@ functions:
       - http:
           path: api/echo/{url}
           method: get
+      - http:
+          path: api/echogreedy/{url+}
+          method: get
 
   ping:
     handler: handler.ping
@@ -99,10 +129,10 @@ functions:
       - http:
           path: api/ping
           method: get
-  
+
   jwt:
     handler: handler.jwt #NOTE: don't add an http event to this! This is just for testing locally.
-  
+      
   env:
     handler: handler.env #NOTE: don't add an http event to this! This is just for testing locally.
 
@@ -153,6 +183,14 @@ functions:
     handler: handler.pluginauthflow
     events:
       - http: GET api/pluginauthcallback/{manifestUrl}
+
+  ssapiproxy:
+    handler: handler.ssapiproxy
+    events:
+      - http: GET api/ssapiproxy/{request+}
+      - http: PUT api/ssapiproxy/{request+}
+      - http: POST api/ssapiproxy/{request+}
+      - http: DELETE api/ssapiproxy/{request+}
 
   defaultredir:
     handler: handler.defaultredirect

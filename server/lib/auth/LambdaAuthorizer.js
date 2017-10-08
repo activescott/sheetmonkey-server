@@ -48,9 +48,9 @@ class LambdaAuthorizer {
       }
 
       if (isAuthenticated) {
-        return this._invokeHandlerAnadMapResponse(postAuthorizationHandler, event, context, callback)
+        return this._invokeHandlerAndMapResponse(postAuthorizationHandler, event, context, callback)
       } else {
-        return this._writeError(`This resource requires authentication. Additional information: ${authError}`, callback)
+        return this._writeError(401, `This resource requires authentication. Additional information: ${authError}`, callback)
       }
     }
   }
@@ -62,24 +62,31 @@ class LambdaAuthorizer {
    */
   publicHandler (postAuthorizationHandler) {
     return (event, context, callback) => {
-      return this._invokeHandlerAnadMapResponse(postAuthorizationHandler, event, context, callback)
+      return this._invokeHandlerAndMapResponse(postAuthorizationHandler, event, context, callback)
     }
   }
 
-  _invokeHandlerAnadMapResponse (postAuthorizationHandler, event, context, callback) {
+  _invokeHandlerAndMapResponse (postAuthorizationHandler, event, context, callback) {
     let result = postAuthorizationHandler(event, context, callback)
     // D.log('response from postAuthorizationHandler:', result)
     const isPromise = obj => obj && 'then' in obj // <- https://stackoverflow.com/a/27746324/51061
     if (isPromise(result)) {
       return result
         .then(handlerResponse => callback(null, handlerResponse))
-        .catch(handlerError => callback(handlerError, null))
+        .catch(handlerError => {
+          if (!('httpStatusCode' in handlerError)) {
+            // let lambda/APIG decide how to handle:
+            callback(handlerError, null)
+            return
+          }
+          this._writeError(handlerError.httpStatusCode, handlerError.message, callback)
+        })
     } else {
       // not a promise, so handler expected to invoke callback
       return result
     }
   }
-  
+
   /**
    * Return true if request is authorized.
    */
@@ -116,10 +123,11 @@ class LambdaAuthorizer {
     return decodePrincipal(token)
   }
 
-  _writeError (errMsg, callback) {
-    //TODO: Should optionally allow to use a templated "error" html page for response via staticfilehandler too. See OAuthClientHandler
+  _writeError (statusCode, errMsg, callback) {
+    // TODO: Could read the accept header here and return HTML response as needed. I'm assuming we really only care about the status code when expecting JSON.
+    // TODO: Should optionally allow to use a templated "error" html page for response via staticfilehandler too. See OAuthClientHandler
     const response = {
-      statusCode: 401,
+      statusCode: statusCode,
       headers: {
         'Content-Type': 'application/json',
         'WWW-Authenticate': 'Bearer'

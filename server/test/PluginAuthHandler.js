@@ -22,7 +22,7 @@ describe('PluginAuthHandler', function () {
   var invoker = new ServerlessInvoker()
 
   before(function () {
-    db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins')
+    db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins', 'sheetmonkey-server-beta-apiTokens')
   })
 
   beforeEach(function () {
@@ -32,7 +32,7 @@ describe('PluginAuthHandler', function () {
     // cleanup any plugins added by tests:
     return db.deleteAllPlugins().then(() => {
       userID = randomUserID()
-    }) 
+    })
   })
 
   describe('pluginauthflow', function () {
@@ -58,17 +58,7 @@ describe('PluginAuthHandler', function () {
       const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
       return db.addPlugin(testPlugin).then(() => {
         // Push the mock HTTP Responses onto SmartsheetApi:
-        //  First is the toekn refresh response:
-        SmartsheetApi._mockResponseStack.push({
-          statusCode: 200,
-          body: JSON.stringify({
-            access_token: 'blahaccesstoken',
-            token_type: 'blaaaahtokentype',
-            refresh_token: 'blllaaahrefreshtoken',
-            expires_in: 7 * 24 * 60 * 60
-          })
-        })
-        //  Second is the /me response:
+        //  The /me response:
         SmartsheetApi._mockResponseStack.push({
           statusCode: 200,
           body: JSON.stringify({
@@ -90,6 +80,16 @@ describe('PluginAuthHandler', function () {
             customWelcomeScreenViewed: '2016-11-23T19:46:34Z'
           })
         })
+        //  The token refresh response:
+        SmartsheetApi._mockResponseStack.push({
+          statusCode: 200,
+          body: JSON.stringify({
+            access_token: 'blahaccesstoken',
+            token_type: 'blaaaahtokentype',
+            refresh_token: 'blllaaahrefreshtoken',
+            expires_in: 7 * 24 * 60 * 60
+          })
+        })
 
         const manifestUrl = encodeURIComponent(testPlugin.manifestUrl)
         const extensionID = Constants.legitExtentionIDs[0]
@@ -104,7 +104,7 @@ describe('PluginAuthHandler', function () {
         return response.then(r => {
           expect(r).to.have.property('statusCode', 302)
           expect(r.headers).to.have.property('Location')
-          return expect(r.headers.Location).match(new RegExp(`^https://${extensionID}.chromiumapp.org/${manifestUrl}\\?tokenInfo=.+$`))
+          return expect(r.headers.Location).match(new RegExp(`^https://${extensionID}.chromiumapp.org/${manifestUrl}\\?status=success$`))
         })
       })
     })

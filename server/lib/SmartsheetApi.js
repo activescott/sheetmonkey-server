@@ -100,21 +100,39 @@ class SmartsheetApi {
   }
 
   httpGet (path) {
+    return this.httpRequest('GET', path)
+  }
+
+  /**
+   * Makes the specified http request to the smartsheet API
+   * @param {*string} httpMethod http method (default: "GET")
+   * @param {*string} path http request path (relative to the Smartsheet API base URL)
+   * @param {*string} body entity body for PATCH, POST and PUT requests
+   */
+  httpRequest (httpMethod, path, body = '', throwOnError = true) {
     return Promise.try(() => {
       // TODO: check validity of token and refresh if needed. Also need to raise an event so caller can save the new tokens.
 
       // https://www.npmjs.com/package/request#requestoptions-callback
+      if (!path.startsWith('/')) {
+        path = '/' + path
+      }
       const options = {
         url: BASE_URL + path,
-        method: 'GET',
+        method: httpMethod || 'GET',
         headers: {
           'Authorization': `Bearer ${this._tokens.access_token}`
         }
       }
+      if (body) {
+        options.body = body
+      }
       // D.log('sending request: ', options)
       return SmartsheetApi._httpRequestImpl(options).then(httpResponse => {
         if (httpResponse.statusCode < 200 || httpResponse.statusCode >= 300) {
-          throw new Error(`Unexpected statusCode from Smartsheet:${httpResponse.statusCode}. Response body:${httpResponse.body}`)
+          if (throwOnError) {
+            throw new Error(`Unexpected statusCode from Smartsheet:${httpResponse.statusCode}. Response body:${httpResponse.body}`)
+          }
         }
         return httpResponse
       })
@@ -138,7 +156,7 @@ class SmartsheetApi {
   }
 }
 
-/** for mocking hte underlying HTTP Request Impl */
+/** for mocking the underlying HTTP Request Impl */
 
 const httpRequestDefaultImpl = (options) => {
   // https://www.npmjs.com/package/request#requestoptions-callback

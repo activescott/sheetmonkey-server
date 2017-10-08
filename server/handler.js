@@ -13,10 +13,11 @@ const LambdaAuthorizer = require('./lib/auth/LambdaAuthorizer')
 const UsersHandler = require('./lib/handlers/UsersHandler')
 const PluginsHandler = require('./lib/handlers/PluginsHandler')
 const PluginAuthHandler = require('./lib/handlers/PluginAuthHandler')
+const SmartsheetApiProxy = require('./lib/handlers/SmartsheetApiProxyHandler')
 
 const authorizer = new LambdaAuthorizer(crt)
 const api = new SmartsheetApi()
-const db = new DB(new DynamoDB(), process.env.DDB_USERS_TABLE, process.env.DDB_PLUGINS_TABLE)
+const db = new DB(new DynamoDB(), process.env.DDB_USERS_TABLE, process.env.DDB_PLUGINS_TABLE, process.env.DDB_API_TOKENS_TABLE)
 
 module.exports.echo = (event, context, callback) => {
   const response = {
@@ -123,4 +124,9 @@ module.exports.plugins_delete = authorizer.protectHandler((event, context, callb
 module.exports.pluginauthflow = authorizer.publicHandler((event, context, callback) => {
   const pluginAuthHandler = new PluginAuthHandler()
   return pluginAuthHandler.get(event, context)
+})
+
+module.exports.ssapiproxy = authorizer.protectHandler((event, context, callback) => {
+  const handler = new SmartsheetApiProxy(db)
+  return handler.handle(event, context)
 })

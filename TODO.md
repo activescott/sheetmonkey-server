@@ -68,14 +68,22 @@
       - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
       - [x] Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care?
     - [ ] Adjust PluginAuthHandler to not return API Access Token and instead:
-      - Save SS API Access Token to DB using pluginID+userID as key. Issue a JWT instaed with pluginID, userID, and exp as claims (JWT later used as Authorization header in proxy call)
-      - Have plugins register a whitelist of method+URL (relative), Examples:
-        POST /folders/{folderId}/copy
-        GET /sheets/{sheetId}/rows/{rowId}/columns/{columnId}/history
-      - Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apicall+}
+      - [x] Save SS API Access Token to DB using pluginID+userID as key.
+          - [ ] Issue a JWT instaed with pluginID, userID, and exp as claims (JWT later used as Authorization header in proxy call) ** Sine we're authed when calling APIs already, don't see the point.
+      - [ ] Have plugins register a whitelist of method+URL (relative) (see RequestWhitelist)
+        - [x] API to add whitelist (allow adding to plugin object)
+        - [ ] UI work
+      - [ ] Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apirequest+}
+        - [x] API endpoint
+        - [ ] Extension work to use this API when routing plugin API requests.
+      - [ ] Move greedy path parameters functionality into the whitelist capability. Doh! Do we really need it?
 
   - [ ] Fix redirect URL after adding plugin not appearing on My Plugins page
   - [ ] Fix redirect URL to be qualified path and not relative path on My Plugins page
+  - [ ] SmartsheetApi needs to refresh access_token in two events:
+    - [ ] Automatically refresh a plugin's expired access_token when making an API call.
+    - [ ] When developer is logging in to beta.smartsheet.com refresh. ?? Other than /me do we even use the SS API again?
+
   - [ ] Add plugin for Sheet permalink to clipboard
   - [ ] Add plugin for Row permalink to clipboard
   - [ ] Add plugin for Cell as JSON
@@ -88,6 +96,8 @@
   - [ ] add keyboard shortcut commands (pass in selection details (container, row, col))
   - [ ] plugin: refresh sheet (sheetmonkey can provide such a service to use)
   
+  - [ ] This: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Using_CSS_flexible_boxes
+
 - [ ] Don't allow adding plugins with the same name (from manifest) to sheetmonkey-server (security/phishing)
 - [ ] Do more validation of manifest when adding plugins (what?) to sheetmonkey-server + preview. Maybe preview is enough?
 
@@ -103,17 +113,15 @@
 
 - [ ] Secure client secret detail so it isn't exposed in cloudformation and console. Like this: http://forum.serverless.com/t/storing-database-credentials-securely/1370/9?u=activescott
 
-
-- [ ] Refresh token automatically in SmartsheetApi.
-  - [ ] Why?
-
 - [ ] Break out LambdaAuthorizer into its own npm package
+  - [ ] Break out LambdaAuthorizer.js. Allow error response to be specified as a templated file (or templated string?)
 - [ ] Separate out oauth & user login/logout stuff into a boiler plate serverless+svelt.
   - [x] Remove vandium and validate tokens in api calls manually (consider just allowing cookie auth!)
     - [x] replace with simple vandium style authorizer or an APIG authorizer.
-  - [ ] Standard lint
+  - [ ] Standard lint (force it)
   - [x] Need mocha tests for server.
 
+- [ ] Setup auto tests upon commit in github
 - [ ] Need mocha tests for client.
 - [ ] add favico
 
@@ -130,6 +138,5 @@
 - [ ] Can content page paths be added to serverless.yml via a script (based on all files in a dir)? How about with an import?
 npm 
 - [ ] Break out the StaticFileHandler. Add https://www.iana.org/assignments/media-types/media-types.xhtml. Make sure error response type of file is flexible (provide a file path to use as a template)
-- [ ] Break out LambdaAuthorizer.js. Allow error response to be specified as a templated file (or templated string?)
 - [ ] provide a boilerplate/starter for a serverless web app backend.
   - [ ] Consider using https://github.com/laardee/serverless-authentication-boilerplate as a base layer for OAuth rather than the custom stuff here :/ Wish I would have found that before I wrote the OAuth stuff here.

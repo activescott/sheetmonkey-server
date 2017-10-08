@@ -3,7 +3,7 @@ const Diag = require('./diag')
 const D = new Diag('RequestWhitelist')
 
 /**
- * Used with SmartsheetApiProxy to handle whitelisted requests.
+ * Used with SmartsheetApiProxyHandler to handle whitelisted requests.
  */
 class RequestWhitelist {
   /**
@@ -43,7 +43,7 @@ class RequestWhitelist {
    */
   isRequestPermitted (method, path) {
     return this._permittedRequests.find(req => {
-      D.log(path, '=>', req.matcher.source, '==', req.matcher.test(path))
+      // D.log(path, '=>', req.matcher.source, '==', req.matcher.test(path))
       return req.method === method && req.matcher.test(path)
     }) !== undefined
   }

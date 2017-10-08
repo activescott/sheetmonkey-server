@@ -9,16 +9,19 @@ const D = new Diag('DB')
 const ALL_USER_PROPS = ['id', 'email', 'createdAt', 'updatedAt', 'access_token', 'expires_at', 'refresh_token']
 const REQUIRED_USER_ADD_PROPS = ['id', 'email']
 const REQUIRED_USER_UPDATE_PROPS = ['id', 'email', 'access_token', 'expires_at', 'refresh_token']
-const ALL_PLUGIN_PROPS = ['manifestUrl', 'ownerID', 'apiClientID', 'apiClientSecret']
+const ALL_PLUGIN_PROPS = ['manifestUrl', 'ownerID', 'apiClientID', 'apiClientSecret', 'requestWhitelist']
+const ALL_PLUGIN_API_AUTH_PROPS = ['manifestUrl', 'userID', 'access_token', 'expires_at', 'refresh_token']
 
 class DB {
-  constructor (ddb, usersTableName, pluginsTableName) {
+  constructor (ddb, usersTableName, pluginsTableName, apiTokensTableName) {
     assert(ddb, 'ddb arg required')
     assert(usersTableName, 'usersTableName arg required')
     assert(pluginsTableName, 'pluginsTableName arg required')
+    assert(apiTokensTableName, 'apiTokensTableName arg required')
     this.ddb = ddb
     this.usersTableName = usersTableName
     this.pluginsTableName = pluginsTableName
+    this.apiTokensTableName = apiTokensTableName
   }
 
   addUser (user) {
@@ -118,7 +121,8 @@ class DB {
         manifestUrl: { type: 'string', required: true },
         ownerID: { type: 'number', required: true },
         apiClientID: { type: 'string', required: false },
-        apiClientSecret: { type: 'string', required: false }
+        apiClientSecret: { type: 'string', required: false },
+        requestWhitelist: { type: 'object', required: false }
       }
       plugin = validateInput(addPluginSpec, plugin)
       const now = String(Date.now())
@@ -227,6 +231,81 @@ class DB {
   deleteAllUsers () {
     return this.listUsers().then(users => {
       let promises = users.map(u => this.deleteUser(u.id))
+      return Promise.all(promises)
+    })
+  }
+
+  /**
+   * Adds or updates the token for the specified plugin and user.
+   */
+  addApiTokenForPluginUser (pluginManifestUrl, userID, access_token, refresh_token, expires_at) { // eslint-disable-line camelcase
+    return Promise.try(() => {
+      const item = {
+        'manifestUrl': pluginManifestUrl,
+        'userID': userID,
+        'access_token': access_token,
+        'refresh_token': refresh_token,
+        'expires_at': expires_at
+      }
+      for (const argName of Object.keys(item)) {
+        if (!item[argName]) throw new Error(`${argName} must be provided`)
+      }
+
+      let putItem = this.ddb.put({
+        TableName: this.apiTokensTableName,
+        Item: item
+      })
+      return putItem.then(() => item)
+    }).catch(err => {
+      throw new Error('addApiTokenForPluginUser error: ' + err)
+    })
+  }
+
+  getApiTokenForPluginUser (pluginManifestUrl, userID) {
+    if (!pluginManifestUrl || typeof pluginManifestUrl !== 'string') {
+      D.log('getApiTokenForPluginUser: invalid pluginManifestUrl')
+      return Promise.resolve(null)
+    }
+    let params = {
+      TableName: this.apiTokensTableName,
+      Key: { manifestUrl: pluginManifestUrl, userID: userID },
+      ProjectionExpression: ALL_PLUGIN_API_AUTH_PROPS.join(', ')
+    }
+    return this.ddb.get(params).then(result => {
+      if (result && result.Item) {
+        return result.Item
+      } else {
+        D.log(`getApiTokenForPluginUser: access token for plugin '${pluginManifestUrl}' and user '${userID}' not found. Result:`, result)
+      }
+      return null
+    }).catch(err => {
+      // more detail to the error
+      throw new Error(`getApiTokenForPluginUser error: ${err}`)
+    })
+  }
+
+  deleteApiToken (pluginManifestUrl, userID) {
+    if (!pluginManifestUrl || typeof pluginManifestUrl !== 'string') {
+      D.log('deleteApiToken: invalid pluginManifestUrl')
+      return Promise.resolve(null)
+    }
+    let params = {
+      TableName: this.apiTokensTableName,
+      Key: { manifestUrl: pluginManifestUrl, userID: userID }
+    }
+    return this.ddb.delete(params).catch(err => {
+      // more detail to the error
+      throw new Error(`deleteApiToken error: ${err}`)
+    })
+  }
+
+  deleteAllApiTokens () {
+    return this.ddb.scan({
+      TableName: this.apiTokensTableName,
+      ProjectionExpression: ALL_PLUGIN_API_AUTH_PROPS.join(', ')
+    }).then(result => {
+      const tokenRecords = result.Items
+      let promises = tokenRecords.map(t => this.deleteApiToken(t.manifestUrl, t.userID))
       return Promise.all(promises)
     })
   }

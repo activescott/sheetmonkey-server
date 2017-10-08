@@ -16,7 +16,7 @@ const D = new Diag(path.parse(__filename).name) // eslint-disable-line no-unused
 class PluginAuthHandler extends Handler {
   constructor () {
     super()
-    this.db = new DB(new DynamoDB(), process.env.DDB_USERS_TABLE, process.env.DDB_PLUGINS_TABLE)
+    this.db = new DB(new DynamoDB(), process.env.DDB_USERS_TABLE, process.env.DDB_PLUGINS_TABLE, process.env.DDB_API_TOKENS_TABLE)
   }
 
   get (event, context) {
@@ -40,6 +40,9 @@ class PluginAuthHandler extends Handler {
           return StaticFileHandler.responseAsError(`${smartsheetErrorMessage}${requiredQueryString} query string not specified`, 400)
         }
       }
+      /* Security Note:
+        Extension IDs should not be spoofable. As noted in https://stackoverflow.com/a/23877974/51061 as they are a public key, encoded in base64 format and will require the crx file to be signed with the corresponding private key to be installed.
+      */
       if (Constants.legitExtentionIDs.indexOf(qs.state) < 0) {
         return StaticFileHandler.responseAsError(`invalid extensionid: ${qs.state}`, 400)
       }
@@ -55,31 +58,19 @@ class PluginAuthHandler extends Handler {
         }
         // Exchange code for token
         return this.exchangeCodeForToken(plugin, qs.code).then(tokenInfo => {
-          // Put token details in a JWT
-          const expiresAtSeconds = new Date(Number.parseInt(tokenInfo.expires_at)).valueOf() / 1000
-          const payload = {
-            access_token: tokenInfo.access_token,
-            // refresh_token: tokenInfo.refresh_token,
-            expires_at: tokenInfo.expires_at,
-            prn: tokenInfo.id,
-            prneml: tokenInfo.email,
-            aud: pp.manifestUrl,
-            iss: 'sheetmonkey-server',
-            exp: expiresAtSeconds
-          }
-          const jwt = JwtHandler.encodeToken(payload)
-          const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?tokenInfo=${encodeURIComponent(jwt)}`
-
-          // Send JWT to browser extension
-          let response = {
-            statusCode: 302,
-            headers: {
-              'Location': redirectUri,
-              'Content-Type': 'text/html'
-            },
-            body: `<html><body>TODO: Redirecting to ${redirectUri}...</body></html>`
-          }
-          return response
+          return this.db.addApiTokenForPluginUser(pp.manifestUrl, tokenInfo.id, tokenInfo.access_token, tokenInfo.refresh_token, tokenInfo.expires_at).then(() => {
+            // now redirect the page back to the special chromiumapp.org url and chrome will detect this rederect and close the window.
+            const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?status=success`
+            let response = {
+              statusCode: 302,
+              headers: {
+                'Location': redirectUri,
+                'Content-Type': 'text/html'
+              },
+              body: `<html><body>Login successful. You can close this window.</body></html>`
+            }
+            return response
+          })
         })
       })
     })

@@ -20,10 +20,8 @@ class DDB {
       dynamoConfig = {
         region: process.env.AWS_REGION
       }
+      D.log('dynamoConfig:', dynamoConfig)
     }
-
-    D.log('dynamoConfig:', dynamoConfig)
-
     // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html
     this.client = new DynamoDB.DocumentClient(dynamoConfig)
   }

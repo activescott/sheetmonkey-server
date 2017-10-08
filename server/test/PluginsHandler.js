@@ -16,7 +16,7 @@ describe('PluginsHandler', function () {
   var invoker = new ServerlessInvoker()
 
   before(function () {
-    db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins')
+    db = new DB(new DynamoDB(), 'sheetmonkey-server-beta-users', 'sheetmonkey-server-beta-plugins', 'sheetmonkey-server-beta-apiTokens')
   })
 
   beforeEach(function () {
