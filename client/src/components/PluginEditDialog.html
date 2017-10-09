@@ -1,4 +1,4 @@
-<div id="dialog" class="dialog-disabled-background hidden" tabindex="-1" role="dialog">
+<div id="pluginEditDialog" class="dialog dialog-disabled-background hidden" tabindex="-1" role="dialog">
   <div class="dialog-modal panel panel-default" role="document">
     <div class="panel-heading">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -6,13 +6,26 @@
     </div>
     <form>
       <div class="dialog-body form-group">
-        <p class="message help-block">dialog message</p>
+        <p class="message help-block">pluginEditDialog message</p>
         <label for="inputManifestUrl">Manifest URL</label>
-        <input type="url" id="inputManifestUrl" class="form-control" pattern="https://.+" placeholder="https://yourdomain.com/yourmanifest.json" required>
+        <input type="url" id="inputManifestUrl" class="form-control" pattern="https://.+" placeholder="https://yourdomain.com/yourmanifest.json"  bind:value="manifestUrl" required>
         <label for="apiClientID">Smartsheet API Client ID <small>(optional)</small></label>
-        <input type="text" id="apiClientID" class="form-control">
+        <input type="text" id="apiClientID" class="form-control" bind:value="apiClientID">
         <label for="apiClientSecret">Smartsheet API Client Secret <small>(optional)</small></label>
-        <input type="text" id="apiClientSecret" class="form-control">
+        <input type="text" id="apiClientSecret" class="form-control" bind:value="apiClientSecret">
+        <label for="requestWhitelist">
+          Smartsheet API Whitelist <small>(optional)</small>
+          <a href="#" on:click="editWhitelist()"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+        </label>
+          <ul class="list-group" id="requestWhitelist">
+            {{#if requestWhitelist}}
+            {{#each requestWhitelist as listValue, listValueIndex }}
+              <li class="list-group-item">
+                {{listValue}}
+              </li>
+            {{/each}}
+            {{/if}}
+          </ul>
       </div>
       <div class="dialog-footer panel-footer">
         <!-- <button class="save btn btn-primary">Save</button> -->
@@ -27,36 +40,36 @@
 import $ from 'jquery'
 import Promise from 'bluebird'
 import urlmod from 'url'
+import ListEditDialog from './ListEditDialog.html'
 
 export default {
   methods: {
-    prompt (plugin, message) {
+    prompt (message, plugin, isEditing = true) {
+      plugin = this.deepClone(plugin) // <- make sure we never dirty up the passed in object (e.g. when user cancels).
       let domLoaded = Promise.resolve()
       return domLoaded.then(() => {
-        let dialog = $('#dialog')
-        let inputManifestUrl = $('#inputManifestUrl')
-        let apiClientID = $('#apiClientID')
-        let apiClientSecret = $('#apiClientSecret')
-        let cancelButton = $('button.cancel')
-        let form = $('#dialog form')
+        let dialog = $('#pluginEditDialog')
+        let inputManifestUrl = dialog.find('#inputManifestUrl')
+        let cancelButton = dialog.find('button.cancel')
+        let form = dialog.find('form')
+        this.set(plugin)
+        console.log('isEditing:', isEditing)
+        inputManifestUrl.get(0).readOnly = isEditing // <- because manifestUrl is the key
         inputManifestUrl.on('input', this.validate.bind(this))
-        // inputManifestUrl.on('valid')
-        $('.message').text(message)
+        dialog.find('.message').text(message)
         if (plugin) inputManifestUrl.val(plugin.manifestUrl)
         dialog.removeClass('hidden')
         return new Promise((resolve, reject) => {
           form.on('submit', e => {
             e.preventDefault()
             console.log('submit:', e)
-            plugin = plugin ? this.deepClone(plugin) : { manifestUrl: '' }
-            plugin.manifestUrl = inputManifestUrl.val()
-            plugin.apiClientID = apiClientID.val()
-            plugin.apiClientSecret = apiClientSecret.val()
             dialog.addClass('hidden')
+            let plugin2 = this.get()
             this.close()
-            resolve(plugin)
+            resolve(plugin2)
           })
           cancelButton.on('click', e => {
+            e.preventDefault() // <- Prevent form from submitting (don't ask me why, html is stupid)
             this.close()
             reject(new Error('user clicked cancel'))
           })
@@ -83,6 +96,16 @@ export default {
       if (!arr) return arr
       let s = JSON.stringify(arr)
       return JSON.parse(s)
+    },
+    editWhitelist () {
+      let requestWhitelist = this.get('requestWhitelist')
+      let listEditor = new ListEditDialog({ target: $('body').get(0) })
+      listEditor.prompt('Smartsheet API Request Whitelist:', requestWhitelist).then(editedList => {
+        console.log('Whitelist editedList:', editedList)
+        this.set({requestWhitelist: editedList})
+      }).catch(e => {
+        if (e.message !== 'user clicked cancel') console.error('Dialog error:', e)
+      })
     }
   },
   oncreate () {

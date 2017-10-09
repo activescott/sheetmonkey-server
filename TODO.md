@@ -67,12 +67,17 @@
     - [x] save token on behalf of plugin (so when plugin wants an API call, extension will do it (to avoid cors))
       - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
       - [x] Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care?
+
+
+
+
+
     - [ ] Adjust PluginAuthHandler to not return API Access Token and instead:
       - [x] Save SS API Access Token to DB using pluginID+userID as key.
-          - [ ] Issue a JWT instaed with pluginID, userID, and exp as claims (JWT later used as Authorization header in proxy call) ** Sine we're authed when calling APIs already, don't see the point.
       - [ ] Have plugins register a whitelist of method+URL (relative) (see RequestWhitelist)
         - [x] API to add whitelist (allow adding to plugin object)
-        - [ ] UI work
+        - [ ] UI: Allow optional specifying a whitelist in PluginEditDialog.html
+          - [ ] Impl Backend.updateUserPlugin
       - [ ] Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apirequest+}
         - [x] API endpoint
         - [ ] Extension work to use this API when routing plugin API requests.

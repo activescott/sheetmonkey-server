@@ -1,9 +1,11 @@
 <button type="button" class="btn btn-default center-block" on:click="onTestApiClick(event)">Test API</button>
+<button type="button" class="btn btn-default center-block" on:click="onShowListEditDialog(event)">Test ListEditDialog</button>
 <div id="response"></div>
 
 <script>
   import $ from 'jquery'
   import Backend from '../lib/Backend'
+  import ListEditDialog from './ListEditDialog.html'
 
   export default {
     methods: {
@@ -25,6 +27,15 @@
         console.log('onTestApiClick:', event)
         this.backend = Backend.build()
         this.pingApi()
+      },
+      onShowListEditDialog (event) {
+        console.log('onShowListEditDialog:', event)
+        let dlg = new ListEditDialog({ target: $('body').get(0) })
+        const listValues = new Array(10).fill(0, 0).map((v, i) => { console.log('i:', i); return `value ${i}` })
+        console.log('listValues before edit:', listValues)
+        dlg.prompt('Edit the list of items below', listValues).then(editedList => {
+          console.log('editedList:', editedList)
+        })
       }
     },
 

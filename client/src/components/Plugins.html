@@ -16,6 +16,7 @@
           <th>Smartsheet API Client ID</th>
           <th>Smartsheet API Client Secret</th>
           <th>Smartsheet API Redirect URL <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Enter this as the 'App redirect URL' in your Smartsheet developer tools." data-toggle="tooltip"></span></th>
+          <th>Smartsheet API Whitelist <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="The list of URLs that are permitted for this plugin." data-toggle="tooltip"></span></th>
           <th> </th>
         </tr>
         </thead>
@@ -26,7 +27,17 @@
             <td>{{plugin.apiClientID || ''}}</td>
             <td>{{plugin.apiClientSecret || ''}}</td>
             <td>{{plugin.redirectUrl || ''}}</td>
-            <td><a href="#" on:click="deletePlugin(idx, plugin)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+            <td>
+              {{#if plugin.requestWhitelist}}
+                {{#each plugin.requestWhitelist as wlItem }}
+                <div style="white-space:nowrap">{{wlItem}}</div>
+                {{/each}}
+              {{/if}}
+            </td>
+            <td>
+              <a href="#" on:click="editPlugin(idx, plugin)"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+              <a href="#" on:click="deletePlugin(idx, plugin)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+            </td>
           </tr>
           {{/each}}
         </tbody>
@@ -77,22 +88,47 @@
           }).finally(() => { if (spinner) spinner.destroy() })
         }
       },
-      addPlugin () {
+      editPlugin (pluginIndex, pluginValue) {
         let dlg = new PluginEditDialog({ target: $('body').get(0) })
-        return dlg.prompt({}, 'Enter the plugin manifest URL below:').then(editedPlugin => {
+        return dlg.prompt('Enter the plugin manifest URL and optional API details below:', pluginValue).then(editedPlugin => {
+          console.log('editedPlugin:', editedPlugin)
           // save the plugin to the server
           let userID = this.get('user').id
           const spinner = new Spinner({ target: $('body').get(0) })
-          this.backend.addUserPlugin(editedPlugin, userID).then(response => {
+          return this.backend.updateUserPlugin(editedPlugin, userID).then(response => {
+            // add the plugin to the local model
+            const action = Actions.editPlugin(pluginIndex, editedPlugin)
+            this.get('store').dispatch(action)
+          }).finally(() => {
+            if (spinner) spinner.destroy()
+          })
+        }).catch(e => {
+          if (e.message !== 'user clicked cancel') console.error('Dialog error:', e)
+        })
+      },
+      emptyPlugin () {
+        return {
+          manifestUrl: '',
+          apiClientID: '',
+          apiClientSecret: '',
+          requestWhitelist: []
+        }
+      },
+      addPlugin () {
+        let dlg = new PluginEditDialog({ target: $('body').get(0) })
+        return dlg.prompt('Enter the plugin manifest URL and optional API details below:', this.emptyPlugin(), false).then(editedPlugin => {
+          // save the plugin to the server
+          let userID = this.get('user').id
+          const spinner = new Spinner({ target: $('body').get(0) })
+          return this.backend.addUserPlugin(editedPlugin, userID).then(response => {
             // add the plugin to the local model
             const action = Actions.addPlugin(editedPlugin)
             this.get('store').dispatch(action)
           }).finally(() => {
             if (spinner) spinner.destroy()
           })
-          return null
         }).catch(e => {
-          console.error('Dialog error:', e)
+          if (e.message !== 'user clicked cancel') console.error('Dialog error:', e)
         })
       }
     },
@@ -116,7 +152,7 @@
       this.getUserPlugins()
       // init the bootstrap tooltip plugin
       $(function () {
-        console.log('initializing toolstipos on', $('[data-toggle="tooltip"]').get(0))
+        console.log('initializing tooltips on', $('[data-toggle="tooltip"]').get(0))
         $('[data-toggle="tooltip"]').tooltip()
       })
     },

@@ -6,7 +6,7 @@
 /*
  * Dialog Styles
  */
-#dialog.dialog-disabled-background {
+.dialog-disabled-background {
   padding: 1em;
   position: fixed;
   top: 0;
@@ -15,7 +15,7 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
 }
-#dialog > .dialog-modal {
+.dialog > .dialog-modal {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -23,7 +23,7 @@
   max-width: 32em;
   transform: translate(-50%,-50%);
 }
-#dialog form {
+.dialog form {
   padding: 1em;
 }
 .hidden {

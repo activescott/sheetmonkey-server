@@ -1,0 +1,92 @@
+<div id="listEditDialog" class="dialog dialog-disabled-background hidden" tabindex="-1" role="dialog">
+    <div class="dialog-modal panel panel-default" role="document">
+      <div class="panel-heading">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Edit</h4>
+      </div>
+      <form>
+        <div class="dialog-body form-group">
+          <p class="message help-block">dialog message</p>
+          <label for="listItems" id="listLabel">Items</label>
+          <ul class="list-group" id="listItems">
+            {{#if listValues}}
+            {{#each listValues as listValue, listValueIndex }}
+              <li class="list-group-item">
+                {{listValue}}
+                <a href="#" on:click="deleteListItem(listValueIndex)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+              </li>
+            {{/each}}
+            {{/if}}
+          </ul>
+            <a href="#" on:click="addListItem()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+        </div>
+        <div class="dialog-footer panel-footer">
+          <input type="submit" value="Save" class="save btn btn-primary" />
+          <button class="cancel btn btn-default">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+  import $ from 'jquery'
+  import Promise from 'bluebird'
+  
+  export default {
+    methods: {
+      prompt (message, listValues) {
+        listValues = this.deepClone(listValues) // <- make sure we never dirty up the passed in object (e.g. when user cancels).
+        console.log('ListEditDialog listValues:', listValues)
+        const domLoaded = Promise.resolve()
+        return domLoaded.then(() => {
+          this.set({listValues: listValues})
+          const dialog = $('#listEditDialog')
+          const cancelButton = dialog.find('button.cancel')
+          const form = dialog.find('form')
+          dialog.find('.message').text(message)
+          dialog.removeClass('hidden')
+          return new Promise((resolve, reject) => {
+            form.on('submit', e => {
+              e.preventDefault()
+              const theList = this.get('listValues')
+              this.close()
+              resolve(theList)
+            })
+            cancelButton.on('click', e => {
+              e.preventDefault() // <- Prevent form from submitting (don't ask me why, html is stupid)
+              this.close()
+              reject(new Error('user clicked cancel'))
+            })
+          })
+        })
+      },
+      close () {
+        this.destroy()
+      },
+      addListItem () {
+        const promptValue = window.prompt('Enter the value for the new list item:', '')
+        if (promptValue) {
+          let listValues = this.get('listValues')
+          listValues.push(promptValue)
+          this.set({ listValues })
+        }
+      },
+      deleteListItem (listValueIndex) {
+        let listValues = this.get('listValues')
+        if (listValueIndex >= 0 && listValueIndex < listValues.length) {
+          listValues.splice(listValueIndex, 1)
+          this.set({ listValues })
+        }
+      },
+      deepClone (arr) {
+        if (!arr) return arr
+        let s = JSON.stringify(arr)
+        return JSON.parse(s)
+      }
+    },
+    oncreate () {
+      this.set({isCreated: true})
+    }
+  }
+  </script>
+  

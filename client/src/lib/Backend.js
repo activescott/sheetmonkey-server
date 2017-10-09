@@ -39,6 +39,10 @@ class BackendImpl {
     })
   }
 
+  updateUserPlugin (plugin, userID) {
+    return Promise.reject(new Error('todo'))
+  }
+
   deleteUserPlugin (manifestUrl, userID) {
     let url = `api/users/${userID}/plugins/${encodeURIComponent(manifestUrl)}`
     return this.xhr.deleteJSON(url, {}).then(response => {
@@ -93,14 +97,13 @@ class BackendMock {
 
   getUserPlugins (userID) {
     return Promise.delay(75).then(() => [
-      { manifestUrl: `https://m${userID}.com/manifest1.json` },
-      { manifestUrl: `https://m${userID}.com/manifest2.json` }
+      { manifestUrl: `https://m${userID}.com/manifest1.json`, apiClientID: 'abcdefg', apiClientSecret: 'supersecretive', redirectUrl: 'https://beta.sheetmonkey.com/fakeredir/manifest1', requestWhitelist: ['GET /sheets/{sheetID}/rows/{rowid}', 'PUT /sheets/{sheetID}/rows/{rowid}'] },
+      { manifestUrl: `https://m${userID}.com/manifest2.json`, apiClientID: 'hijklmnop', apiClientSecret: 'alsosupersecretive', redirectUrl: 'https://beta.sheetmonkey.com/fakeredir/manifest2' }
     ])
   }
 
   updateUserPlugin (plugin, userID) {
-    return Promise.delay(75).then(() => {
-    })
+    return Promise.delay(75).then(() => plugin)
   }
 
   addUserPlugin (plugin) {
