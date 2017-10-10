@@ -40,7 +40,7 @@ class BackendImpl {
   }
 
   updateUserPlugin (plugin, userID) {
-    let url = `api/users/${userID}/plugins`
+    let url = `api/users/${userID}/plugins/${encodeURIComponent(plugin.manifestUrl)}`
     plugin = Object.assign({}, plugin, {ownerID: userID})
     return this.xhr.putJSON(url, {}, plugin).then(response => {
       console.log(`${url} response:`, response)
