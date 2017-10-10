@@ -205,7 +205,7 @@ Tasks:
           if (!window.chrome || !chrome.runtime) {
             reject(new Error('not in chrome browser, assuming sheetmonkey not available in client.'))
           }
-          
+
           // first try to see if dev extension is installed:
           chrome.runtime.connect(sheetmonkeyExtensionIDDev)
           const cmd = { sheetmonkey: { cmd: 'getRegisteredPlugins' } }

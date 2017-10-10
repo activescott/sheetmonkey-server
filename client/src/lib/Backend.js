@@ -40,7 +40,12 @@ class BackendImpl {
   }
 
   updateUserPlugin (plugin, userID) {
-    return Promise.reject(new Error('todo'))
+    let url = `api/users/${userID}/plugins`
+    plugin = Object.assign({}, plugin, {ownerID: userID})
+    return this.xhr.putJSON(url, {}, plugin).then(response => {
+      console.log(`${url} response:`, response)
+      return response
+    })
   }
 
   deleteUserPlugin (manifestUrl, userID) {

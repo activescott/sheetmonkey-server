@@ -207,6 +207,25 @@ describe('PluginsHandler', function () {
       })
     })
 
+    it('should list optional properties with sane default', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: {},
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`get api/users/${userID}/plugins`, event).then(response => {
+          const plugins = response.body
+          expect(plugins).to.have.lengthOf(1)
+          const p = plugins[0]
+          expect(p).to.have.property('apiClientID', null)
+          expect(p).to.have.property('apiClientSecret', null)
+          expect(p).to.have.property('requestWhitelist').that.is.eql([])
+        })
+      })
+    })
+
   })
 
   describe('list public', function () {
@@ -340,6 +359,21 @@ describe('PluginsHandler', function () {
       })
     })
 
+    it('should include sane default properties', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          headers: buildAuthorizedHeaders()
+        }
+        return invoker.invoke(`GET api/users/${userID}/plugins/${encodeURIComponent(testPlugin.manifestUrl)}`, event).then(response => {
+          const p = response.body
+          expect(p).to.have.property('apiClientID', null)
+          expect(p).to.have.property('apiClientSecret', null)
+          expect(p).to.have.property('requestWhitelist').that.is.eql([])
+        })
+      })
+    })
+
     it('should not include redirectURL if apiClient props not provided', function () {
       const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
       return db.addPlugin(testPlugin).then(() => {
@@ -367,7 +401,7 @@ describe('PluginsHandler', function () {
       })
     })
 
-    it('should not let caller update unless he is the owner', function () {
+    it('should not let non-owner edit plugin', function () {
       const testPlugin = { manifestUrl: `https://blah.com/${randomUserID()}.json`, ownerID: randomUserID() }
 
       return db.addPlugin(testPlugin).then(() => {
@@ -375,9 +409,94 @@ describe('PluginsHandler', function () {
           body: JSON.stringify(testPlugin),
           headers: buildAuthorizedHeaders(randomUserID()) // note deliberately different userID
         }
-        let pluginID = encodeURIComponent('http://blah.co/manifest.json')
+        let pluginID = encodeURIComponent(testPlugin.manifestUrl)
         return invoker.invoke(`PUT api/users/${userID}/plugins/${pluginID}`, event).then(response => {
           expect(response).to.have.property('statusCode', 403)
+        })
+      })
+    })
+
+    it('should allow succesful update by owner', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      const testPluginEdit = { manifestUrl: testPlugin.manifestUrl, ownerID: testPlugin.ownerID, apiClientID: 'abc', apiClientSecret: 'xyz' }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPluginEdit),
+          headers: buildAuthorizedHeaders(userID)
+        }
+        let pluginID = encodeURIComponent(testPluginEdit.manifestUrl)
+        return invoker.invoke(`PUT api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+          expect(response).to.have.property('statusCode', 200)
+          event.body = ''
+          return invoker.invoke(`GET api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+            expect(response.body).to.have.property('apiClientID', testPluginEdit.apiClientID)
+            expect(response.body).to.have.property('apiClientSecret', testPluginEdit.apiClientSecret)
+          })
+        })
+      })
+    })
+
+    it('should not allow changing ownerID', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      const otherUserID = randomUserID()
+      const testPluginEdit = { manifestUrl: testPlugin.manifestUrl, ownerID: otherUserID }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPluginEdit),
+          headers: buildAuthorizedHeaders(userID)
+        }
+        let pluginID = encodeURIComponent(testPluginEdit.manifestUrl)
+        return invoker.invoke(`PUT api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+          expect(response).to.have.property('statusCode', 200)
+          event.body = ''
+          return invoker.invoke(`GET api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+            expect(response.body).to.have.property('ownerID', testPlugin.ownerID)
+          })
+        })
+      })
+    })
+
+    it('should update requestWhitelist', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      const testPluginEdit = { manifestUrl: testPlugin.manifestUrl, requestWhitelist: ['GET /sheets/{sheetid}'] }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPluginEdit),
+          headers: buildAuthorizedHeaders(userID)
+        }
+        let pluginID = encodeURIComponent(testPluginEdit.manifestUrl)
+        return invoker.invoke(`PUT api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+          expect(response).to.have.property('statusCode', 200)
+          event.body = ''
+          return invoker.invoke(`GET api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+            expect(response.body).to.have.deep.property('requestWhitelist').that.is.eql(testPluginEdit.requestWhitelist)
+          })
+        })
+      })
+    })
+
+    it('should have sane defaults for optional properties', function () {
+      const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID }
+      const testPluginEdit = { manifestUrl: testPlugin.manifestUrl }
+
+      return db.addPlugin(testPlugin).then(() => {
+        const event = {
+          body: JSON.stringify(testPluginEdit),
+          headers: buildAuthorizedHeaders(userID)
+        }
+        let pluginID = encodeURIComponent(testPluginEdit.manifestUrl)
+        return invoker.invoke(`PUT api/users/${userID}/plugins/${pluginID}`, event).then(response => {
+          expect(response).to.have.property('statusCode', 200)
+          event.body = ''
+          return invoker.invoke(`GET api/users/${userID}/plugins/${pluginID}`, event).then(resp => {
+            const p = resp.body
+            expect(p).to.have.property('apiClientID', null)
+            expect(p).to.have.property('apiClientSecret', null)
+            expect(p).to.have.property('requestWhitelist').that.is.eql([])
+          })
         })
       })
     })

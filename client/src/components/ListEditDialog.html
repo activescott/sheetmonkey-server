@@ -35,6 +35,9 @@
   export default {
     methods: {
       prompt (message, listValues) {
+        if (listValues === null) {
+          listValues = []
+        }
         listValues = this.deepClone(listValues) // <- make sure we never dirty up the passed in object (e.g. when user cancels).
         console.log('ListEditDialog listValues:', listValues)
         const domLoaded = Promise.resolve()

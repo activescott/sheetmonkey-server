@@ -158,7 +158,8 @@ class DB {
       const updatePluginSpec = {
         manifestUrl: { type: 'string', required: true },
         apiClientID: { type: 'string', required: false },
-        apiClientSecret: { type: 'string', required: false }
+        apiClientSecret: { type: 'string', required: false },
+        requestWhitelist: { type: 'object', required: false }
       }
       plugin = validateInput(updatePluginSpec, plugin)
       const now = String(Date.now())
@@ -166,11 +167,12 @@ class DB {
       return this.ddb.update({
         TableName: this.pluginsTableName,
         Key: { manifestUrl: plugin.manifestUrl },
-        UpdateExpression: 'SET apiClientID = :apiClientID, apiClientSecret = :apiClientSecret, updatedAt = :updatedAt',
+        UpdateExpression: 'SET apiClientID = :apiClientID, apiClientSecret = :apiClientSecret, requestWhitelist = :requestWhitelist, updatedAt = :updatedAt',
         ExpressionAttributeValues: {
           ':callerPrincipalID': callerPrincipalID,
           ':apiClientID': plugin.apiClientID ? plugin.apiClientID : null,
           ':apiClientSecret': plugin.apiClientSecret ? plugin.apiClientSecret : null,
+          ':requestWhitelist': plugin.requestWhitelist ? plugin.requestWhitelist : [],
           ':updatedAt': now
         },
         ConditionExpression: 'attribute_exists(manifestUrl) AND ownerID = :callerPrincipalID',
