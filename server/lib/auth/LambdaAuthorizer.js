@@ -79,7 +79,12 @@ class LambdaAuthorizer {
             callback(handlerError, null)
             return
           }
-          this._writeError(handlerError.httpStatusCode, handlerError.message, callback)
+          let errorMessage = ''
+          if ('name' in handlerError && handlerError.name) {
+            errorMessage = handlerError.name + ': '
+          }
+          errorMessage += handlerError.message
+          this._writeError(handlerError.httpStatusCode, errorMessage, callback)
         })
     } else {
       // not a promise, so handler expected to invoke callback

@@ -15,7 +15,9 @@ function validateInput (expectation, input) {
     if (argName in input) {
       const expectedType = expectation[argName].type
       const actualType = typeof input[argName]
-      if (expectedType === actualType) { // eslint-disable-line valid-typeof
+      if ((expectedType === actualType) ||
+          (input[argName] === null && !required) // <-- // because in JS `typeof null === 'object'`, if it isn't a required argument don't force null values to be the wrong type:
+         ) {
         validatedArgs[argName] = input[argName]
       } else {
         throw new InvalidArgumentTypeError(argName, expectedType, actualType)
@@ -33,6 +35,7 @@ class InvalidArgumentTypeError extends Error {
     super(message)
     this.message = message
     this.name = 'InvalidArgumentTypeError'
+    this.httpStatusCode = 400 // This tells LambdaAuthorizer to detect we want to return a specific HTTP response rather than be treated as a 5xx error
   }
 }
 
@@ -42,6 +45,7 @@ class MissingRequiredArgumentError extends Error {
     super(message)
     this.message = message
     this.name = 'InvalidArgumentTypeError'
+    this.httpStatusCode = 400 // This tells LambdaAuthorizer to detect we want to return a specific HTTP response rather than be treated as a 5xx error
   }
 }
 

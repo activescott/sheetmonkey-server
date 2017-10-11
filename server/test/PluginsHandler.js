@@ -65,10 +65,11 @@ describe('PluginsHandler', function () {
       ]
 
       const results = testCases.map(event => {
-        let response = invoker.invoke(`POST api/users/${userID}/plugins`, event)
-        return expect(response).to.eventually.be.rejectedWith(/Argument \S+ is required and was not provided/)
+        return invoker.invoke(`POST api/users/${userID}/plugins`, event).then(response => {
+          expect(response).to.have.property('statusCode', 400)
+          return expect(response.body.message).to.match(/Argument \S+ is required and was not provided/)
+        })
       })
-
       return Promise.all(results)
     })
 
@@ -138,6 +139,40 @@ describe('PluginsHandler', function () {
       return response.then(r => {
         expect(r).to.have.property('statusCode', 200)
         return expect(r.body).to.not.have.property('redirectUrl')
+      })
+    })
+
+    it('should return actionable error message for invalid args', function () {
+      let event = {
+        body: JSON.stringify({
+          manifestUrl: `https://${userID}.com/manifest.json`,
+          apiClientID: {}, // <- invalid argument type
+          apiClientSecret: {} // <- invalid argument type
+        }),
+        headers: buildAuthorizedHeaders(userID)
+      }
+
+      let response = invoker.invoke(`POST api/users/${userID}/plugins`, event)
+      return response.then(r => {
+        expect(r).to.have.property('statusCode', 400)
+        expect(r.body).to.have.property('message', 'InvalidArgumentTypeError: Argument apiClientID must be of type string but was object.')
+      })
+    })
+
+    it('should allow null for optional properties', function () {
+      let event = {
+        body: JSON.stringify({
+          manifestUrl: `https://${userID}.com/manifest.json`,
+          apiClientID: null,
+          apiClientSecret: null,
+          requestWhitelist: null
+        }),
+        headers: buildAuthorizedHeaders(userID)
+      }
+
+      let response = invoker.invoke(`POST api/users/${userID}/plugins`, event)
+      return response.then(r => {
+        expect(r).to.have.property('statusCode', 200)
       })
     })
 
