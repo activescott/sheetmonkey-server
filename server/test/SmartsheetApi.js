@@ -14,7 +14,7 @@ describe('SmartsheetApi', function () {
     access_token: 'aaa',
     token_type: 'bearer',
     refresh_token: 'rrr',
-    expires_at: '1498549175394'
+    expires_at: 1498549175
   }
 
   let API

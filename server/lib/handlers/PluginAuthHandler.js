@@ -13,6 +13,9 @@ const assert = require('assert')
 const path = require('path')
 const D = new Diag(path.parse(__filename).name) // eslint-disable-line no-unused-vars
 
+/**
+ * Handles the receiving of the Smartsheet OAuth callback/redirect for a plugin.
+ */
 class PluginAuthHandler extends Handler {
   constructor () {
     super()
@@ -59,8 +62,27 @@ class PluginAuthHandler extends Handler {
         // Exchange code for token
         return this.exchangeCodeForToken(plugin, qs.code).then(tokenInfo => {
           return this.db.addApiTokenForPluginUser(pp.manifestUrl, tokenInfo.id, tokenInfo.access_token, tokenInfo.refresh_token, tokenInfo.expires_at).then(() => {
+            /** Prepare a JWT to inform the plugin the user and plugin we have an SS API token for this user/plugin.
+             *  We never send the SS API tokens to the client, but this JWT will let the extension know that we have one so they can give it back later to make API calls.
+             *  This JWT is a bearer token for calling the API for this user & plugin, but it isn't as permissive as the API Access token since plugins must whitelist every API call that they can make. 
+             *  Since there is a whitelist, even if this JWT gets leaked to the wrong user, it isn't nearly as hostile as an SS API Token due to the whitelist.
+             */
+            // TODO: Reconsider expiring this token at the same time as the access token. We have a refresh token, so no real reason to expire it:
+            if (typeof tokenInfo.expires_at !== 'number') {
+              throw new Error('expected expires_at to be a number!')
+            }
+            const expiresAtSeconds = tokenInfo.expires_at
+            const payload = {
+              expires_at: tokenInfo.expires_at,
+              prn: tokenInfo.id,
+              prneml: tokenInfo.email,
+              aud: pp.manifestUrl,
+              iss: 'sheetmonkey-server',
+              exp: expiresAtSeconds
+            }
+            const jwt = JwtHandler.encodeToken(payload)
             // now redirect the page back to the special chromiumapp.org url and chrome will detect this rederect and close the window.
-            const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?status=success`
+            const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?status=success&tokenInfo=${encodeURIComponent(jwt)}`
             let response = {
               statusCode: 302,
               headers: {

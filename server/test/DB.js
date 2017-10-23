@@ -82,7 +82,7 @@ describe('DB', function () {
           email: 'addUser@test.com',
           access_token: 'CREATED',
           refresh_token: 'xxx',
-          expires_at: String(Date.now())
+          expires_at: Date.now() / 1000
         }
         return db.addUser(testUser).then(newUser => {
           const testUser2 = {

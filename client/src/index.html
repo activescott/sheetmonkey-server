@@ -17,6 +17,14 @@
         document.write('<script src="http://' + (document.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
       }
     </script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-149900-8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag () { window.dataLayer.push(arguments) }
+      gtag('js', new Date())
+      gtag('config', 'UA-149900-8')
+    </script>
   </head>
   <body>
     <!-- Catches the csrf token -->

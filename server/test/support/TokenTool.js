@@ -18,5 +18,9 @@ class TokenTool {
   static newToken (payload) {
     return jwt.encode(payload, TokenTool.pem, TokenTool.alg)
   }
+
+  static decodeToken (token) {
+    return jwt.decode(token, TokenTool.crt)
+  }
 }
 module.exports = TokenTool

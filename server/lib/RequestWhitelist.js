@@ -11,9 +11,13 @@ class RequestWhitelist {
    * @param {*array<string>} permittedRequests An array of strings in the format '<method> relative_path' such as 'GET /sheets/{sheetID}'. The placeholders like {sheetID} accept any value in the actual incoming request in isPermitted.
    */
   constructor (permittedRequests) {
+    D.log('permittedRequests:', permittedRequests)
     permittedRequests = permittedRequests || []
     this._permittedRequests = permittedRequests.map(req => {
       const arr = req.split(' ', 2)
+      if (arr.length < 2) {
+        D.log('Invalid request syntax. Request must must be in the format <method> <path>. Request was:', req)
+      }
       return {
         method: arr[0],
         path: arr[1],

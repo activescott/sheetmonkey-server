@@ -68,21 +68,19 @@
       - This implies we need to include the plugin ID (manifest url) in <anything-here> so extension knows who to route token to
       - [x] Security note: Review attack surface. What if someone else routes a token to the wrong plugin? Do we care?
 
-
-
-
-
     - [ ] Adjust PluginAuthHandler to not return API Access Token and instead:
       - [x] Save SS API Access Token to DB using pluginID+userID as key.
-      - [ ] Have plugins register a whitelist of method+URL (relative) (see RequestWhitelist)
+      - [x] Have plugins register a whitelist of method+URL (relative) (see RequestWhitelist)
         - [x] API to add whitelist (allow adding to plugin object)
-        - [ ] UI: Allow optional specifying a whitelist in PluginEditDialog.html
-          - [ ] Impl Backend.updateUserPlugin
-      - [ ] Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apirequest+}
+        - [x] UI: Allow optional specifying a whitelist in PluginEditDialog.html
+          - [x] Impl Backend.updateUserPlugin
+      - [x] Extension routes all api calls through a proxy that only proxies API calls that meet the whitelist: /api/ssapiproxy/{apirequest+}
         - [x] API endpoint
-        - [ ] Extension work to use this API when routing plugin API requests.
+      
+      - [ ] Do some input validation on the server for the whitelist. Also put some nicer hints on the syntax on the UI too.
       - [ ] Move greedy path parameters functionality into the whitelist capability. Doh! Do we really need it?
 
+  - [x] Add GA!
   - [ ] Fix redirect URL after adding plugin not appearing on My Plugins page
   - [ ] Fix redirect URL to be qualified path and not relative path on My Plugins page
   - [ ] SmartsheetApi needs to refresh access_token in two events:

@@ -10,6 +10,7 @@ const DB = require('../lib/DB')
 const randomUserID = require('./support/tools').randomUserID
 const Constants = require('../lib/Constants')
 const SmartsheetApi = require('../lib/SmartsheetApi')
+const TokenTool = require('./support/TokenTool')
 
 describe('PluginAuthHandler', function () {
   var db
@@ -59,13 +60,14 @@ describe('PluginAuthHandler', function () {
       return db.addPlugin(testPlugin).then(() => {
         // Push the mock HTTP Responses onto SmartsheetApi:
         //  The /me response:
+        const fakeUID = 48569348493401200
         SmartsheetApi._mockResponseStack.push({
           statusCode: 200,
           body: JSON.stringify({
             email: 'john.doe@smartsheet.com',
             firstName: 'John',
             lastName: 'Doe',
-            id: 48569348493401200,
+            id: fakeUID,
             admin: true,
             licensedSheetCreator: true,
             groupAdmin: true,
@@ -104,7 +106,12 @@ describe('PluginAuthHandler', function () {
         return response.then(r => {
           expect(r).to.have.property('statusCode', 302)
           expect(r.headers).to.have.property('Location')
-          return expect(r.headers.Location).match(new RegExp(`^https://${extensionID}.chromiumapp.org/${manifestUrl}\\?status=success$`))
+          const qsStr = r.headers.Location.substring(r.headers.Location.lastIndexOf('?') + 1)
+          const qsParsed = querystring.parse(qsStr)
+          console.log('qsParsed:', qsParsed)
+          const jwtParsed = TokenTool.decodeToken(qsParsed.tokenInfo)
+          expect(jwtParsed).to.have.property('aud', testPlugin.manifestUrl)
+          return expect(jwtParsed).to.have.property('prn', fakeUID)
         })
       })
     })

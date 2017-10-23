@@ -22,6 +22,7 @@ class SmartsheetApiProxyHandler extends Handler {
   handle (event, context) {
     return Promise.try(() => {
       // D.log('event:', JSON.stringify(event, null, 2))
+      D.log('attempting to proxy request for event:', event)
       for (let requiredClaim of ['prn', 'aud']) {
         if (!(requiredClaim in context.protected.claims)) {
           return this.responseAsError(`missing required claim ${requiredClaim}`, 401)
@@ -41,6 +42,7 @@ class SmartsheetApiProxyHandler extends Handler {
         }
         let requestPath = event.pathParameters.request
         return this.verifyRequestInWhitelist(pluginManifestUrl, event.httpMethod, requestPath).then(() => {
+          D.log('following request passed whitelist:', event.httpMethod, requestPath)
           const tokens = {
             'access_token': apiTokenRecord.access_token,
             'refresh_token': apiTokenRecord.refresh_token,
@@ -48,10 +50,11 @@ class SmartsheetApiProxyHandler extends Handler {
           }
           const ssApi = new SmartsheetApi(tokens)
           return ssApi.httpRequest(event.httpMethod, requestPath, event.body, false).then(apiResponse => {
+            D.log('apiResponse.status:', apiResponse.status)
             let response = {
               statusCode: apiResponse.statusCode,
               headers: apiResponse.headers,
-              body: apiResponse.headers
+              body: apiResponse.body
             }
             return response
           })

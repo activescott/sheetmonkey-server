@@ -37,7 +37,7 @@ class SmartsheetApi {
     return {
       access_token: 'xxx',
       refresh_token: 'xxx',
-      expires_at: String(Date.now() - 10000)
+      expires_at: (Date.now() - 10000) / 1000 // Date works in milliseconds since epoch, but expires_at is seconds since epoch
     }
   }
 
@@ -47,7 +47,7 @@ class SmartsheetApi {
    *   "access_token":"xxxxx",
    *   "token_type":"bearer",
    *   "refresh_token":"xxxx",
-   *   "expires_at":"1498549175394"
+   *   "expires_at":1498549175
    *  }
    * Also sets the current object's tokens value with the returned tokens.
    *
@@ -91,9 +91,9 @@ class SmartsheetApi {
         ['access_token', 'token_type', 'refresh_token'].forEach(p => {
           response[p] = body[p]
         })
-        // Note Smartsheet's API returns expires_in which is in seconds. We convert to a Date here:
-        response.expires_at = String(Date.now() + body.expires_in * 1000)
-        // D.log('transformed token response:', response)
+        // Note Smartsheet's API returns expires_in which is in seconds. We convert to JWT-style IntDate (The number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the desired date/time):
+        const nowInSeconds = Date.now() / 1000
+        response.expires_at = nowInSeconds + body.expires_in
         this._tokens = response
         return response
       })

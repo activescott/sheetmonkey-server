@@ -1,36 +1,35 @@
-'use strict';
-const Promise = require('bluebird');
-const randomUserID = require('../support/tools').randomUserID;
+'use strict'
+const Promise = require('bluebird')
+const randomUserID = require('../support/tools').randomUserID
 
 class SmartsheetApiMock {
-  constructor() {
-    const id = randomUserID();
+  constructor () {
+    const id = randomUserID()
     this.setMeValue({
       id: id,
-      email: `${id}@SmartsheetApiMock.com` 
-    });
-
+      email: `${id}@SmartsheetApiMock.com`
+    })
   }
 
-  refreshToken(code, refreshToken) {
+  refreshToken (code, refreshToken) {
     return Promise.resolve({
-      access_token: "aaa",
-      token_type: "bearer",
-      refresh_token: "bbb",
-      expires_at: "1498549175394"
-    });
+      access_token: 'aaa',
+      token_type: 'bearer',
+      refresh_token: 'bbb',
+      expires_at: 1498549175
+    })
   }
 
-  me() {
-    return Promise.resolve(this._me);
+  me () {
+    return Promise.resolve(this._me)
   }
 
   /**
    * Specifies the value for the next time me() is called.
    */
-  setMeValue(me) {
-    this._me = me;
+  setMeValue (me) {
+    this._me = me
   }
 }
 
-module.exports = SmartsheetApiMock;
+module.exports = SmartsheetApiMock

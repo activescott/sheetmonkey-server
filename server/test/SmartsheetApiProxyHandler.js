@@ -5,6 +5,7 @@ require('./support/setup.js')
 const expect = require('chai').expect
 const ServerlessInvoker = require('serverless-http-invoker')
 const randomUserID = require('./support/tools').randomUserID
+const getExpiresAtDateValue = require('./support/tools').getExpiresAtDateValue
 const DynamoDB = require('../lib/DynamoDB')
 const DB = require('../lib/DB')
 const SmartsheetApi = require('../lib/SmartsheetApi')
@@ -143,7 +144,7 @@ describe('SmartsheetApiProxyHandler', function () {
     })
   })
 
-  it('should reject if corresponding access token not in DB', function () {
+  it('should reject if current authenticated user doesn\'t have API token in DB', function () {
     const requestWhitelist = ['GET sheets/{sheetid}']
     return addTestPlugin(requestWhitelist).then(p => {
       // NOTE: missing addApiTokenForPluginUser here
@@ -167,7 +168,7 @@ describe('SmartsheetApiProxyHandler', function () {
     return addTestPlugin(requestWhitelist).then(p => {
       // NOTE: if SS_API_TOKEN is in environment this request will work against real API
       let testToken = process.env.SS_API_TOKEN || `token-for-${userID}`
-      return db.addApiTokenForPluginUser(p.manifestUrl, userID, testToken, testToken, 123456).then(token => {
+      return db.addApiTokenForPluginUser(p.manifestUrl, userID, testToken, testToken, getExpiresAtDateValue(60)).then(token => {
         // console.log('saved token:', token)
         let event = {
           body: JSON.stringify({}),
