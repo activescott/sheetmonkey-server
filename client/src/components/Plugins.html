@@ -26,7 +26,7 @@
             <td>{{plugin.manifestUrl}}</td>
             <td>{{plugin.apiClientID || ''}}</td>
             <td>{{plugin.apiClientSecret || ''}}</td>
-            <td>{{plugin.redirectUrl || ''}}</td>
+            <td>{{genRedirectUrl(plugin)}}</td>
             <td>
               {{#if plugin.requestWhitelist}}
                 {{#each plugin.requestWhitelist as wlItem }}
@@ -56,7 +56,11 @@
   export default {
     helpers: {
       genRedirectUrl (plugin) {
-        return 'https://beta.sheetmonkey.com/'
+        if (plugin.redirectUrl) {
+          return window.location.origin + plugin.redirectUrl
+        } else {
+          return ''
+        }
       }
     },
     methods: {
