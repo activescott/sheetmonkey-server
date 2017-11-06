@@ -28,6 +28,7 @@ class PluginAuthHandler extends Handler {
       const pp = event.pathParameters
       // D.log('qs:', qs)
       // D.log('pp:', pp)
+      // D.log('PluginAuthHandler.get: qs:', qs, 'pp:', pp)
 
       // Which plugin is this for?
       if (!('manifestUrl' in pp)) {
@@ -83,6 +84,7 @@ class PluginAuthHandler extends Handler {
             const jwt = JwtHandler.encodeToken(payload)
             // now redirect the page back to the special chromiumapp.org url and chrome will detect this rederect and close the window.
             const redirectUri = `https://${qs.state}.chromiumapp.org/${encodeURIComponent(pp.manifestUrl)}?status=success&tokenInfo=${encodeURIComponent(jwt)}`
+            D.log('Redirecting to', redirectUri)
             let response = {
               statusCode: 302,
               headers: {

@@ -5,7 +5,7 @@ class Constants {
    * Sorted such that development environment IDs come first.
    */
   static get legitExtentionIDs () {
-    const sheetmonkeyExtensionIDDev = 'ogdoodkbmjkdjinimjigbkhioigjgfij'
+    const sheetmonkeyExtensionIDDev = 'ffnljkjkjkjalaeioncbnbpfgnkohblm'
     const sheetmonkeyExtensionIDProd = 'gdnefhegodkfgopmjacoenelkfkbkkdg'
     return [sheetmonkeyExtensionIDDev, sheetmonkeyExtensionIDProd]
   }
