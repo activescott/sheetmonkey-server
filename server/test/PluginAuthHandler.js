@@ -38,7 +38,7 @@ describe('PluginAuthHandler', function () {
 
   describe('pluginauthflow', function () {
 
-    it('extensionID in state param must be an expected extensionID (this is critical to avoid attacker from being able to send any extensionID to grab secure tokens with their own extension)', function () {
+    it('must have extensionID in state param that is an expected extensionID (this is critical to avoid attacker from being able to send any extensionID to grab secure tokens with their own extension)', function () {
       const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
       return db.addPlugin(testPlugin).then(() => {
         const manifestUrl = encodeURIComponent('https://blah.blah/someplugin.manifest')
@@ -180,7 +180,7 @@ describe('PluginAuthHandler', function () {
       const response = invoker.invoke(`GET api/pluginauthcallback/${manifestUrl}?` + qs, emptyEvent)
       return response.then(r => {
         expect(r).to.have.property('body')
-        expect(r.body).to.match(/Smartsheet error detail: Whatever smartsheet says is wrong is wrong\./)
+        expect(r.body.message).to.match(/Smartsheet error detail: Whatever smartsheet says is wrong is wrong\./)
         return expect(r).to.have.property('statusCode', 400)
       })
     })

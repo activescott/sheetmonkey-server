@@ -2731,9 +2731,9 @@ serverless-dynamodb-local@^0.2.22:
     dynamodb-localhost "^0.0.5"
     lodash "^4.17.0"
 
-serverless-http-invoker@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/serverless-http-invoker/-/serverless-http-invoker-0.1.1.tgz#3badd4275af43f4f8561604f6dbfb413a0cbc286"
+serverless-http-invoker@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/serverless-http-invoker/-/serverless-http-invoker-0.8.3.tgz#ac2f3dfc9b2346f3d12d7ec0a233b1ead3bdb85d"
   dependencies:
     lambda-wrapper "^0.2.1"
     serverless "^1.18.0"

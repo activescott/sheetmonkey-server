@@ -29,7 +29,7 @@
     "nodemon": "^1.11.0",
     "serverless": "^1.18.0",
     "serverless-dynamodb-local": "^0.2.22",
-    "serverless-http-invoker": "^0.1.1",
+    "serverless-http-invoker": "^0.8.3",
     "standard": "^10.0.2"
   }
 }

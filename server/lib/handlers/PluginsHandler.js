@@ -2,8 +2,6 @@
 const Handler = require('./Handler')
 const Diag = require('../diag')
 const assert = require('assert')
-const StaticFileHandler = require('./StaticFileHandler')
-
 const path = require('path')
 const D = new Diag(path.parse(__filename).name)
 
@@ -66,7 +64,7 @@ class PluginsHandler extends Handler {
           p = PluginsHandler.ensureDefaults(p)
           return this.responseAsJson(p)
         } else {
-          return StaticFileHandler.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
+          return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
         }
       })
     })
@@ -77,7 +75,7 @@ class PluginsHandler extends Handler {
     args.manifestUrl = decodeURIComponent(args.manifestUrl)
     return this.db.getPlugin(args.manifestUrl).then(p => {
       if (p) return this.responseAsJson(p)
-      else return StaticFileHandler.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
+      else return this.responseAsError(`Plugin ${args.manifestUrl} not found.`, 404)
     })
   }
 
@@ -115,7 +113,7 @@ class PluginsHandler extends Handler {
       }).catch(err => {
         // if user exists, just return null; if another error, rethrow
         if (('name' in err) && err.name === 'ConditionalCheckFailedException') {
-          return StaticFileHandler.responseAsError('Forbidden: Only the owner can update their plugin.', 403)
+          return this.responseAsError('Forbidden: Only the owner can update their plugin.', 403)
         }
         throw err
       })
@@ -128,7 +126,7 @@ class PluginsHandler extends Handler {
       args.manifestUrl = decodeURIComponent(args.manifestUrl)
       return this.db.getPlugin(args.manifestUrl).then(p => {
         if (p.ownerID !== principalID) {
-          return StaticFileHandler.responseAsError('Forbidden: Only the owner can delete their plugin.', 403)
+          return this.responseAsError('Forbidden: Only the owner can delete their plugin.', 403)
         }
         return this.db.deletePlugin(args.manifestUrl, principalID).then(() => {
           return this.responseAsJson()

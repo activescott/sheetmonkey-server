@@ -1,7 +1,7 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const StaticFileHandler = require('./lib/handlers/StaticFileHandler')
+const StaticFileHandler = require('serverless-aws-static-file-handler')
 const JwtHandler = require('./lib/handlers/JwtHandler')
 const OAuthClientHandler = require('./lib/handlers/OAuthClientHandler')
 const SmartsheetApi = require('./lib/SmartsheetApi')

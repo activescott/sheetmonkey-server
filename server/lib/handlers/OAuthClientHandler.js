@@ -2,7 +2,6 @@
 const Handler = require('./Handler')
 const Diag = require('../diag')
 const JwtHandler = require('./JwtHandler')
-const StaticFileHandler = require('./StaticFileHandler')
 const Promise = require('bluebird')
 const assert = require('assert')
 
@@ -27,16 +26,16 @@ class OAuthClientHandler extends Handler {
       let params = event.queryStringParameters || {}
 
       if (!('state' in params)) {
-        return StaticFileHandler.writeError('Login failed: no state.', 400)
+        return this.writeError('Login failed: no state.', 400)
       }
       if (!JwtHandler.isValidJwtSignature(params.state)) {
-        return StaticFileHandler.writeError('Login failed: invalid state.', 400)
+        return this.writeError('Login failed: invalid state.', 400)
       }
       if ('error' in params) {
-        return StaticFileHandler.writeError('Login failed:' + params.error, 400)
+        return this.writeError('Login failed:' + params.error, 400)
       }
       if (!('code' in params)) {
-        return StaticFileHandler.writeError('Login failed: No code provided.', 400)
+        return this.writeError('Login failed: No code provided.', 400)
       }
 
       // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
@@ -90,7 +89,7 @@ class OAuthClientHandler extends Handler {
             .then(handleAddedOrUpdatedUser)
         })
       }).catch(err => {
-        return StaticFileHandler.responseAsError(`Login failed: Error getting token: ${err}`, 500)
+        return this.responseAsError(`Login failed: Error getting token: ${err}`, 500)
       })
     })
   }

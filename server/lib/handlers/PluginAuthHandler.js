@@ -7,7 +7,6 @@ const DB = require('../DB')
 const Constants = require('../Constants')
 const SmartsheetApi = require('../SmartsheetApi')
 const JwtHandler = require('./JwtHandler')
-const StaticFileHandler = require('./StaticFileHandler')
 const assert = require('assert')
 
 const path = require('path')
@@ -32,7 +31,7 @@ class PluginAuthHandler extends Handler {
 
       // Which plugin is this for?
       if (!('manifestUrl' in pp)) {
-        return StaticFileHandler.writeError('plugin manifestUrl not specified', 400)
+        return this.writeError('plugin manifestUrl not specified', 400)
       }
       let smartsheetErrorMessage = ''
       if ('error' in qs) {
@@ -41,24 +40,25 @@ class PluginAuthHandler extends Handler {
 
       for (let requiredQueryString of ['code', 'expires_in', 'state']) {
         if (!(requiredQueryString in qs)) {
-          return StaticFileHandler.responseAsError(`${smartsheetErrorMessage}${requiredQueryString} query string not specified`, 400)
+          return this.responseAsError(`${smartsheetErrorMessage} ${requiredQueryString} query string not specified`, 400)
         }
       }
       /* Security Note:
         Extension IDs should not be spoofable. As noted in https://stackoverflow.com/a/23877974/51061 as they are a public key, encoded in base64 format and will require the crx file to be signed with the corresponding private key to be installed.
       */
       if (Constants.legitExtentionIDs.indexOf(qs.state) < 0) {
-        return StaticFileHandler.responseAsError(`invalid extensionid: ${qs.state}`, 400)
+        return this.responseAsError(`invalid extensionid: ${qs.state}`, 400)
       }
       pp.manifestUrl = decodeURIComponent(pp.manifestUrl)
 
       // Lookup the plugin:
       return this.db.getPlugin(pp.manifestUrl).then(plugin => {
+        D.log('db returned plugin:', plugin)
         if (!plugin) {
-          return StaticFileHandler.responseAsError('plugin not found', 404)
+          return this.responseAsError('plugin not found', 404)
         }
         if (!('apiClientID' in plugin) || !('apiClientSecret' in plugin)) {
-          return StaticFileHandler.responseAsError('plugin does not have client id and secret registered', 400)
+          return this.responseAsError('plugin does not have client id and secret registered', 400)
         }
         // Exchange code for token
         return this.exchangeCodeForToken(plugin, qs.code).then(tokenInfo => {
@@ -100,6 +100,7 @@ class PluginAuthHandler extends Handler {
     })
   }
   exchangeCodeForToken (plugin, code) {
+    D.log('exchangeCodeForToken')
     // exchange code for token: http://smartsheet-platform.github.io/api-docs/#obtaining-an-access-token
     assert(plugin.apiClientID && plugin.apiClientSecret, 'plugin doesn\'t have apiClientID or secret!')
     const smartsheetApi = new SmartsheetApi(null, plugin.apiClientID, plugin.apiClientSecret)
