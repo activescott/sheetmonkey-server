@@ -19,7 +19,8 @@
     "jwt-simple": "^0.5.1",
     "mustache": "^2.3.0",
     "request": "^2.81.0",
-    "serverless-apigwy-binary": "^0.1.0"
+    "serverless-apigwy-binary": "^0.1.0",
+    "serverless-aws-static-file-handler": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -29,7 +30,7 @@
     "nodemon": "^1.11.0",
     "serverless": "^1.18.0",
     "serverless-dynamodb-local": "^0.2.22",
-    "serverless-http-invoker": "^0.8.3",
+    "serverless-http-invoker": "^0.8.4",
     "standard": "^10.0.2"
   }
 }
