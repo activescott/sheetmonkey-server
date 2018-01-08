@@ -39,6 +39,7 @@ describe('PluginAuthHandler', function () {
   describe('pluginauthflow', function () {
 
     it('must have extensionID in state param that is an expected extensionID (this is critical to avoid attacker from being able to send any extensionID to grab secure tokens with their own extension)', function () {
+      this.timeout(5000)
       const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
       return db.addPlugin(testPlugin).then(() => {
         const manifestUrl = encodeURIComponent('https://blah.blah/someplugin.manifest')

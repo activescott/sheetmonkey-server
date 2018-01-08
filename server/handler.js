@@ -65,6 +65,11 @@ module.exports.jwt = (event, context, callback) => {
 
 module.exports.staticfile = (event, context, callback) => {
   const clientFilesPath = path.join(__dirname, './data/public/')
+  context.staticFileHandler = {
+    viewData: {
+      csrftoken: JwtHandler.newToken()
+    }
+  }
   return new StaticFileHandler(clientFilesPath).get(event, context)
     .then(response => callback(null, response))
     .catch(err => callback(err))
