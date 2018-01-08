@@ -1,9 +1,8 @@
 'use strict'
 const Promise = require('bluebird')
-const assert = require('assert')
 const DynamoDB = require('aws-sdk').DynamoDB
 
-const Diag = require('./diag')
+const Diag = require('./Diag')
 
 const D = new Diag('DynamoDB')
 

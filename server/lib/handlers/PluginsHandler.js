@@ -1,6 +1,6 @@
 'use strict'
 const Handler = require('./Handler')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const assert = require('assert')
 const path = require('path')
 const D = new Diag(path.parse(__filename).name)

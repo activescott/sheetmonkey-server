@@ -1,5 +1,5 @@
 'use strict'
-const Diag = require('./diag')
+const Diag = require('./Diag')
 const D = new Diag('RequestWhitelist')
 
 /**

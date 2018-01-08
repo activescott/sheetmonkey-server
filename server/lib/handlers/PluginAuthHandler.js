@@ -1,6 +1,6 @@
 'use strict'
 const Handler = require('./Handler')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const Promise = require('bluebird')
 const DynamoDB = require('../DynamoDB')
 const DB = require('../DB')
@@ -22,12 +22,13 @@ class PluginAuthHandler extends Handler {
   }
 
   get (event, context) {
+    D.log('PluginAuthHandler.get...')
     return Promise.try(() => {
       const qs = event.queryStringParameters
       const pp = event.pathParameters
       // D.log('qs:', qs)
       // D.log('pp:', pp)
-      // D.log('PluginAuthHandler.get: qs:', qs, 'pp:', pp)
+      D.log('PluginAuthHandler.get: qs:', qs, 'pp:', pp)
 
       // Which plugin is this for?
       if (!('manifestUrl' in pp)) {
@@ -46,7 +47,7 @@ class PluginAuthHandler extends Handler {
       /* Security Note:
         Extension IDs should not be spoofable. As noted in https://stackoverflow.com/a/23877974/51061 as they are a public key, encoded in base64 format and will require the crx file to be signed with the corresponding private key to be installed.
       */
-      if (Constants.legitExtentionIDs.indexOf(qs.state) < 0) {
+      if (Constants.legitExtensionIDs.indexOf(qs.state) < 0) {
         return this.responseAsError(`invalid extensionid: ${qs.state}`, 400)
       }
       pp.manifestUrl = decodeURIComponent(pp.manifestUrl)
@@ -65,7 +66,7 @@ class PluginAuthHandler extends Handler {
           return this.db.addApiTokenForPluginUser(pp.manifestUrl, tokenInfo.id, tokenInfo.access_token, tokenInfo.refresh_token, tokenInfo.expires_at).then(() => {
             /** Prepare a JWT to inform the plugin the user and plugin we have an SS API token for this user/plugin.
              *  We never send the SS API tokens to the client, but this JWT will let the extension know that we have one so they can give it back later to make API calls.
-             *  This JWT is a bearer token for calling the API for this user & plugin, but it isn't as permissive as the API Access token since plugins must whitelist every API call that they can make. 
+             *  This JWT is a bearer token for calling the API for this user & plugin, but it isn't as permissive as the API Access token since plugins must whitelist every API call that they can make.
              *  Since there is a whitelist, even if this JWT gets leaked to the wrong user, it isn't nearly as hostile as an SS API Token due to the whitelist.
              */
             // TODO: Reconsider expiring this token at the same time as the access token. We have a refresh token, so no real reason to expire it:

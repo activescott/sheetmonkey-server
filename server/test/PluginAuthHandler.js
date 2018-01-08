@@ -39,7 +39,7 @@ describe('PluginAuthHandler', function () {
   describe('pluginauthflow', function () {
 
     it('must have extensionID in state param that is an expected extensionID (this is critical to avoid attacker from being able to send any extensionID to grab secure tokens with their own extension)', function () {
-      this.timeout(5000)
+      // this.timeout(8000) // This damn test is terribly slow at times. I think because while deploying VSCode runs it slow. Running in external terminal seems to be snappy.
       const testPlugin = { manifestUrl: `https://blah.com/${userID}.json`, ownerID: userID, apiClientID: 'clid', apiClientSecret: 'secret' }
       return db.addPlugin(testPlugin).then(() => {
         const manifestUrl = encodeURIComponent('https://blah.blah/someplugin.manifest')
@@ -50,7 +50,10 @@ describe('PluginAuthHandler', function () {
         })
         const response = invoker.invoke(`GET api/pluginauthcallback/${manifestUrl}?` + qs, emptyEvent)
         return response.then(r => {
+          // console.log('r:', r)
           expect(r).to.have.property('statusCode', 400)
+          expect(r).to.have.deep.property('body.message')
+          expect(r.body.message).to.match(/invalid extensionid/)
           return expect(r.headers).to.not.have.property('Location')
         })
       })
@@ -95,7 +98,7 @@ describe('PluginAuthHandler', function () {
         })
 
         const manifestUrl = encodeURIComponent(testPlugin.manifestUrl)
-        const extensionID = Constants.legitExtentionIDs[0]
+        const extensionID = Constants.legitExtensionIDs[0]
         const qs = querystring.stringify({
           'code': 123456,
           'expires_in': 90,
@@ -123,7 +126,7 @@ describe('PluginAuthHandler', function () {
       const qs = querystring.stringify({
         'code': 123456,
         'expires_in': 90,
-        'state': Constants.legitExtentionIDs[0]
+        'state': Constants.legitExtensionIDs[0]
       })
       const response = invoker.invoke(`GET api/pluginauthcallback/${manifestUrl}?` + qs, emptyEvent)
       return response.then(r => {

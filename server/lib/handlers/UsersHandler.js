@@ -1,11 +1,7 @@
 'use strict'
 const Handler = require('./Handler')
-const Diag = require('../diag')
 const Promise = require('bluebird')
 const assert = require('assert')
-
-const path = require('path')
-const D = new Diag(path.parse(__filename).name)
 
 class UsersHandler extends Handler {
   constructor (db) {
@@ -25,15 +21,15 @@ class UsersHandler extends Handler {
   }
 
   listUsers (event, context) {
-    throw 'todo: why would we ever list all users?'
+    throw new Error('todo: why would we ever list all users?')
   }
 
   post (event, context) {
-    throw 'todo: why could a user create another user? this should only be possible via oauth?'
+    throw new Error('todo: why could a user create another user? this should only be possible via oauth?')
   }
 
   put (event, context) {
-    throw 'todo: no need for this (since the current user cannot update anything about himself, only via oauth'
+    throw new Error('todo: no need for this (since the current user cannot update anything about himself, only via oauth')
   }
 
   static sanitizeUserProps (user) {

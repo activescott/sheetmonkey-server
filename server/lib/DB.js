@@ -1,7 +1,7 @@
 'use strict'
 const Promise = require('bluebird')
 const assert = require('assert')
-const Diag = require('./diag')
+const Diag = require('./Diag')
 const validateInput = require('./ValidationTools').validateInput
 
 const D = new Diag('DB')

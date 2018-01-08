@@ -1,7 +1,7 @@
 'use strict'
 const Promise = require('bluebird')
 const Handler = require('./Handler')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const HttpError = require('../HttpError')
 const assert = require('assert')
 const SmartsheetApi = require('../SmartsheetApi')

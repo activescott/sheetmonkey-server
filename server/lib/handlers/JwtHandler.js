@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const Handler = require('./Handler')
 const jwt = require('jwt-simple')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const Promise = require('bluebird')
 
 const D = new Diag('JwtHandler') // eslint-disable-line

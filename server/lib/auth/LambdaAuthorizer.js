@@ -1,6 +1,6 @@
 'use strict'
 const jwt = require('jwt-simple')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const path = require('path')
 const D = new Diag(path.parse(__filename).name)
 const assert = require('assert')

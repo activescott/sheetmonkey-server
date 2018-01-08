@@ -1,6 +1,6 @@
 'use strict'
 const Handler = require('./Handler')
-const Diag = require('../diag')
+const Diag = require('../Diag')
 const JwtHandler = require('./JwtHandler')
 const Promise = require('bluebird')
 const assert = require('assert')

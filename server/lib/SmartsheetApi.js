@@ -1,6 +1,6 @@
 'use strict'
 const Promise = require('bluebird')
-const Diag = require('./diag')
+const Diag = require('./Diag')
 const crypto = require('crypto')
 const assert = require('assert')
 const request = require('request')
@@ -129,6 +129,7 @@ class SmartsheetApi {
       }
       // D.log('sending request: ', options)
       return SmartsheetApi._httpRequestImpl(options).then(httpResponse => {
+        // D.log('httpResponse:', httpResponse)
         if (httpResponse.statusCode < 200 || httpResponse.statusCode >= 300) {
           if (throwOnError) {
             throw new Error(`Unexpected statusCode from Smartsheet:${httpResponse.statusCode}. Response body:${httpResponse.body}`)
