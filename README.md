@@ -17,3 +17,6 @@ Build the client with `npm build` or `client/build.sh`. It will be bundled and d
 
 ## Server
 You don't need to build the server locally, but you can run mocha tests with `npm test` or `npm run watch` (tested mostly via [serverless-http-invoker](https://github.com/activescott/serverless-http-invoker)). To deploy to AWS and run `deploy.sh` or `npm deploy` and [Serverless](https://github.com/serverless/serverless) will do the rest.
+
+### Docker
+The server tests require DynamoDB Local which requires installing Java. To run them in a Docker container (and not install java on your host) run `server/docker-build.sh` to build the container followed by `server/docker-test.sh` to run tests in the container (can also use standard docker commands to run the server in docker and client locally, etc).

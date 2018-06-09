@@ -9,3 +9,4 @@ node_modules/
 /client/dist/
 
 /server/junk/
+yarn-error.log

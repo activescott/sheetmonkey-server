@@ -13,14 +13,17 @@ class DDB {
     if (process.env.IS_LOCAL === 'true' || process.env.AWS_REGION === 'LOCAL') {
       dynamoConfig = {
         region: 'localhost',
-        endpoint: 'http://localhost:8000'
+        endpoint: 'http://localhost:8000',
+        // Below because DDB SDK requires them but DDB Local doesn't need them so we just have to set something to prevent error:
+        accessKeyId: 'N/A',
+        secretAccessKey: 'N/A'
       }
     } else {
       dynamoConfig = {
         region: process.env.AWS_REGION
       }
-      D.log('dynamoConfig:', dynamoConfig)
     }
+    D.log('dynamoConfig:', dynamoConfig)
     // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html
     this.client = new DynamoDB.DocumentClient(dynamoConfig)
   }
